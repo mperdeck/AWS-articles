@@ -45,6 +45,43 @@
 </p>
 <img src="architecture.png" />
 
+<h2>Trial web site</h2>
+<p>
+    Seeing that this article shows how to deploy a web site to AWS,
+    if you want to follow along you'll need some web site to deploy.
+</p>
+<p>
+    If you have a web site project lying around that use a SQL Server database, you can use that.
+    MVC and WebForms are both fine.
+</p>
+<p>
+    Otherwise feel free to 
+    <a href="https://github.com/mperdeck/AWS-articles" target="_blank">get my trial site SimpleSiteWithDb from Github</a>.
+    If you use this site, do this <b>before</b> running it on your computer: 
+</p>
+<ol>
+    <li>
+        Make sure you have access to a SQL Server database server.
+        If you don't, install 
+        <a href="http://www.microsoft.com/en-au/server-cloud/products/sql-server-editions/sql-server-express.aspx" target="_blank">SQL Server Express</a> for free.
+    </li>
+    <li>
+        Edit the connection string in the web.config file, so it points at your database server.
+    </li>
+    <li>
+        Create an empty database named <i>BookStore</i> on the server (as named as the <i>Initial Catalog</i>in the connection string).
+    </li>
+</ol>
+<p>
+    My trial site uses 
+    <a href="https://msdn.microsoft.com/en-us/data/ee712907" target="_blank">Entity Framework Code First</a>. 
+    This way, it creates everything that it needs in the 
+    <i>BookStore</i> database when it starts up for the first time - so you don't have to do this yourself.
+    However, you can deploy any site to AWS, it doesn't have to use Entity Framework Code First.
+</p>
+
+
+
 
 
 
