@@ -1,0 +1,11 @@
+﻿@using SimpleSiteWithDb.Models
+@model Book
+
+<h1>Add</h1>
+
+@using (Html.BeginForm())
+{
+    @Html.EditorForModel()
+    
+    <input type="submit" value="Add Book"/>
+}
