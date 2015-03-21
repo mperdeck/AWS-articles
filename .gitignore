@@ -183,6 +183,6 @@ UpgradeLog*.htm
 FakesAssemblies/
 
 # personal definitions
-uncontrolled
-
+uncontrolled/
+packages/
 
