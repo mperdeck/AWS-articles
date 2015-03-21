@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+    <body>
+        <p>
+            server ip:
+            @Request.ServerVariables["LOCAL_ADDR"]
+            |
+            @Html.ActionLink("Index", "Index", "Home")
+            |
+            @Html.ActionLink("Heavy", "Heavy", "Home")
+        </p>
+        @RenderBody()
+    </body>
+</html>

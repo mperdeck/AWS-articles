@@ -1,0 +1,543 @@
+
+<h2>Introduction</h2>
+<p>
+    <a href="http://aws.amazon.com/" target="_blank">Amazon Web Services</a> (AWS)
+    is a cloud provider, similar to 
+    <a href="http://azure.microsoft.com/en-us/" target="_blank">Windows Azure</a>. 
+    Launched in 2006, it has a 4 year head start on Azure. 
+    As of late 2014, it had 1.4 Million servers in data centres in the US, Europe, Asia and Australia.
+    So it's very big.
+</p>
+<p>
+    AWS offers over 40 services, from virtual machines and load balancers, to very large scale data warehouses.
+    It's well documented and .Net receives first class support, making it a worthy alternative to Windows Azure.  
+</p>
+<p>
+    In this article, 
+    we'll take a web site with a SQL Server database, and host it on AWS.
+</p>
+<p>
+    To make it interesting, here are some goals:
+</p>
+<ul>
+    <li>
+        <b>Highly Availability</b> -
+        Even if an entire data centre fails, your site will recover automatically.
+    </li>
+    <li>
+        <b>High Performance</b> - 
+        If marketing forgot to mention that massive ad campaign and your site suddenly receives massive traffic,
+        it adjusts by automatically spinning up more web servers. When things quiet down, it automatically
+        terminates them to save money.
+    </li>
+    <li>
+        <b>Your Domain</b> - 
+        If you have a spare domain lying around, we'll assign it to your site.
+        Otherwise, we'll use an AWS sub domain.
+    </li>
+    <li>
+        <b>Now please</b> -
+        You should be done about an hour from now.
+    </li>
+</ul>
+<p>
+    Here is what it will look like:
+</p>
+<a id="architecture"></a>
+<img src="architecture.png" />
+
+<a id="trialsite"></a><h2>Trial web site</h2>
+<p>
+    Seeing that this article shows how to deploy a web site to AWS,
+    if you want to follow along you'll need some web site to deploy.
+</p>
+<p>
+    If you have a web site project lying around that use a SQL Server database, you can use that.
+    MVC and WebForms are both fine.
+</p>
+<p>
+    Otherwise feel free to 
+    <a href="https://github.com/mperdeck/AWS-articles" target="_blank">get my trial site <i>SimpleSiteWithDb</i> from Github</a>.
+    If you use this site, do this <b>before</b> running it on your computer: 
+</p>
+<ol>
+    <li>
+        Make sure you have access to a SQL Server database server.
+        If you don't, install 
+        <a href="http://www.microsoft.com/en-au/server-cloud/products/sql-server-editions/sql-server-express.aspx" target="_blank">SQL Server Express</a> for free.
+    </li>
+    <li>
+        Edit the connection string in the web.config file, so it points at your database server.
+    </li>
+    <li>
+        Make sure that all references pointing to outside your web application have <i>Copy Local</i> set to 
+        <i>True</i>. This goes in particular for NuGet packages, because these normally sit in a 
+        <i>packages</i> directory that sits outside your project directory. 
+        Framework dlls should be fine, because the AWS EC2 web server will have the .Net framework installed.
+        <p>
+            <img src="copy-local.png" />
+        </p>
+    </li>
+</ol>
+<p>
+    My trial site uses 
+    <a href="https://msdn.microsoft.com/en-us/data/ee712907" target="_blank">Entity Framework Code First</a>. 
+    This way, it creates everything that it needs in the 
+    <i>BookStore</i> database when it starts up for the first time - so you don't have to do this yourself.
+    However, you can deploy any site to AWS, it doesn't have to use Entity Framework Code First.
+</p>
+
+<h2>Get an AWS account</h2>
+<p>
+    If you do not have an AWS account yet,
+    <a href="http://aws.amazon.com/free/" target="_blank">create a free account</a>.
+</p>
+<p>
+    Note that although Amazon calls this a &quot;free&quot; account,
+    you may still incur some charges - if you go over usage limits, or if you use services
+    that are not included in the free tier. For example, in this article we'll create a load balancer,
+    which costs some tiny amount to run.
+</p>
+
+<h3>Costs</h3>
+<p>
+    Here are the pages with pricing info for the services that we'll use in this article, as of March 2015. 
+You'll probably find that just playing around with these services won't cost you more than a coffee:
+</p>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>
+            Service
+        </th>
+        <th>
+            Used for
+        </th>
+    </tr>
+    <tr>
+        <td>
+            <a href="http://aws.amazon.com/ec2/pricing/" target="_blank">EC2</a>
+        </td>
+        <td>
+            Virtual machines running web servers
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="http://aws.amazon.com/rds/pricing/" target="_blank">RDS</a>
+        </td>
+        <td>
+            Managed SQL Server database
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="http://aws.amazon.com/elasticloadbalancing/pricing/" target="_blank">Elastic Load Balancing</a>
+        </td>
+        <td>
+            Load balancer
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="http://aws.amazon.com/autoscaling/pricing/" target="_blank">Auto Scaling</a>
+        </td>
+        <td>
+            Spinning up/down web servers in response to traffic load
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="http://aws.amazon.com/route53/pricing/" target="_blank">Route 53</a>
+        </td>
+        <td>
+            DNS name servers
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="http://aws.amazon.com/elasticbeanstalk/pricing/" target="_blank">Elastic Beanstalk</a>
+        </td>
+        <td>
+            Deployment configuration
+        </td>
+    </tr>
+</table>
+
+<h2>Set a region</h2>
+<p>
+    AWS had data centers spread all over the world. They are divided into regions, such as &quot;US East (N. Virginia)&quot;
+    and &quot;EU (Ireland)&quot;.
+</p>
+<p>
+    After you've logged into the AWS Console, select the region that you're in or close to (top right hand corner of the page).
+</p>
+<img src="setting-aws-region.PNG" />
+
+
+<a id="keypair"></a><h2>Create a Key Pair</h2>
+<p>
+    Once you have your EC2 web servers created, you will be able to log into them - using RDP, as with any other Windows Server machine.
+    However, to keep your login password secure, AWS uses a 
+    <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html" target="_blank">key pair</a>
+     - the public key is used to encrypt the password, the private key is used
+    to decrypt it. Only you have the private key. 
+</p>
+<p>
+   The deployment system that we're going to set up will log into your web servers to 
+    deploy your website, so it will need your key pair. That means that now is a good time to 
+    <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair" target="_blank">create your key pair</a>:
+</p>
+<ol>
+    <li>
+        Open the Amazon EC2 console: <i>Services</i> | <i>Compute</i> | <i>EC2</i> 
+        <p>
+            <img src="ec2-console.PNG" />
+        </p>
+    </li>
+    <li>
+        Click Key Pairs in the navigation pane
+        <p>
+            <img src="key-pairs-menu-item.PNG" />
+        </p>
+    </li>
+    <li>
+        Click the <i>Create Key Pair</i> button and follow the instructions.
+    </li>
+</ol>
+
+<p>
+    Note that a key pair is only valid in the region where it was created. So when you create EC2 web servers in another region, you'll 
+    need to create another key pair for that region to be able to log into the servers in that region. 
+</p>
+
+<a id="sourcebundle"></a><h2>Application Source Bundle</h2>
+<p>
+    In order to deploy your web application to AWS, you have to 
+    package it into an
+    <a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.deployment.source.html" target="_blank">application source bundle</a>.
+</p>
+<p>
+    I have found that Amazon's instructions didn't give me 
+    an application source bundle that would actually work on AWS.
+</p>
+<p>
+    However, you can simply run msbuild to create a
+valid application source bundle for you, using these command line instructions:
+</p>
+<pre>cd /D "&lt;directory with your .csproj file&gt;"
+msbuild &lt;your project&gt;.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
+</pre>
+<p>
+    This produces a .zip file in the current directory. That .zip file is your application source bundle.
+</p>
+
+
+<h2>Creating the web servers, database servers and load balancer</h2>
+<p>
+    In this section, we'll create all the bits shown in the 
+    <a href="#architecture">architecture</a>, except for the DNS name servers.
+</p>
+<p>
+    A very easy way to do this is through the 
+    <a href="http://aws.amazon.com/elasticbeanstalk/" target="_blank">Elastic Beanstalk</a>
+    service. 
+    This lets you create a specification of the environment you want - what size web servers, what sort of database, etc.
+    You also give it the code making up your web application.
+    Once that's done, it creates all the web servers, etc. you specified and deploys your application.
+</p>
+<p>
+    A specification is called a &quot;Elastic Beanstalk application&quot;.
+    You can have multiple Elastic Beanstalk applications - which may be useful for example if you have multiple web sites. 
+</p>
+<p>
+    When it comes time to deploy a new version of your application, you select the Elastic Beanstalk
+    and tell it to deploy your new version. 
+</p>
+<p>
+Because it stores each version, you can quickly get a list of versions that have gone before, and revert to a previous version
+    if your new version doesn't work out.
+    This puts it in the same space as 
+    for example
+    <a href="https://octopusdeploy.com/" target="_blank">Octopus Deploy</a>.
+</p>
+
+<h3>Creating an Elastic Beanstalk application</h3>
+
+<ol>
+    <li>
+        Open the Elastic Beanstalk console: <i>Services</i> | <i>Deployment &amp; Management</i> | <i>Elastic Beanstalk</i> 
+        <p>
+            <img src="ebs-console.PNG" />
+        </p>
+    </li>
+    <li>
+        Click <i>Create New Application</i> (top right corner of the page).
+        AWS now takes you through a wizard to gather all your specifications.
+    </li>
+    <li>
+        <b>Application Info</b> -
+        Give your application some fancy name. Or maybe something boring, such as &quot;application1&quot;. Click <i>Next</i>.
+    </li>
+    <li>
+        <b>New Environment</b> -
+        Elastic Beanstalk lets you create two types of applications - web sites and 
+        <a href="http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features-managing-env-tiers.html" target="_blank">workers</a>
+         that take items from a 
+        <a href="http://aws.amazon.com/sqs/" target="_blank">queue</a>
+        and process them.  
+        <p>
+            Here we're deploying a web site, so click <i>Create web server</i>.
+        </p>
+    </li>
+    <li>
+        <b>Permissions</b> -
+        Your new environment needs certain permissions, which are contained in an
+        <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html" target="_blank">IAM instance profile</a>.
+        Just click <i>Next</i> to accept the default.
+    </li>
+    <li>
+        <b>Environment Type</b> -
+        Assuming you are deploying a .Net application, set <i>Predefined configuration</i> to <i>IIS</i>. 
+        And set <i>Environment type</i> to <i>Load balancing, auto scaling</i>. Click <i>Next</i>.
+    </li>
+    <li>
+        <b>Application Version</b> -
+        Here is where you get to upload your application, so it can be deployed to the web servers. Select
+        <i>Upload your own</i> and choose the application source bundle that you created
+        <a href="#sourcebundle">earlier</a>.
+        <p>
+            Later on, you'll see how to deploy new versions of your application to an existing environment.
+            The <i>Deployment Limits</i> section shows how Elastic Beanstalk avoids downtime during a deployment
+            by deploying to a few web servers at a time, while the others keep serving requests. Click <i>Next</i>.
+        </p>
+    </li>
+    <li>
+        <b>Environment Information</b> -
+        Elastic Beanstalk lets you have multiple 
+        <a href="http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.environments.html" target="_blank">environments</a>
+         for your application, such as a Test environment, a Live environment, etc.
+        <p>
+        Each environment (test site, live site, etc.) obviously has its own URL. Here you get to specify 
+            a sub domain of the <i>elasticbeanstalk.com</i> domain. Later on, you'll see how to associate your own domain 
+            with your site.
+        </p>
+    </li>
+    <li>
+        <b>Additional Resources</b> -
+        The web site is going to have a database, so tick the <i>RDS DB</i> check box. We're not interested in a VPC
+        right now.
+    </li>
+    <li>
+        <b>Configuration Details</b> -
+        You can use the defaults for most fields. However, these fields are noteworthy:
+            <table border="1" cellspacing="0" cellpadding="5">
+                <tr>
+                    <th>
+                        Field
+                    </th>
+                    <th>
+                        Description
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        Instance type
+                    </td>
+                    <td>
+                        The default here is <i>t1.micro</i>, but this type is of a 
+                        <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#AvailableInstanceTypes" target="_blank">previous generation</a>.
+                        Note that <i>t2.micro</i> is included in the 
+                        <a href="http://aws.amazon.com/free/" target="_blank">AWS Free Tier</a>,
+                        so you may want to select that instead.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        EC2 key pair
+                    </td>
+                    <td>
+                        Select the key pair that you created 
+                        <a href="#keypair">earlier on</a>.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Application health check URL
+                    </td>
+                    <td>
+                        The load balancer keeps track of the health of your web servers, so it can replace web servers
+                        that are no longer healthy. It does this by regularly sending requests to each web server.
+                        If it gets a normal HTTP 200 response, it assumes the web server is healthy.
+                        <p>
+                        Here you specify the relative URL that the load balancer should request.
+                            Make this a page that doesn't take a lot of resources to generate, but that still
+                            gives a fair indication of whether the server is functioning well. 
+                        </p>
+                        <p>
+                            If you're using my
+                            <a href="#trialsite">trial site</a>, you could use the home page. In that case, you'd enter the URL
+                            &quot;/&quot; (without the quotes).
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Cross zone load balancing
+                    </td>
+                    <td>
+                        <a href="http://aws.amazon.com/about-aws/whats-new/2013/11/06/elastic-load-balancing-adds-cross-zone-load-balancing/"
+                            target="_blank">Cross zone load balancing</a> is a feature that allows the load balancer to correctly 
+                        balance the load across servers in multiple data centers, giving you higher availability for your web site. 
+                        Leave this checked.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Root volume size
+                    </td>
+                    <td>
+                        Leave the default, or make 30
+                        <a href="http://en.wikipedia.org/wiki/Gibibyte" target="_blank">GiB</a>
+                         or higher - in spite of the 8 GiB minimum stated by Amazon. 
+                        Otherwise you will get error messages later on when you try to actually
+                        create the environment.
+                    </td>
+                </tr>
+            </table>
+    </li>
+    <li>
+        <b>Environment Tags</b> -
+        You can tag your environment, which may be useful if you have lots of them.
+    </li>
+    <li>
+        <b>RDS Configuration</b> -
+        Here is where you configure your database servers:
+            <table border="1" cellspacing="0" cellpadding="5">
+                <tr>
+                    <th>
+                        Field
+                    </th>
+                    <th>
+                        Description
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        Snapshot
+                    </td>
+                    <td>
+                        Allows you to create a database from an existing snapshot. Leave at <i>None</i>.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        DB engine
+                    </td>
+                    <td>
+                        The cheapest option here would be SQL Server Express
+                        (listed as <i>sqlserver-ex</i>), because that is part of the 
+                        <a href="http://aws.amazon.com/free/" target="_blank">AWS Free Tier</a>.
+                        However, with that engine, you can't have automatic fail overs.
+                        If you use this for production and it goes down, you'll be sorry.
+                        <p>
+                            Other editions of SQL Server will give you automatic fail over, but 
+                            are not free. Instead, they 
+                            cost
+                            a tiny bit of money
+                            (<a href="" target="_blank">compare pricing</a>,
+                            <a href="" target="_blank">compare editions</a>). 
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Instance class
+                    </td>
+                    <td>
+                        db.t1.micro (included in the <a href="http://aws.amazon.com/free/" target="_blank">AWS Free Tier</a>).
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Allocated storage
+                    </td>
+                    <td>
+                        Set to at least 20GB. Any smaller won't work with SQL Server Express. 
+                        <a href="http://aws.amazon.com/free/" target="_blank">AWS Free Tier</a> gives you 20GB.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Username, Password
+                    </td>
+                    <td>
+                        SQL Server databases hosted on RDS 
+                        <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html" target="_blank">can only use SQL Server Authentication</a>,
+                        not
+                        Windows Authentication.
+                        <p>
+                            Pick a username and password. The connection strings used by your application on AWS 
+                            will have to use the same username and password.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Retention setting
+                    </td>
+                    <td>
+                        This is about what happens when you delete your environment. The default is to keep a copy of your database data
+                        in AWS, which may cost you some money. The other option is to simply delete the data, which seems reasonable if it is just a \
+                        trial database.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Availability
+                    </td>
+                    <td>
+                        If you want AWS to keep a replica database of your main database in another data center with automatic fail over,
+                        choose <i>Multiple Availability Zones</i> 
+                        (<a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">details</a>).
+                        <p>
+                            You can't combine a SQL Server Express database
+                            with multiple availability zones. So if you chose that database,
+                            choose 
+                        <i>Single Availability Zone</i> (which means no automatic fail overs).
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+            </table>
+    </li>
+    <li>
+        <b>Review information</b> -
+        The <i>Launch</i> button at the bottom of the page creates your environment and deploys your site!
+    </li>
+    <li>
+        <b></b> -
+
+    </li>
+    <li>
+        <b></b> -
+
+    </li>
+</ol>
+
+
+
+
+
+
+
