@@ -1,0 +1,236 @@
+{ "id": "http://api.echoenabled.com/v1/search?q=((childrenof:%20http://www.washingtonpost.com/opinions/the-dubious-task-of-making-everyone-above-average/2015/03/20/0ec5a4e6-ce6e-11e4-a2a7-9517a3a70506_story.html%20source:washpost.com%20(((state:Untouched%20user.state:ModeratorApproved)%20OR%20(state:CommunityFlagged,ModeratorApproved,ModeratorDeleted%20-user.state:ModeratorBanned,ModeratorDeleted)%20)%20%20AND%20(%20-markers:ignore%20)%20)%20%20%20))%20itemsPerPage:%2015%20sortOrder:reverseChronological%20safeHTML:aggressive%20children:%202%20childrenSortOrder:chronological%20childrenItemsPerPage:3%20%20(((state:Untouched%20user.state:ModeratorApproved)%20OR%20(state:CommunityFlagged,ModeratorApproved%20-user.state:ModeratorBanned,ModeratorDeleted)%20)%20%20AND%20(%20-markers:ignore%20)%20)%20",
+"sortOrder": "reverseChronological",
+"showFlags": "on",
+"safeHTML": "aggressive",
+"itemsPerPage": "15",
+"updated": "2015-03-21T12:20:20Z",
+"nextSince": "1426940418.4275789",
+"entries": [
+	{
+		"id": "http://js-kit.com/activities/post/c30d94236599785eb47e29569dc728eb",
+		"actor": {
+			"links": [],
+			"objectTypes": [
+				"http://activitystrea.ms/schema/1.0/person"
+			],
+			"id": "http://washingtonpost.com/TxnFrNfNV0t9T53psu7MtMgoWI6YUHMFVlNQOUtKBgd/tT03sC7QkQ%3D%3D/",
+			"title": "erbkon",
+			"status": "ModeratorApproved",
+			"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+		},
+		"object": {
+			"id": "http://washingtonpost.com/ECHO/item/1426940413-68-8",
+			"objectTypes": [
+				"http://activitystrea.ms/schema/1.0/comment"
+			],
+			"permalink": "",
+			"context": [
+				{
+					"uri": "http://washingtonpost.com/opinions/the-dubious-task-of-making-everyone-above-average/2015/03/20/0ec5a4e6-ce6e-11e4-a2a7-9517a3a70506_story.html",
+					"title": "Social inequality’s deepening roots"
+				}
+			],
+			"content": "I suggest a course in reading comprehension.  The thesis is clear: More men are becoming less suitable to marry educated women; that means fewer stable families.  Equality of opportunity is vital but can't be enforced except by disadvantaging others who have often earned those opportunities, so it has to be encouraged other ways.  This is not rocket science.",
+			"content_type": "html",
+			"status": "Untouched",
+			"tags": [
+				"replyto_LeftGuy"
+			],
+			"published": "2015-03-21T12:20:13Z"
+		},
+		"source": {
+			"name": "washpost.com"
+		},
+		"provider": {
+			"name": "echo",
+			"uri": "http://aboutecho.com/",
+			"icon": "http://cdn.echoenabled.com/images/echo.png"
+		},
+		"verbs": [
+			"http://activitystrea.ms/schema/1.0/post"
+		],
+		"postedTime": "2015-03-21T12:20:13Z",
+		"targets": [
+			{
+				"id": "http://washingtonpost.com/ECHO/item/1426939313-408-747",
+				"conversationID": "http://washingtonpost.com/ECHO/item/1426939313-408-747"
+			}
+		],
+		"pageAfter": "1426940413.0699260"
+	}
+,
+	{
+		"id": "http://js-kit.com/activities/post/ba76b16ee4f5e65b91aea8c61a4d5227",
+		"actor": {
+			"links": [],
+			"objectTypes": [
+				"http://activitystrea.ms/schema/1.0/person"
+			],
+			"id": "http://washingtonpost.com/JF18vipjIfJHODmLkE%2Ba6Dp1sZwaf5%2B5vZWUI6yS69toGeVxxhJF5A%3D%3D/",
+			"title": "SeriousLee",
+			"status": "ModeratorApproved",
+			"avatar": "http://post-avatars.s3.amazonaws.com/0000013e-cf6d-5b85-fbc1-672425f9da4c"
+		},
+		"object": {
+			"id": "http://washingtonpost.com/ECHO/item/1426906234-755-442",
+			"objectTypes": [
+				"http://activitystrea.ms/schema/1.0/comment"
+			],
+			"permalink": "",
+			"context": [
+				{
+					"uri": "http://washingtonpost.com/opinions/the-dubious-task-of-making-everyone-above-average/2015/03/20/0ec5a4e6-ce6e-11e4-a2a7-9517a3a70506_story.html",
+					"title": "Social inequality’s deepening roots"
+				}
+			],
+			"content": "This was one of the most incoherent articles grandpa George has penned (or quilled) in at least the last week.  We start with who women marry and then spiral down to \"[w]hat is dubious is the conclusion that government has the capacity and duty to calibrate, redistribute and equalize advantages\" and seems to suggest that somehow the government is involved in marriage rates of millennials (aka \"whippersnappers\" to grandpa George)?\n\nEither grandpa George needs to take advantage of DC's pot laws, or his articles needs to come with advisories that readers would have a better experience his articles if they smoked a bit of the chronic.",
+			"content_type": "html",
+			"status": "Untouched",
+			"likes": [
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/TIGbOWoezH3AZVI3xONp/3ROUvIR6NGZXoEZDORDspFoGeVxxhJF5A%3D%3D/",
+						"title": "Quidnunc2",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T12:20:18Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/jrLUWyYwCazihyEWF1MuWfJkV59ZvvsM2tG8oZLe/1VoGeVxxhJF5A%3D%3D/",
+						"title": "Science and Reasoning",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T12:02:08Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/BGDY6E6nvFPPKKdiyhtq7ridoaFyAQkMe2qIGpRSUmUC1YGyXPVjbA%3D%3D/",
+						"title": "mhoulehan",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T11:17:30Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/kIElNjfRRAfzRF8Su5Oj3nrE7VgS76krNWZjM5N3fM%2B%2B%2BfrlKkwhFQ%3D%3D/",
+						"title": "LecTric",
+						"avatar": "http://wpidpub.s3.amazonaws.com/0000014b-3e00-cc53-6514-c19ad71474d7"
+					},
+					"published": "2015-03-21T10:53:02Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/DYH%2BzBig5zndUZTn%2BKIvl/JkV59ZvvsM3C50Itq0zVZoGeVxxhJF5A%3D%3D/",
+						"title": "Bobert57",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T07:00:24Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/6GRq4lqdU2SAQ1LXD2QfgridoaFyAQkMe2qIGpRSUmUC1YGyXPVjbA%3D%3D/",
+						"title": "mollycoddle3",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T06:10:25Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/Mh5C/jzGbgv4taeREhrrtXrE7VgS76krNWZjM5N3fM%2B%2B%2BfrlKkwhFQ%3D%3D/",
+						"title": "cococo",
+						"avatar": "http://post-avatars.s3.amazonaws.com/0000013d-c8dc-d405-107e-de26e83069c9"
+					},
+					"published": "2015-03-21T04:42:27Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/xE%2BsWcpWtH2xBmlEhVfoa/%2BLRzrUEvutXu1U%2BBAdJgdoGeVxxhJF5A%3D%3D/",
+						"title": "scunnert",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T04:22:56Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/iDhx3k0YezAHue809Nam/sgoWI6YUHMFVlNQOUtKBgd/tT03sC7QkQ%3D%3D/",
+						"title": "publia",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T04:04:06Z"
+				},
+				{
+					"actor": {
+						"links": [],
+						"objectTypes": [
+							"http://activitystrea.ms/schema/1.0/person"
+						],
+						"id": "http://washingtonpost.com/eMVsubvgcRoOUVHFahvx2HrE7VgS76krNWZjM5N3fM%2B%2B%2BfrlKkwhFQ%3D%3D/",
+						"title": "lewfournier1",
+						"avatar": "https://wpidentity.s3.amazonaws.com/assets/images/avatar-default.png"
+					},
+					"published": "2015-03-21T03:28:43Z"
+				}
+			],
+			"published": "2015-03-21T02:50:34Z",
+			"accumulators": {
+				"likesCount": "11"
+			}
+		},
+		"source": {
+			"name": "washpost.com"
+		},
+		"provider": {
+			"name": "echo",
+			"uri": "http://aboutecho.com/",
+			"icon": "http://cdn.echoenabled.com/images/echo.png"
+		},
+		"verbs": [
+			"http://activitystrea.ms/schema/1.0/post"
+		],
+		"postedTime": "2015-03-21T02:50:34Z",
+		"targets": [
+			{
+				"id": "http://washingtonpost.com/opinions/the-dubious-task-of-making-everyone-above-average/2015/03/20/0ec5a4e6-ce6e-11e4-a2a7-9517a3a70506_story.html",
+				"conversationID": "http://washingtonpost.com/ECHO/item/1426906234-755-442"
+			}
+		],
+		"pageAfter": "1426906234.0288210"
+	}
+] }

@@ -1,0 +1,9 @@
+GET http://application2-envb.elasticbeanstalk.com/Home/Heavy HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Accept-Language: en-AU
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Host: application2-envb.elasticbeanstalk.com
+DNT: 1
+Proxy-Connection: Keep-Alive
+

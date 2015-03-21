@@ -1,0 +1,10 @@
+GET http://ping.chartbeat.net/ping?h=en-au.msn.com&p=%2Fen-au&u=BKq7sZC3F5BECUCgda&d=msn.com&g=42635&g0=homepage&n=0&f=3000f&c=9&x=0&m=0&y=4823&o=1920&w=985&j=270&R=0&W=0&I=1&E=0&e=0&v=http%3A%2F%2Fwww.msn.com%2Fen-au%2F%3Focid%3Diehp%26AR%3D5&t=DnCSADBc-C5pDhAmUFC_DNPfLniym&V=50&tz=-660&_cdname=easia&sn=6&_ HTTP/1.1
+Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5
+Referer: http://www.msn.com/en-au/?ocid=iehp&AR=6
+Accept-Language: en-AU
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Proxy-Connection: Keep-Alive
+DNT: 1
+Host: ping.chartbeat.net
+

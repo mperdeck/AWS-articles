@@ -1,0 +1,9 @@
+GET http://pnytimes.chartbeat.net/ping?h=nytimes.com&p=%2F2015%2F03%2F20%2Fus%2Fvenice-high-school-unnerved-by-accusations-of-sex-crimes.html&u=CC-d2wCRyjhKBZGAlb&d=nytimes.com&g=16698&g0=U.S.%2C&g1=RICK%20ROJAS&n=0&f=00001&c=14&x=0&m=0&y=2586&o=1920&w=917&j=270&R=0&W=0&I=1&E=12&e=0&v=http%3A%2F%2Fwww.nytimes.com%2F2015%2F03%2F20%2Fus%2Fvenice-high-school-unnerved-by-accusations-of-sex-crimes.html&t=DlN3jWD_IA9ZDzGXzlDcfcPQD47edE&V=50&tz=-660&sn=14&_ HTTP/1.1
+Host: pnytimes.chartbeat.net
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0
+Accept: image/png,image/*;q=0.8,*/*;q=0.5
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Referer: http://www.nytimes.com/2015/03/20/us/venice-high-school-unnerved-by-accusations-of-sex-crimes.html?gwh=E7BFA912D1E6278C58AB43F9608C2983&gwt=pay&assetType=nyt_now
+Connection: keep-alive
+

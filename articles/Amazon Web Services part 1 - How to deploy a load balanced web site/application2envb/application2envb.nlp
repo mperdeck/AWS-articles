@@ -1,0 +1,8 @@
+#NeoLoad project description file
+#Sat Mar 21 23:23:25 EST 2015
+project.config.storage=ZIP
+project.name=application2envb
+project.original.version=5.0
+project.version=5.0
+team.server.enabled=false
+project.config.path=config.zip

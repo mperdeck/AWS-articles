@@ -1,0 +1,10 @@
+GET http://tch390506.tch.quora.com/up/chan8-8888/updates?min_seq=2213255255&channel=main-w-dep3803-1971613061204531624&callback=jsonp14c3c4687d99c41257c HTTP/1.1
+Host: tch390506.tch.quora.com
+Proxy-Connection: keep-alive
+Accept: */*
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.89 Safari/537.36
+Referer: http://www.quora.com/Whats-the-easiest-way-to-run-a-cheap-web-load-test-with-Amazon-EC2-or-another-cloud-platform
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: en-US,en;q=0.8,nl;q=0.6
+Cookie: m-b="SP4BZCl8ksk6LCyLaoERIw\075\075"; m-f=9YPE3gamBhuBhNHA5QIZnsLqMbvoy132KCkJ; __utma=261736717.1628762895.1406199877.1407578230.1407582138.12; m-age_gate_cb=checked; ishs=true; m-css_v=731a602d47615f3318; m-s="z-pUkl1G8IKBv1ZlFn6pdQ\075\075"; m-tz=-660; _ga=GA1.2.1628762895.1406199877
+
