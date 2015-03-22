@@ -9,10 +9,6 @@
         <p>
             server ip:
             @Request.ServerVariables["LOCAL_ADDR"]
-            |
-            @Html.ActionLink("Index", "Index", "Home")
-            |
-            @Html.ActionLink("Heavy", "Heavy", "Home")
         </p>
         @RenderBody()
     </body>

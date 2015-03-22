@@ -1,6 +1,0 @@
-GET http://ocsp.verisign.com/MFEwTzBNMEswSTAJBgUrDgMCGgUABBTSqZMG5M8TA9rdzkbCnNwuMAd5VgQUz5mp6nsm9EvJjo%2FX8AUm7%2BPSp50CEApPmHp2nko1OyaHijvT094%3D HTTP/1.1
-Accept: */*
-User-Agent: Microsoft-CryptoAPI/6.1
-Proxy-Connection: Keep-Alive
-Host: ocsp.verisign.com
-

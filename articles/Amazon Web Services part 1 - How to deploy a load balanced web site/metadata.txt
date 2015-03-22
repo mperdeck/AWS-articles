@@ -1,7 +1,7 @@
 
-Hosting a high performance high availability web site on Amazon Web Services
+Amazon Web Services part 1 - How to deploy a load balanced web site
 
-How to quickly create a load balanced, auto scaled web site with a SQL Server database with a standby replica and automatic failover
+How to quickly create a load balanced web site in the cloud with AWS Elastic Beanstalk
 
 
 

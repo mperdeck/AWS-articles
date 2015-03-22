@@ -142,9 +142,6 @@
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\Heavy.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>

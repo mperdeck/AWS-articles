@@ -1,0 +1,45 @@
+scenario
+{
+	name = "test1”;
+	warmup = 5;
+	duration = 100;
+	cooldown = 5;
+	default
+	{
+	setheader
+	{
+	name = "Connection”;
+	value = "keep-alive”;
+	}
+	setheader
+	{
+	name = "Accept-Encoding";
+	value = "gzip, deflate";
+	}
+	setheader
+	{
+	name = "Host";
+	value = server();
+	}
+	version = HTTP11;
+	statuscode = 200;
+	close = ka;
+	}
+	transaction
+	{
+		id = "test1_transaction1";
+		weight = 100;
+		request
+		{
+			url = "/default.aspx";
+		}
+		
+		sleep
+    	{
+      	 id = "sleep1";
+         delay = 2000;
+    	}
+	}
+}
+
+

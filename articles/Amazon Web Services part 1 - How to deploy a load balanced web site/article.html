@@ -491,6 +491,12 @@ Because it stores each version, you can quickly get a list of versions that have
     </li>
 </ol>
 
+<h2>Deploy new version</h2>
+<p>
+To deploy a new version of your web site, first
+        <a href="#sourcebundle">create a new application source bundle</a>.
+        Then click <i>Upload and Deploy</i> on the Elastic Beanstalk dashboard.
+</p>
 
 
 <h2>Get some stats</h2>
@@ -503,22 +509,44 @@ Because it stores each version, you can quickly get a list of versions that have
     on the dashboard via the <i>Edit</i> buttons.
 </p>
 
-<h2>See how it deals with load</h2>
+
+<h2>Take down your servers to save money</h2>
+
 <p>
-    It would be good to see what happens if we apply a bit of load on our new
-    AWS deployed site. That will show us its effect on the monitoring dashboard and also show 
-    how new servers will be spun up to deal with the load.
+    Once you're done with the servers, 
+    you will want to take them down to save money.
+</p>
+<p>
+    Note that one way of doing this would be by terminating the environment from the <i>Actions</i> drop down on the
+    Elastic Beanstalk dashboard. However, this deletes your entire environment, so next time you want to spin up the servers,
+    you have to go through the wizard again to specify the environment.
+</p>
+<p>
+    The only way to take down your web servers is one by one:
+    <i>Services</i> | <i>EC2</i> | <i>Instances</i> | click your server | <i>Actions</i> | <i>Instance State</i> | <i>Stop</i>.
+</p>
+<p>
+    To take down your load balancer:
+    <i>Load Balancers</i> (left hand menu) | click load balancer | <i>Actions</i> | <i>Delete</i>.
 </p>
 
+<p>
+    Once all this is done, your Elastic Beanstalk application shows red.
+</p>
 
+<h2>Restart your environment</h2>
 
+<p>
+    To get your application operational again:
+    <i>Services</i> | <i>Elastic Beanstalk</i> | click the environment | <i>Actions</i> | <i>Rebuild Environment</i>
+</p>
 
+<h2>Next Parts</h2>
 
-http://loader.io/
-
-
-
-<h2>Delete your servers to save money</h2>
-
-
-
+<p>
+    In 
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw">subsequent parts</a>,
+    you'll see how to add a SQL Server database with automatic fail over, 
+    so if your database server goes missing, your application recovers automatically. You'll also see 
+    how to point your own domain to your AWS hosted web site.
+</p>

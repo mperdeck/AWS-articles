@@ -1,0 +1,6 @@
+settings
+{
+server = "application2-envb.elasticbeanstalk.com";
+clients = 1;
+virtualclients = 2;
+}

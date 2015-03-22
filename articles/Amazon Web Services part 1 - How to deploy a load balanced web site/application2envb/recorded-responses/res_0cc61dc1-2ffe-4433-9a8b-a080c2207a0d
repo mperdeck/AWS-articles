@@ -1,8 +1,0 @@
-{ "id": "http://api.echoenabled.com/v1/search?q=((childrenof:%20http://www.washingtonpost.com/opinions/the-dubious-task-of-making-everyone-above-average/2015/03/20/0ec5a4e6-ce6e-11e4-a2a7-9517a3a70506_story.html%20source:washpost.com%20(((state:Untouched%20user.state:ModeratorApproved)%20OR%20(state:CommunityFlagged,ModeratorApproved,ModeratorDeleted%20-user.state:ModeratorBanned,ModeratorDeleted)%20)%20%20AND%20(%20-markers:ignore%20)%20)%20%20%20))%20itemsPerPage:%2015%20sortOrder:reverseChronological%20safeHTML:aggressive%20children:%202%20childrenSortOrder:chronological%20childrenItemsPerPage:3%20%20(((state:Untouched%20user.state:ModeratorApproved)%20OR%20(state:CommunityFlagged,ModeratorApproved%20-user.state:ModeratorBanned,ModeratorDeleted)%20)%20%20AND%20(%20-markers:ignore%20)%20)%20",
-"sortOrder": "reverseChronological",
-"showFlags": "on",
-"safeHTML": "aggressive",
-"itemsPerPage": "15",
-"updated": "2015-03-21T12:21:05Z",
-"nextSince": "1426940435.0000000",
-"entries": [] }

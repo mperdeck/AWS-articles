@@ -14,11 +14,5 @@ namespace SimpleSite.Controllers
         {
             return View();
         }
-
-        public ActionResult Heavy()
-        {
-            Thread.Sleep(5000);
-            return View();
-        }
     }
 }

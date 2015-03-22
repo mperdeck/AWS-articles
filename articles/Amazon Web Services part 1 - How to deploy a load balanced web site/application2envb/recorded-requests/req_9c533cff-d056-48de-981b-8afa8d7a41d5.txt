@@ -1,9 +1,0 @@
-GET http://api.echoenabled.com/v1/bus/washpost.com/channel/142691627279911904?callback=Backplane.response&rnd=0.2726074083255179 HTTP/1.1
-Host: api.echoenabled.com
-User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0
-Accept: */*
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate
-Referer: http://www.washingtonpost.com/opinions/the-dubious-task-of-making-everyone-above-average/2015/03/20/0ec5a4e6-ce6e-11e4-a2a7-9517a3a70506_story.html
-Connection: keep-alive
-
