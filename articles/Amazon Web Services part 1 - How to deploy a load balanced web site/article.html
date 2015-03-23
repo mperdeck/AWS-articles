@@ -234,12 +234,22 @@ msbuild &lt;your project&gt;.csproj /t:Package /p:Configuration=Release /p:Packa
 </p>
 
 
-<h2>Creating the web servers and load balancer</h2>
+<h2>Creating the web servers, auto scaling group and load balancer</h2>
 <p>
-    A very easy way to do this is through the 
+    Your web site will be hosted on
+    <a href="http://aws.amazon.com/documentation/ec2/" target="_blank">EC2 virtual machines</a>. These live in an
+    <a href="http://aws.amazon.com/documentation/autoscaling/" target="_blank">auto scaling group</a>, which spins up/down machines in response to events, such
+    as a machine going down or machines getting overloaded.
+    The 
+    <a href="http://aws.amazon.com/documentation/elastic-load-balancing/" target="_blank">load balancer</a> receives requests from browsers and spreads the load
+    to the available servers.
+</p>
+
+<p>
+    A very easy way to spin up all this infrastructure to host your site is through the 
     <a href="http://aws.amazon.com/elasticbeanstalk/" target="_blank">Elastic Beanstalk</a>
     service. 
-    This lets you create a specification of the environment you want - what size web servers, what sort of database, etc.
+    This lets you create a specification of the environment you want, such as the size of your web servers.
     You also give it the code making up your web application.
     Once that's done, it creates all the web servers, etc. you specified and deploys your application.
 </p>
