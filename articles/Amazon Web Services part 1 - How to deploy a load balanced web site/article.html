@@ -34,7 +34,7 @@ In the .Net world, the best known cloud provider is
 </p>
 <ul>
     <li>
-        <b>Highly Availability</b> -
+        <b>High Availability</b> -
         Even if an entire data centre fails, your site will recover automatically and keep going.
     </li>
     <li>
@@ -57,7 +57,7 @@ In the .Net world, the best known cloud provider is
     Here is what it will look like:
 </p>
 <a id="architecture"></a>
-<img src="architecture.png" />
+<img src="architecture.png" width="400" />
 <p>
     We'll do the blue bit (the web servers and the load balancer) in this article.
     The DNS name servers (for your own domain name) and the database will be covered in 
@@ -81,7 +81,13 @@ In the .Net world, the best known cloud provider is
 <p>
 
         Make sure that all references pointing to outside your web application have <i>Copy Local</i> set to 
-        <i>True</i>. This goes in particular for NuGet packages, because these normally sit in a 
+        <i>True</i>. This way, they'll wind up in the 
+        <a href="#sourcebundle">application source bundle</a>
+        that you'll create in a moment to deploy your site to AWS.
+    Otherwise, your site will simply crash when it starts up due to missing assemblies.
+</p>
+<p>
+        This goes in particular for NuGet packages, because these normally sit in a 
         <i>packages</i> directory that sits outside your project directory. 
         Framework dlls should be fine, because the AWS EC2 web server will have the .Net framework installed.
         <p>
@@ -550,3 +556,4 @@ To deploy a new version of your web site, first
     so if your database server goes missing, your application recovers automatically. You'll also see 
     how to point your own domain to your AWS hosted web site.
 </p>
+
