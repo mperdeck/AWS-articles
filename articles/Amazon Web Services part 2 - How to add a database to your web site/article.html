@@ -1,0 +1,460 @@
+
+<h2>Introduction</h2>
+<p>
+    This is part 2 of a series of articles about deploying your site to 
+    <a href="http://aws.amazon.com/" target="_blank">Amazon Web Services</a> (AWS), 
+    Amazon's counterpart to <a href="http://azure.microsoft.com/en-us/" target="_blank">Windows Azure</a>.
+</p>
+<p>
+    In <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">part 1</a>,
+    we looked at the architecture of a web site with load balanced web servers and a SQL Server database with automatic fail over.
+    We then implemented a simple site without a database. In this part, we'll add the database. That is, we'll do the green bit below.
+    The red bit (DNS name servers so your site uses your own domain) we'll leave for 
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">another part</a>.
+</p>
+<a id="architecture"></a>
+<img src="architecture.png" />
+
+<p>
+    This article assumes you have a web site deployed to AWS with <a href="http://aws.amazon.com/elasticbeanstalk/" target="_blank">Elastic Beanstalk application</a>, 
+    as described in
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">part 1</a>.
+    We'll first create the database, and then 
+    <a href="#sitewithdb">deploy a new version of the web site</a>
+     that uses that database.
+</p>
+
+<h2>Automatic fail over aka Multi-AZ deployment</h2>
+<p>
+    AWS refers to the automatic fail over feature as a 
+    <a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">Multi-AZ deployment</a>.
+AZ stands for Availability Zone. Each AZ has its own data centre.
+</p>
+<p>
+    With a Multi-AZ deployment, AWS creates a backup database server in another availability zone within the same region.
+    Modifications to your main database server are continuously mirrored to the other server. If your main database server goes down,
+    the other server is automatically made the main server (fail over). Because it has the same
+    DNS name as the main database, your application doesn't need a new connection string.
+</p>
+<p>
+    The fail over process may take a few minutes. During that time, your application will see a broken database connection.
+    AWS will automatically spin up a new backup database server.
+</p>
+<p>
+    Because the backup server is in another data centre, it is highly unlikely that both your main and backup servers 
+    go down at the same time. Because they are in the same region, moving data from main to backup is still fast.
+</p>
+<p>
+    Note that automatic failover for SQL Server databases
+    is 
+    <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html#SQLServer.Concepts.General.Mirroring" target="_blank">currently only available</a>
+     in the US East (N. Virginia), US West (Oregon), and EU (Ireland) AWS regions.
+</p>
+
+
+<h2>Database with fail over costs money</h2>
+<p>
+    If you are using the
+    <a href="http://aws.amazon.com/free/" target="_blank">AWS Free Tier</a>,
+    you can use a database server running SQL Server Express for 
+    <a href="http://aws.amazon.com/rds/free/" target="_blank">free</a>
+     (as of March 2015).
+</p>
+<p>
+    The problem is that Amazon have implemented fail over for SQL Server servers using
+    the SQL Server Mirroring feature. This feature is 
+    <a href="https://msdn.microsoft.com/en-us/library/cc645993.aspx" target="_blank">not available</a>
+     on SQL Server Express.
+</p>
+<p>
+    Your cheapest option that supports mirroring would be a SQL Server Standard Edition database
+    on a db.m1.small instance
+    (<a href="http://aws.amazon.com/rds/previous-generation/" target="_blank">pricing</a>).
+</p>
+<p>
+    Because of this, I've discussed installation of both SQL Server Express (no fail over)
+    and 
+    <a href="#create-se">SQL Server Standard Edition</a>
+     (with fail over, costs money) below.
+</p>
+
+
+<a id="create-ex"></a><h2>Creating an SQL Server Express database</h2>
+<ol>
+    <li>
+        <b>Select Engine</b> - 
+        Click <i>Services</i> | <i>RDS</i> | Get started now | SQL Server logo | <i>Select</i> for SQL Server Express.
+        <p />
+    </li>
+    <li>
+        <b>Specify DB Details</b> - Here is where you enter most of the details of your database.
+
+        <table border="1" cellspacing="0" cellpadding="5">
+            <tr>
+                <th>
+                    Field
+                </th>
+                <th>
+                    Value
+                </th>
+            </tr>
+            <tr>
+                <td valign="top">
+                    DB Instance Class
+                </td>
+                <td valign="top">
+                    db.t1.micro
+                </td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    Allocated Storage
+                </td>
+                <td valign="top">
+                   The free tier gives you 20GB max, so keep it at that.
+                    Note that SQL Server Express needs 20GB or more, so 20GB is exactly the sweet spot.
+
+                </td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    Db Instance Identifier
+                </td>
+                <td valign="top">
+                    Must be unique amongst your databases in this region. Maybe something boring like &quot;dbinstance1&quot;.
+                </td>
+            </tr>
+            <tr>
+                    <td valign="top">
+                        Username, Password
+                    </td>
+                <td valign="top">
+                                            SQL Server databases hosted on RDS 
+                        <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html" target="_blank">can only use SQL Server Authentication</a>,
+                        not
+                        Windows Authentication. The username and password you enter here will also have to be used in the connection strings used by your application on AWS. 
+                </td>
+            </tr>
+        </table>
+<p>
+    Click <i>Next Step</i> (bottom right).
+</p>
+    </li>
+    <li>
+        <b>Configure Advanced Settings</b> - 
+        You can leave all defaults. Click <i>Launch DB Instance</i>. Click <i>View Your DB Instances</i> to get to where you really want to be.
+        <p />
+    </li>
+    <li>
+You're now on the RDS page showing your database servers. It will show your server spinning up, which will take a while.
+    </li>
+</ol>
+
+<a id="create-se"></a><h2>Creating a SQL Server Standard Edition database</h2>
+<ol>
+    <li>
+        <b>Select Engine</b> - 
+        Click <i>Services</i> | <i>RDS</i> | Get started now | SQL Server logo | <i>Select</i> for SQL Server SE.
+        <p />
+    </li>
+    <li>
+        <b>Production?</b> -
+        Seeing that you're here for automatic fail over (that is, Multi-AZ Deployment), it makes sense to say <i>Yes</i>
+        here. Click <i>Next Step</i>.
+        <p />
+    </li>
+    <li>
+        <b>Specify DB Details</b> - Here is where you enter most of the details of your database.
+
+        <table border="1" cellspacing="0" cellpadding="5">
+            <tr>
+                <th>
+                    Field
+                </th>
+                <th>
+                    Value
+                </th>
+            </tr>
+            <tr>
+                <td valign="top">
+                    License Model
+                </td>
+                <td valign="top">
+                    Unless you bring your own SQL Server license, you'll want AWS to take care of the license: <i>license-included</i>.
+                </td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    DB Instance Class
+                </td>
+                <td valign="top">
+                    <i>db.m1.micro</i> would be the cheapest option, but it may not be powerful enough for you
+                    (<a href="http://aws.amazon.com/rds/details/" target="_blank">compare instances</a>). 
+                </td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    Allocated Storage
+                </td>
+                <td valign="top">
+                   You'll need 200GB or more for Standard Edition.
+                </td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    Db Instance Identifier
+                </td>
+                <td valign="top">
+                    Must be unique amongst your databases in this region. Maybe something boring like &quot;dbinstance1&quot;.
+                </td>
+            </tr>
+            <tr>
+                    <td valign="top">
+                        Username, Password
+                    </td>
+                <td valign="top">
+                                            SQL Server databases hosted on RDS 
+                        <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html" target="_blank">can only use SQL Server Authentication</a>,
+                        not
+                        Windows Authentication. The username and password you enter here will also have to be used in the connection strings used by your application on AWS. 
+                </td>
+            </tr>
+        </table>
+<p>
+    Click <i>Next Step</i> (bottom right).
+</p>
+    </li>
+    <li>
+        <b>Configure Advanced Settings</b> - 
+        You can leave all defaults. Click <i>Launch DB Instance</i>. Click <i>View Your DB Instances</i> to get to where you really want to be.
+        <p />
+    </li>
+    <li>
+You're now on the RDS page showing your database servers. It will show your server spinning up, which will take a while.
+    </li>
+</ol>
+
+<h2>Adding a database while creating a Elastic Beanstalk application</h2>
+<p>
+    In part 1, while going through the wizard to create the web servers and load balancer,
+    there was a step <i>Additional Resources</i>
+    where the wizard offered to create a database.
+</p>
+<p>
+    It would certainly have been possible to create a database at that point in time.
+    The wizard will ask you your username, password, database instance, etc., and even whether you want a 
+    Multi-AZ Deployment. 
+</p>
+<p>
+    However, if you say yes to that, Elastic Beanstalk throws an error when it actually tries to
+    create the application. This is because a Multi-AZ Deployment for SQL Server requires that 
+    an 
+    <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithOptionGroups.html" target="_blank">option group </a>
+    is created and attached to the SQL Server database server that switches on mirroring.
+    Elastic Beanstalk fails to do this though. As a result of this bug, it is easier to create the database
+    directly from the RDS dashboard.
+</p>
+<p>
+    Note that if you created a SQL Server Standard Edition database server with Multi-AZ Deployment,
+    you can see its option group: <i>Services</i> | <i>RDS</i> | <i>Instances</i> | click your database (database details appear) | 
+    click option group in the details section. 
+</p>
+
+<a id="dbservername"></a><h2>Find the database server name</h2>
+<p>
+    When you create a connection string for your new database server,
+    you need to know the server name.
+</p>
+<p>
+    That name is listed on the RDS dashboard as the end point:
+</p>
+<img src="db-server-name.png" />
+
+<h2>Copy your current schema and data to your new database</h2>
+
+<p>
+As an aside, there is nothing stopping you from accessing your new database on AWS from SQL Server Management Studio (SSMS). Simply create a new connection with the 
+    <a href="#dbservername">database name you found earlier</a> and the username and password you specified whilst creating the new database.
+</p>
+<p>
+My trial site <i>SimpleSiteWithDb</i> 
+    (on 
+        <a href="https://github.com/mperdeck/AWS-articles" target="_blank">Github</a>)
+    uses
+        <a href="https://msdn.microsoft.com/en-us/data/ee712907" target="_blank">Entity Framework Code First</a>,
+    which means that it creates the database schema when it first runs against an empty server.
+</p>
+<p>
+    However, if your application doesn't use
+    Entity Framework Code First,
+    you will want to copy the schema of your existing database to your new AWS database.
+</p>
+<p>
+You can easily do this with SQL Database Migration Wizard, a tool that ironically was created inside Microsoft to transfer databases to Microsoft Azure.
+</p>
+<ol>
+    <li>
+        <a href="http://sqlazuremw.codeplex.com/" target="_blank">Download SQL Database Migration Wizard</a>. This gives you a .zip file.
+    </li>
+    <li>
+        Expand the .zip file. The result will contain a file <i>SQLAzureMW.exe</i>.
+    </li>
+    <li>
+        Run <i>SQLAzureMW.exe</i>. A wizard appears.
+    </li>
+    <li>
+        <b>Select Process</b> -
+        Set <i>Analyze / Migrate</i> to <i>Database</i>. Set <i>Target Server</i> to <i>SQL Server</i>. Leave everything else unchecked. Click <i>Next</i>.
+    </li>
+    <li>
+        <b>Connect to Server dialog</b> - Enter the details of the source database.
+    </li>
+    <li>
+        Going through the wizard, it will let you save a script that creates the schema. You could use SSMS to  use that, but if you click <i>Next</i>, it will 
+        apply the script for you.
+    </li>
+    <li>
+        <b>Setup Target Server Connection - Connect to Server dialog</b> - Enter the details of your new database at AWS. Leave <i>Database</i> at <i>Master DB</i>. 
+        Click <i>Connect</i>.
+    </li>
+    <li>
+           <b>Setup Target Server Connection</b>
+        -
+        click your target database. Click <i>Create Database</i>. It now transfers the schema. Click <i>Exit</i>.
+    </li>
+</ol>
+
+<p>
+    Once that's done, you can use the <i>SQL Server Import and Export Wizard</i>
+    to copy your data from your current database to your new AWS database: 
+</p>
+<ol>
+    <li>
+        Open SQL Server Management Studio;
+    </li>
+    <li>
+Connect to your current server;
+    </li>
+    <li>
+        Right click your current database | <i>Tasks</i> | <i>Export Data</i>.
+    </li>
+</ol>
+
+
+<a id="sitewithdb"></a><h2>Trial site that uses the database</h2>
+
+<p>
+    If you have a web site project lying around that uses a SQL Server database, you can use that.
+    MVC and WebForms are both fine.
+</p>
+<p>
+    Otherwise feel free to 
+    get my trial site <i>SimpleSiteWithDb</i> from
+    <a href="https://github.com/mperdeck/AWS-articles" target="_blank">Github</a>.
+    If you use this site, do this <b>before</b> running it on your computer: 
+</p>
+<ol>
+    <li>
+        Make sure you have access to a SQL Server database server.
+        If you don't, install 
+        <a href="http://www.microsoft.com/en-au/server-cloud/products/sql-server-editions/sql-server-express.aspx" target="_blank">SQL Server Express</a> for free.
+    </li>
+    <li>
+        Edit the connection string in the web.config file, so it points at your database server.
+    </li>
+</ol>
+
+<p>
+    If you use your own site, 
+make sure that all references pointing to outside your web application have <i>Copy Local</i> set to 
+        <i>True</i> (I've already done this for my trial site). This goes in particular for NuGet packages, because these normally sit in a 
+        <i>packages</i> directory that sits outside your project directory. 
+        Framework dlls should be fine, because the AWS EC2 web server will have the .Net framework installed.
+</p>
+            <img src="copy-local.png" />
+
+<p>
+    Lastly, make sure that the Release version of your site has a connection string pointing at the AWS database server, not your local database server.
+</p>
+<p>
+    You can make this happen 
+    through 
+    <a href="http://www.asp.net/mvc/overview/deployment/visual-studio-web-deployment/web-config-transformations" target="_blank">Web.config transformations</a>,
+    by adding a <i>Web.Release.config</i> file in the same directory as your <i>Web.config</i> file.
+The
+    <i>Web.Release.config</i> file
+    contains XSLT to transform the <i>Web.config</i> file to the Release version.
+</p>
+<p>
+    My trial site already has such a file. Be sure to modify it, to give it your own database name, username and password.
+</p>
+
+<p>
+Otherwise, this     <i>Web.Release.config</i> file
+would do the trick:
+</p>
+
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform"&gt;
+    &lt;connectionStrings&gt;
+      &lt;add name="&lt;connection string name used in web.config&gt;" 
+        connectionString="Data Source=........rds.amazonaws.com;Initial Catalog=....;User Id=.....;
+Password=.......;" 
+        xdt:Transform="SetAttributes" xdt:Locator="Match(name)"/&gt;
+    &lt;/connectionStrings&gt;
+ 
+&lt;/configuration&gt;
+</pre>
+
+<p>
+    Don't forget to fill in your server name, username and password.
+</p>
+<p>
+    Some connection strings use <i>Integrated Security=SSPI;</i>. Do not use this. It will cause AWS to try to log into your database with the 
+    <i>NT AUTHORITY\ANONYMOUS LOGON</i> account rather than your own account - which will fail. 
+</p>
+
+
+<h2>Deploying your site</h2>
+<ol>
+    <li>
+        #############
+        Create an
+    <a href="http://##############sourcebundle" target="_blank">application source bundle</a>
+        for your site;
+    </li>
+<li>
+    Open
+    Elastic Beanstalk dashboard: click <i>Services</i> | <i>Elastic Beanstalk</i> | 
+        your application (that you created in 
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">part 1</a>).
+        <p />
+</li>
+<li>
+    If you stopped the web servers,
+        get your application operational again:
+    <i>Actions</i> | <i>Rebuild Environment</i>
+        <p />
+</li>
+<li>
+Click <i>Upload and Deploy</i> on the Elastic Beanstalk dashboard to deploy your application source bundle.
+</li>
+
+</ol>
+
+<h2>Next Parts</h2>
+
+<p>
+    In 
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw">subsequent parts</a>,
+    you'll see 
+    how to point your own domain to your AWS hosted web site.
+</p>
+
+
+
+
+
+
+

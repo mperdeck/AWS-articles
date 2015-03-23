@@ -1,0 +1,8 @@
+
+Amazon Web Services part 2 - How to add a database to your web site
+
+How to add a database to your web site with automatic fail over using AWS RDS
+
+
+
+
