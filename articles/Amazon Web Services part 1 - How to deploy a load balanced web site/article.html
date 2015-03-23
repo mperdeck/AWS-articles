@@ -112,44 +112,44 @@ In the .Net world, the best known cloud provider is
     Here are the pages with pricing info for the services that we'll use in this article, as of March 2015. 
 You'll probably find that just playing around with these services won't cost you more than a coffee:
 </p>
-<table border="1" cellspacing="0" cellpadding="5">
+<table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
     <tr>
-        <th>
-            Service
+        <th style="padding: 5px; border: 1px solid black;">
+            Pricing Page
         </th>
-        <th>
-            Used for
+        <th style="padding: 5px; border: 1px solid black;">
+            Service is used for
         </th>
     </tr>
     <tr>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             <a href="http://aws.amazon.com/ec2/pricing/" target="_blank">EC2 t2.micro instances</a>
         </td>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             Virtual machines running web servers
         </td>
     </tr>
     <tr>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             <a href="http://aws.amazon.com/elasticloadbalancing/pricing/" target="_blank">Elastic Load Balancing</a>
         </td>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             Load balancer
         </td>
     </tr>
     <tr>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             <a href="http://aws.amazon.com/autoscaling/pricing/" target="_blank">Auto Scaling</a>
         </td>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             Spinning up/down web servers in response to traffic load
         </td>
     </tr>
     <tr>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             <a href="http://aws.amazon.com/elasticbeanstalk/pricing/" target="_blank">Elastic Beanstalk</a>
         </td>
-        <td>
+        <td style="padding: 5px; border: 1px solid black;">
             Deployment configuration
         </td>
     </tr>
@@ -190,13 +190,13 @@ You'll probably find that just playing around with these services won't cost you
 </p>
 <ol>
     <li>
-        Open the Amazon EC2 console: <i>Services</i> | <i>Compute</i> | <i>EC2</i> 
+        Open the Amazon EC2 console: <i>Services</i> | <i>Compute</i> | <i>EC2</i>: 
         <p>
             <img src="ec2-console.PNG" />
         </p>
     </li>
     <li>
-        Click Key Pairs in the navigation pane
+        Click <i>Key Pairs</i> in the left hand menu:
         <p>
             <img src="key-pairs-menu-item.PNG" />
         </p>
@@ -226,7 +226,8 @@ You'll probably find that just playing around with these services won't cost you
 valid application source bundle for you, using these command line instructions:
 </p>
 <pre>cd /D "&lt;directory with your .csproj file&gt;"
-msbuild &lt;your project&gt;.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
+msbuild &lt;your project&gt;.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. 
+    /p:AutoParameterizationWebConfigConnectionStrings=False
 </pre>
 <p>
     This produces a .zip file in the current directory. That .zip file is your application source bundle.
@@ -333,12 +334,12 @@ Because it stores each version, you can quickly get a list of versions that have
     <li>
         <b>Configuration Details</b> -
         You can use the defaults for most fields. However, these fields are noteworthy:
-            <table border="1" cellspacing="0" cellpadding="5">
+            <table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
                 <tr>
-                    <th>
+                    <th style="padding: 5px; border: 1px solid black;">
                         Field
                     </th>
-                    <th>
+                    <th style="padding: 5px; border: 1px solid black;">
                         Description
                     </th>
                 </tr>
@@ -346,7 +347,7 @@ Because it stores each version, you can quickly get a list of versions that have
                     <td valign="top">
                         Instance type
                     </td>
-                    <td>
+                    <td style="padding: 5px; border: 1px solid black;">
                         The default here is <i>t1.micro</i>, but this type is of a 
                         <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#AvailableInstanceTypes" target="_blank">previous generation</a>.
                         Note that <i>t2.micro</i> is included in the 
@@ -358,7 +359,7 @@ Because it stores each version, you can quickly get a list of versions that have
                     <td valign="top">
                         EC2 key pair
                     </td>
-                    <td>
+                    <td style="padding: 5px; border: 1px solid black;">
                         Select the key pair that you created 
                         <a href="#keypair">earlier on</a>.
                     </td>
@@ -367,7 +368,7 @@ Because it stores each version, you can quickly get a list of versions that have
                     <td valign="top">
                         Application health check URL
                     </td>
-                    <td>
+                    <td style="padding: 5px; border: 1px solid black;">
                         The load balancer keeps track of the health of your web servers, so it can replace web servers
                         that are no longer healthy. It does this by regularly sending requests to each web server.
                         If it gets a normal HTTP 200 response, it assumes the web server is healthy.
@@ -398,7 +399,7 @@ Because it stores each version, you can quickly get a list of versions that have
                     <td valign="top">
                         Root volume size
                     </td>
-                    <td>
+                    <td style="padding: 5px; border: 1px solid black;">
                         Leave the default, or make 30
                         <a href="http://en.wikipedia.org/wiki/Gibibyte" target="_blank">GiB</a>
                          or higher - in spite of the 8 GiB minimum stated by Amazon. 
