@@ -344,6 +344,7 @@ Because it stores each version, you can quickly get a list of versions that have
     <li>
         <b>Configuration Details</b> -
         You can use the defaults for most fields. However, these fields are noteworthy:
+        <p />
             <table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
                 <tr>
                     <th style="padding: 5px; border: 1px solid black;">
@@ -354,7 +355,7 @@ Because it stores each version, you can quickly get a list of versions that have
                     </th>
                 </tr>
                 <tr>
-                    <td valign="top">
+                    <td valign="top" style="padding: 5px; border: 1px solid black;">
                         Instance type
                     </td>
                     <td style="padding: 5px; border: 1px solid black;">
@@ -366,16 +367,16 @@ Because it stores each version, you can quickly get a list of versions that have
                     </td>
                 </tr>
                 <tr>
-                    <td valign="top">
+                    <td valign="top" style="padding: 5px; border: 1px solid black;">
                         EC2 key pair
                     </td>
-                    <td style="padding: 5px; border: 1px solid black;">
+                    <td valign="top" style="padding: 5px; border: 1px solid black;">
                         Select the key pair that you created 
                         <a href="#keypair">earlier on</a>.
                     </td>
                 </tr>
                 <tr>
-                    <td valign="top">
+                    <td valign="top" style="padding: 5px; border: 1px solid black;">
                         Application health check URL
                     </td>
                     <td style="padding: 5px; border: 1px solid black;">
@@ -395,10 +396,10 @@ Because it stores each version, you can quickly get a list of versions that have
                     </td>
                 </tr>
                 <tr>
-                    <td valign="top">
+                    <td valign="top" style="padding: 5px; border: 1px solid black;">
                         Cross zone load balancing
                     </td>
-                    <td valign="top">
+                    <td valign="top" style="padding: 5px; border: 1px solid black;">
                         <a href="http://aws.amazon.com/about-aws/whats-new/2013/11/06/elastic-load-balancing-adds-cross-zone-load-balancing/"
                             target="_blank">Cross zone load balancing</a> is a feature that allows the load balancer to correctly 
                         balance the load across servers in multiple data centers, giving you higher availability for your web site. 
@@ -406,7 +407,7 @@ Because it stores each version, you can quickly get a list of versions that have
                     </td>
                 </tr>
                 <tr>
-                    <td valign="top">
+                    <td valign="top" style="padding: 5px; border: 1px solid black;">
                         Root volume size
                     </td>
                     <td style="padding: 5px; border: 1px solid black;">
@@ -422,7 +423,7 @@ Because it stores each version, you can quickly get a list of versions that have
     </li>
     <li>
         <b>Environment Tags</b> -
-        You can tag your environment, which may be useful if you have lots of them.
+        You can tag your environment, which may be useful if you have lots of environments.
         <p />
     </li>
     <li>
@@ -496,14 +497,17 @@ Because it stores each version, you can quickly get a list of versions that have
         </p>
     </li>
     <li>
-        <b>Back to Elastic Beanstalk</b> - To get back to the Elastic Beanstalk dashboard, click <i>Services</i> | <i>Elastic Beanstalk</i> | 
-        your application.
-        <p />
+        <b>Auto scaling groups</b> - To see your auto scaling groups: On the EC2 management console, click <i>Auto Scaling Groups</i>
+        (left hand menu).
+        <p>
+            Under the <i>Details</i> tab, you will find the minimum number of servers for the group.
+            If the number of healthy servers falls below that minimum due to server(s) going down, new server(s) will be spun up automatically
+            to achieve the minimum.
+        </p>
     </li>
     <li>
-        <b>Deploy new version</b> - To deploy a new version of your web site, first
-        <a href="#sourcebundle">create a new application source bundle</a>.
-        Then click <i>Upload and Deploy</i> on the Elastic Beanstalk dashboard.
+        <b>Back to Elastic Beanstalk</b> - To get back to the Elastic Beanstalk dashboard, click <i>Services</i> | <i>Elastic Beanstalk</i> | 
+        your application.
         <p />
     </li>
 </ol>
@@ -563,8 +567,8 @@ To deploy a new version of your web site, first
 <p>
     In 
     <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw">subsequent parts</a>,
-    you'll see how to add a SQL Server database with automatic fail over, 
-    so if your database server goes missing, your application recovers automatically. You'll also see 
+    you'll see how to add a SQL Server database with automatic fail over. So
+     if your database server goes missing, your application recovers automatically. You'll also see 
     how to point your own domain to your AWS hosted web site.
 </p>
 
