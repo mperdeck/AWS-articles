@@ -13,7 +13,7 @@
     <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">another part</a>.
 </p>
 <a id="architecture"></a>
-<img src="architecture.png" />
+<img src="architecture.png" width="400" />
 
 <p>
     This article assumes you have a web site deployed to AWS with <a href="http://aws.amazon.com/elasticbeanstalk/" target="_blank">Elastic Beanstalk application</a>, 
@@ -28,7 +28,7 @@
 <p>
     AWS refers to the automatic fail over feature as a 
     <a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">Multi-AZ deployment</a>.
-AZ stands for Availability Zone. Each AZ has its own data centre.
+AZ stands for Availability Zone. An AZ is essentially a data centre, with its own power supply, etc.
 </p>
 <p>
     With a Multi-AZ deployment, AWS creates a backup database server in another availability zone within the same region.
@@ -62,7 +62,8 @@ AZ stands for Availability Zone. Each AZ has its own data centre.
 </p>
 <p>
     The problem is that Amazon have implemented fail over for SQL Server servers using
-    the SQL Server Mirroring feature. This feature is 
+    the 
+    <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring feature</a>. This feature is 
     <a href="https://msdn.microsoft.com/en-us/library/cc645993.aspx" target="_blank">not available</a>
      on SQL Server Express.
 </p>
@@ -83,52 +84,52 @@ AZ stands for Availability Zone. Each AZ has its own data centre.
 <ol>
     <li>
         <b>Select Engine</b> - 
-        Click <i>Services</i> | <i>RDS</i> | Get started now | SQL Server logo | <i>Select</i> for SQL Server Express.
+        Click <i>Services</i> (top of the page) | <i>RDS</i> | <i>Get started now</i> | SQL Server logo | <i>Select</i> for SQL Server Express.
         <p />
     </li>
     <li>
         <b>Specify DB Details</b> - Here is where you enter most of the details of your database.
-
-        <table border="1" cellspacing="0" cellpadding="5">
+        <p />
+        <table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
             <tr>
-                <th>
+                <th style="padding: 5px; border: 1px solid black;">
                     Field
                 </th>
-                <th>
+                <th style="padding: 5px; border: 1px solid black;">
                     Value
                 </th>
             </tr>
             <tr>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     DB Instance Class
                 </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     db.t1.micro
                 </td>
             </tr>
             <tr>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     Allocated Storage
                 </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                    The free tier gives you 20GB max, so keep it at that.
                     Note that SQL Server Express needs 20GB or more, so 20GB is exactly the sweet spot.
 
                 </td>
             </tr>
             <tr>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     Db Instance Identifier
                 </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     Must be unique amongst your databases in this region. Maybe something boring like &quot;dbinstance1&quot;.
                 </td>
             </tr>
             <tr>
-                    <td valign="top">
+                    <td style="padding: 5px; border: 1px solid black;" valign="top">
                         Username, Password
                     </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                                             SQL Server databases hosted on RDS 
                         <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html" target="_blank">can only use SQL Server Authentication</a>,
                         not
@@ -154,7 +155,7 @@ You're now on the RDS page showing your database servers. It will show your serv
 <ol>
     <li>
         <b>Select Engine</b> - 
-        Click <i>Services</i> | <i>RDS</i> | Get started now | SQL Server logo | <i>Select</i> for SQL Server SE.
+        Click <i>Services</i> (top of the page) | <i>RDS</i> | <i>Get started now</i> | SQL Server logo | <i>Select</i> for SQL Server SE.
         <p />
     </li>
     <li>
@@ -165,54 +166,55 @@ You're now on the RDS page showing your database servers. It will show your serv
     </li>
     <li>
         <b>Specify DB Details</b> - Here is where you enter most of the details of your database.
+        <p />
 
-        <table border="1" cellspacing="0" cellpadding="5">
+        <table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
             <tr>
-                <th>
+                <th style="padding: 5px; border: 1px solid black;">
                     Field
                 </th>
-                <th>
+                <th style="padding: 5px; border: 1px solid black;">
                     Value
                 </th>
             </tr>
             <tr>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     License Model
                 </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     Unless you bring your own SQL Server license, you'll want AWS to take care of the license: <i>license-included</i>.
                 </td>
             </tr>
             <tr>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     DB Instance Class
                 </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     <i>db.m1.micro</i> would be the cheapest option, but it may not be powerful enough for you
                     (<a href="http://aws.amazon.com/rds/details/" target="_blank">compare instances</a>). 
                 </td>
             </tr>
             <tr>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     Allocated Storage
                 </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                    You'll need 200GB or more for Standard Edition.
                 </td>
             </tr>
             <tr>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     Db Instance Identifier
                 </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                     Must be unique amongst your databases in this region. Maybe something boring like &quot;dbinstance1&quot;.
                 </td>
             </tr>
             <tr>
-                    <td valign="top">
+                    <td style="padding: 5px; border: 1px solid black;" valign="top">
                         Username, Password
                     </td>
-                <td valign="top">
+                <td style="padding: 5px; border: 1px solid black;" valign="top">
                                             SQL Server databases hosted on RDS 
                         <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html" target="_blank">can only use SQL Server Authentication</a>,
                         not
@@ -236,7 +238,8 @@ You're now on the RDS page showing your database servers. It will show your serv
 
 <h2>Adding a database while creating a Elastic Beanstalk application</h2>
 <p>
-    In part 1, while going through the wizard to create the web servers and load balancer,
+    In <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">part 1</a>, 
+    while going through the wizard to create the web servers and load balancer,
     there was a step <i>Additional Resources</i>
     where the wizard offered to create a database.
 </p>
@@ -289,6 +292,12 @@ My trial site <i>SimpleSiteWithDb</i>
     Entity Framework Code First,
     you will want to copy the schema of your existing database to your new AWS database.
 </p>
+<p>
+    An issue here is that AWS doesn't allow you to log into an RDS database server.
+    That means that you can't simply take a backup of your existing database and restore it on your new database server in AWS.
+</p>
+
+
 <p>
 You can easily do this with SQL Database Migration Wizard, a tool that ironically was created inside Microsoft to transfer databases to Microsoft Azure.
 </p>
@@ -419,9 +428,8 @@ Password=.......;"
 <h2>Deploying your site</h2>
 <ol>
     <li>
-        #############
         Create an
-    <a href="http://##############sourcebundle" target="_blank">application source bundle</a>
+    <a href="http://www.codeproject.com/Articles/889059/Amazon-Web-Services-part-How-to-deploy-a-load-bala#sourcebundle" target="_blank">application source bundle</a>
         for your site;
     </li>
 <li>

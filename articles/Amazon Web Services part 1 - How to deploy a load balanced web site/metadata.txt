@@ -1,7 +1,7 @@
 
 Amazon Web Services part 1 - How to deploy a load balanced web site
 
-How to quickly create a load balanced web site in the cloud with AWS Elastic Beanstalk
+Quickly create a load balanced web site in the cloud with AWS Elastic Beanstalk
 
 
 
