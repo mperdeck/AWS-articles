@@ -236,7 +236,7 @@ You're now on the RDS page showing your database servers. It will show your serv
     </li>
 </ol>
 
-<h2>Adding a database while creating a Elastic Beanstalk application</h2>
+<h2>Adding a database while creating an Elastic Beanstalk application</h2>
 <p>
     In <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">part 1</a>, 
     while going through the wizard to create the web servers and load balancer,
@@ -259,17 +259,18 @@ You're now on the RDS page showing your database servers. It will show your serv
 </p>
 <p>
     Note that if you created a SQL Server Standard Edition database server with Multi-AZ Deployment,
-    you can see its option group: <i>Services</i> | <i>RDS</i> | <i>Instances</i> | click your database (database details appear) | 
+    you can see its option group here: <i>Services</i> | <i>RDS</i> | <i>Instances</i> | click your database (database details appear) | 
     click option group in the details section. 
 </p>
 
 <a id="dbservername"></a><h2>Find the database server name</h2>
 <p>
     When you create a connection string for your new database server,
+    and also when you try to connect to it with SSMS,
     you need to know the server name.
 </p>
 <p>
-    That name is listed on the RDS dashboard as the end point:
+    That name is listed on the RDS dashboard as the &quot;Endpoint&quot;:
 </p>
 <img src="db-server-name.png" />
 
@@ -280,17 +281,22 @@ As an aside, there is nothing stopping you from accessing your new database on A
     <a href="#dbservername">database name you found earlier</a> and the username and password you specified whilst creating the new database.
 </p>
 <p>
+    If your site uses
+    <a href="https://msdn.microsoft.com/en-us/data/ee712907" target="_blank">Entity Framework Code First</a>
+    and you don't have any data yet, things are easy. This is because
+    EF Code First will create the database schema when it first runs against an empty server.
+</p>
+<p>
 My trial site <i>SimpleSiteWithDb</i> 
     (on 
         <a href="https://github.com/mperdeck/AWS-articles" target="_blank">Github</a>)
-    uses
-        <a href="https://msdn.microsoft.com/en-us/data/ee712907" target="_blank">Entity Framework Code First</a>,
-    which means that it creates the database schema when it first runs against an empty server.
+ uses EF Code First. So if you're using this, you're done already!
 </p>
 <p>
-    However, if your application doesn't use
+If your application doesn't use
     Entity Framework Code First,
-    you will want to copy the schema of your existing database to your new AWS database.
+ or if you need to preload data before starting your site,
+       you will want to copy the schema of your existing database to your new AWS database, and then the data.
 </p>
 <p>
     An issue here is that AWS doesn't allow you to log into an RDS database server.
@@ -299,7 +305,9 @@ My trial site <i>SimpleSiteWithDb</i>
 
 
 <p>
-You can easily do this with SQL Database Migration Wizard, a tool that ironically was created inside Microsoft to transfer databases to Microsoft Azure.
+    However,
+you can easily copy the schema with SQL Database Migration Wizard, 
+    a tool that ironically was created inside Microsoft to transfer databases to Microsoft Azure.
 </p>
 <ol>
     <li>
@@ -360,7 +368,11 @@ Connect to your current server;
     Otherwise feel free to 
     get my trial site <i>SimpleSiteWithDb</i> from
     <a href="https://github.com/mperdeck/AWS-articles" target="_blank">Github</a>.
-    If you use this site, do this <b>before</b> running it on your computer: 
+</p>
+<p>
+    I'm assuming that you'll want to run this site locally on your computer first, 
+    with a local database, before attempting to deploy it to AWS. 
+    In that case, do the following steps <b>before</b> running it on your computer: 
 </p>
 <ol>
     <li>
@@ -420,7 +432,7 @@ Password=.......;"
     Don't forget to fill in your server name, username and password.
 </p>
 <p>
-    Some connection strings use <i>Integrated Security=SSPI;</i>. Do not use this. It will cause AWS to try to log into your database with the 
+    Some connection strings use <i>Integrated Security=SSPI;</i>. Do not use this with an AWS hosted site. It will cause AWS to try to log into your database with the 
     <i>NT AUTHORITY\ANONYMOUS LOGON</i> account rather than your own account - which will fail. 
 </p>
 
@@ -431,6 +443,7 @@ Password=.......;"
         Create an
     <a href="http://www.codeproject.com/Articles/889059/Amazon-Web-Services-part-How-to-deploy-a-load-bala#sourcebundle" target="_blank">application source bundle</a>
         for your site;
+        <p />
     </li>
 <li>
     Open
@@ -447,7 +460,12 @@ Password=.......;"
 </li>
 <li>
 Click <i>Upload and Deploy</i> on the Elastic Beanstalk dashboard to deploy your application source bundle.
+        <p />
 </li>
+    <li>
+        Once your site has been deployed, click the Url of your new environment (right next to the header with your environment name) 
+        to see your web site appear.
+    </li>
 
 </ol>
 
@@ -457,7 +475,8 @@ Click <i>Upload and Deploy</i> on the Elastic Beanstalk dashboard to deploy your
     In 
     <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw">subsequent parts</a>,
     you'll see 
-    how to point your own domain to your AWS hosted web site.
+    how to point your own domain to your AWS hosted web site, and how to use a certificate to give your site
+    a secure connection (https instead of http).
 </p>
 
 

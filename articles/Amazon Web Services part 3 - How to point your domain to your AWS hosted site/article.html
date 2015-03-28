@@ -1,0 +1,263 @@
+
+<h2>Introduction</h2>
+<p>
+    This is part 3 of a series of articles about deploying your site to 
+    <a href="http://aws.amazon.com/" target="_blank">Amazon Web Services</a> (AWS), 
+    Amazon's counterpart to <a href="http://azure.microsoft.com/en-us/" target="_blank">Windows Azure</a>.
+</p>
+<p>
+    In <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">parts 1 and 2</a>,
+    we
+    implemented a simple web site with a database, corresponding to  the green and blue bits below.
+</p>
+<p>
+    In this part, we'll point your own domain to this web site. This corresponds to the red bit.
+</p>
+<a id="architecture"></a>
+<img src="architecture.png" width="400" />
+
+<p>
+    This article assumes you have a web site deployed to AWS with 
+    a 
+    <a href="http://aws.amazon.com/elasticloadbalancing/" target="_blank">load balancer</a>,
+    as described in
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">part 1</a>.
+This is because your domain will actually point at the load balancer, which takes requests coming in from the outside world and
+    distributes them to the web servers.
+</p>
+
+<h2>About the domain name system</h2>
+<p>
+    The objective here is that if someone enters your domain in their browser, the browser requests a page 
+    from the load balancer, which then passes on the request to one of the web servers. 
+</p>
+<p>
+    The problem is that to reach any machine on the Internet, including your load balancer,
+    you need its
+    <a href="http://en.wikipedia.org/wiki/IP_address" target="_blank">IP address</a>. 
+    So the browser needs to somehow translate the domain entered by the user into an IP address.
+    It does this through the
+    <a href="http://en.wikipedia.org/wiki/Domain_Name_System" target="_blank">Domain Name System</a> (DNS):
+</p>
+<img src="DomainNameSystem.png" width="400" />
+<p>
+    This is essentially a large database that maps domain names such as &quot;yourdomain.com&quot; onto
+    a set of 
+    <a href="https://support.google.com/a/answer/48090?hl=en" target="_blank">DNS records</a>. 
+    Of the many types of records, you'll be most likely to work with these:
+</p>
+
+<table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
+    <tr>
+        <th style="padding: 5px; border: 1px solid black;">
+            Type
+        </th>
+        <th style="padding: 5px; border: 1px solid black;">
+            Description
+        </th>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;" valign="top">
+            A (Address)
+        </td>
+        <td style="padding: 5px; border: 1px solid black;" valign="top">
+            Maps a domain name to an IP address
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;" valign="top">
+            CNAME (Canonical Name)
+        </td>
+        <td style="padding: 5px; border: 1px solid black;" valign="top">
+        Creates an alias of a domain name
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;" valign="top">
+            NS (Name Server)
+        </td>
+        <td style="padding: 5px; border: 1px solid black;" valign="top">
+        Lets you point at the name server of a sub domain, such as &quot;admin.yourdomain.com&quot;
+        </td>
+    </tr>
+</table>
+
+
+<p>
+    One way of building this database would be to simply put it on 
+    a computer somewhere in the world. But this wouldn't work well for several reasons. 
+    For example, if that computer went down, 
+    nobody would be able to use domain names anymore.
+To overcome this, the DNS is implemented as a distributed system, 
+    organized as a hierarchy of <i>name servers</i>.
+</p>
+<p>
+    Here is how a browser finds the IP address of some domain 
+    &quot;yourdomain.com&quot;:
+</p>
+<ol>
+    <li>
+        The browser has a list of DNS root servers. These sit at the top of the tree shown above.
+        It asks a root server for the IP address of &quot;yourdomain.com&quot;.
+        <p />
+    </li>
+    <li>
+        Every domain name consists of labels separated with periods. &quot;yourdomain.com&quot;
+        has the labels &quot;yourdomain&quot; and &quot;com&quot;. The right most label is a Top Level Domain (TLD).
+        <p>
+            The root server has the IP addresses of the name servers for the TLDs. It forwards the request
+            to the name server for &quot;com&quot;.
+        </p>
+    </li>
+    The name server for &quot;com&quot; has the IP addresses of the name servers for all its sub domains, such as
+    &quot;mydomain.com&quot;, &quot;yourdomain.com&quot;, etc.
+    It forwards the request to the name server for &quot;yourdomain.com&quot;.
+    <p>
+Who controls
+        the IP addresses of the name servers of your domain? You do.        
+        If you registered &quot;yourdomain.com&quot; with a registrar such as GoDaddy,
+        you can log into your account with them and change the name server IP addresses.
+    </p>
+    <li>
+        The name server for &quot;yourdomain.com&quot; 
+        has the A record with the IP address for the domain.
+        This makes it the
+        <a href="http://www.dnsmadeeasy.com/authoritative-vs-recursive-dns-servers-whats-the-difference/" target="_blank">authoritative name server</a>.
+    </li>
+</ol>
+
+<p>
+    One problem with this sequence is that it still has every browser in the world hit 
+    the root servers each time they need to resolve a domain name.
+    All those servers talking to each other also takes time.
+</p>
+
+<p>
+    To prevent this, browsers and the DNS servers cache the results of DNS lookups. 
+    To ensure that these caches don't go stale,
+    the authoritative name server sets a 
+ <a href="http://en.wikipedia.org/wiki/Time_to_live#DNS_records" target="_blank">Time To Live</a>
+     (TTL) in seconds, after which the caches evict the old results.
+    This means that when you make a change to a record in a name server, it can take a while for browsers to pick up your change.
+</p>
+
+<p>
+    One last term you'll come across is 
+    <a href="http://en.wikipedia.org/wiki/DNS_zone">DNS zone</a>.
+    This is a part of the tree controlled by a given administrator.
+    If you control &quot;yourdomain.com&quot;, &quot;www.yourdomain.com&quot; and
+    &quot;admin.yourdomain.com&quot;, than they are in your DNS zone.
+</p>
+
+
+
+<h2>Your own name server with Route 53</h2>
+<p>
+    What this all means is that in order to point 
+    your domain name to your load balancer, 
+    you need your own name server.
+    Then you can create a record in your name server that points at your load balancer.
+</p>
+<p>
+    You can easily create a name server through the 
+    <a href="http://aws.amazon.com/route53/" target="_blank">AWS Route 53</a> service.
+    This gives you a name server plus 3 duplicates, spread over several locations in the world.
+    That gives you great availability.
+    It's named after port 53, the 
+    <a href="http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers" target="_blank">well known port</a>
+    for DNS servers.
+</p>
+
+<h2>Costs</h2>
+<p>
+    Route 53 is cheap but not free
+    (<a href="http://aws.amazon.com/route53/pricing/" target="_blank">pricing</a>).
+</p>
+
+<h2>Point your domain to your load balancer</h2>
+<p>
+    The following assumes you already have a domain registered with a registrar such as GoDaddy.
+</p>
+<ol>
+    <li>
+    Log into 
+    <a href="http://aws.amazon.com/" target="_blank">AWS</a>.
+        <p />
+    </li>
+    <li>
+        Click <i>Services</i> | <i>Route 53</i> | <i>Get Started Now</i> under DNS Management | <i>Create Hosted Zone</i>.
+        This takes you to the <i>Hosted Zones</i> page.
+        <p />
+    </li>
+    <li>
+        Click <i>Create Hosted Zone</i>. A panel opens at the right hand side of the page.
+        <p />
+    </li>
+    <li>
+        Fill in your domain name, such as &quot;yourdomain.com&quot; (without quotes). Click <i>Create</i>.
+        This gives you your own name servers (all duplicates of each other).
+        <p />
+    </li>
+    <li>
+        In addition to normal DNS records, 
+        Route 53 also lets you use 
+        <a href="http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html" target="_blank">Alias 
+            record sets</a>,
+        which are AWS specific.
+        Essentially, these are a cheaper and quicker way to associate your domain with your load balancer.
+        <p>
+Create an Alias: 
+        </p>
+        <ol style="list-style:lower-alpha">
+            <li>
+            Click <i>Create Record Set</i> (panel opens at the right)
+            </li>
+            <li>
+            Set <i>Alias</i> to <i>Yes</i>
+            </li>
+            <li>
+            Click in the <i>Alias Target</i> control. A drop down will appear. 
+                Click the domain of your load balancer.
+            </li>
+            <li>
+                Click <i>Create</i>.
+            </li>
+        </ol>            
+        <p />
+    </li>
+    <li>
+        The 4 domains in the NS record are your name servers. 
+        Log into your registrar (such as GoDaddy) and look for an area where you can manage your domains.
+        This should include the name servers of your domain.
+        Replace the domains you find there with those of your new AWS name servers.
+        <p>
+            The domains in the NS record have a period at the end. Leave those off when you enter them
+            in your registrar account.
+        </p>
+        <p>
+            It may take some time for the DNS and your browser to pick up the change in name servers.
+But once that's happened, your domain will be pointing at your AWS hosted site.
+        </p>
+    </li>
+</ol>
+
+
+<h2>Next Parts</h2>
+
+<p>
+    In 
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw">subsequent parts</a>,
+    you'll see 
+    how to use a certificate to give your site
+    a secure connection (https instead of http).
+</p>
+
+
+
+
+
+
+
+
+
+
