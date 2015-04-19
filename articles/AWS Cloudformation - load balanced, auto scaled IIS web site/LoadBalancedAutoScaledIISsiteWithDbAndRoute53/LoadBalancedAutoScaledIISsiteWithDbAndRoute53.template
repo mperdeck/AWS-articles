@@ -49,6 +49,8 @@
     "rdsdbinstance1": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
+        "MultiAZ" : "true",
+		"OptionGroupName": "sqlserver-mirroring",
         "AutoMinorVersionUpgrade": "true",
         "DBInstanceClass": "db.m1.small",
         "Port": "1433",
