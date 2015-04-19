@@ -276,7 +276,7 @@
     "dnsaspdotnetperformanceorg": {
       "Type": "AWS::Route53::RecordSetGroup",
       "Properties": {
-        "HostedZoneName": { "Ref": "DNS" },
+        "HostedZoneId": { "Ref": "DNS" },
         "RecordSets": [
           {
             "Name": "aspdotnetperformance.org.",
@@ -285,23 +285,8 @@
 
             ],
             "AliasTarget": {
-              "HostedZoneId": "Z35SXDOTRQ7X7K",
-              "DNSName": "dualstack.awseb-e-7-awsebloa-vju66xqqrg7w-1467309377.us-east-1.elb.amazonaws.com"
-			  
-			  
-			  
-			  CanonicalHostedZoneNameID
-The ID of the Amazon Route 53 hosted zone name that is associated with the load balancer.
-
-Example: Z3DZXE0Q79N41H
-
-DNSName
-The DNS name for the load balancer.
-
-Example: mystack-myelb-15HMABG9ZCN57-1013119603.us-east-1.elb.amazonaws.com
-			  
-			  
-			  
+              "HostedZoneId": {"Fn::GetAtt" : ["ElasticLoadBalancer", "CanonicalHostedZoneNameID"]},
+              "DNSName": {"Fn::GetAtt" : ["ElasticLoadBalancer", "DNSName"]}
             }
           }
         ]
