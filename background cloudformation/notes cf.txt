@@ -1,0 +1,67 @@
+Do not have a scaling group wait for init of the first instance. It will only start the first instance after it received the signal (deadlock)
+http://stackoverflow.com/questions/21721397/cloudformation-error-waitcondition-timed-out-received-0-conditions-when-expect
+============================
+db instances
+
+dbinstance1
+mperdeck
+Morehits 1!
+
+=============================
+
+
+
+
+
+Set-ExecutionPolicy Unrestricted
+y
+import-module webadministration
+
+==============
+add-windowsfeature web-webserver -includeallsubfeature -logpath $env:temp\webserver_addrole.log
+add-windowsfeature web-mgmt-tools -includeallsubfeature -logpath $env:temp\mgmttools_addrole.log
+
+New-WebAppPool "v4.5" -force
+Set-ItemProperty "IIS:\AppPools\v4.5" managedRuntimeVersion "v4.5"
+================
+
+Restart-WebAppPool "v4.5"
+
+
+
+================
+new-website -name Test -port 80 -physicalpath c:\inetpub\Test -ApplicationPool "v4.5" -force
+remove-website -name "Default Web Site"
+start-WebAppPool "v4.5"
+start-website -name Test
+================
+
+			  
+========================================
+
+remove-windowsfeature web-webserver
+
+=======================
+New-WebAppPool "v4.5" -force
+Set-ItemProperty "IIS:\AppPools\v4.5" managedRuntimeVersion "v4.5"
+
+remove-website -name "Default Web Site"
+
+
+Set-ItemProperty "IIS:\DefaultAppPool\Default Web Site" applicationPool "v4.5"
+Set-ItemProperty "IIS:\DefaultAppPool\Default Web Site" physicalpath c:\inetpub\Test
+
+
+	57000780
+80070057 
+
+The worker process failed to initialize correctly and therefore could not be started.  The data is the error. 80070057 
+++++++++++++++++++++++++++++++
+
+			  "cfn-signal.exe -e 0 --stack ", {"Ref" : "AWS::StackId"}, " --resource WebServerGroup --region ", {"Ref" : "AWS::Region"}, "\n",
+
+			  
+			  
+
+
+	
