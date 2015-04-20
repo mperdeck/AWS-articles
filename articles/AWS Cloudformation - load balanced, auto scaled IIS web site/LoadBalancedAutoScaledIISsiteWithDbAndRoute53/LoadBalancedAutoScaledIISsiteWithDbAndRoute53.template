@@ -8,8 +8,7 @@
       "Description" : "WebServer EC2 instance type",
       "Type" : "String",
       "Default" : "t2.micro",
-      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"]
-,
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
@@ -23,10 +22,45 @@
     "SourceCidrForRDP" : {
       "Description" : "IP Cidr from which you are likely to RDP into the instances. You can add rules later by modifying the created security groups e.g. 54.32.98.160/32",
       "Type" : "String",
-      "Default" : "124.149.118.60/32",
+      "Default" : "124.171.5.210/32",
       "MinLength" : "9",
       "MaxLength" : "18",
       "AllowedPattern" : "^([0-9]+\\.){3}[0-9]+\\/[0-9]+$"
+    },
+
+    "DBInstanceClass" : {
+      "Description" : "The name of the compute and memory capacity class of the DB instance.",
+      "Type" : "String",
+      "Default" : "db.m1.small",
+      "AllowedValues" : ["db.m1.small","db.m1.medium","db.m1.large","db.m1.xlarge","db.m3.medium","db.m3.large","db.m3.xlarge","db.m3.2xlarge","db.r3.large","db.r3.xlarge","db.r3.2xlarge","db.m2.xlarge","db.m2.2xlarge","db.m2.4xlarge"],
+      "ConstraintDescription" : "must be a valid database server instance type."
+    },
+
+    "AllocatedStorage" : {
+      "Description" : "The allocated storage size specified in gigabytes (GB).",
+      "Type" : "Number",
+      "Default" : "200",
+      "MinValue" : "200",
+      "ConstraintDescription" : "Allocated storage must be at least 200GB."
+    },
+
+    "OptionGroupName" : {
+      "Description" : "Option group with mirroring option.",
+      "Type" : "String",
+      "Default" : "sqlserver-mirroring"
+    },
+
+    "MasterUsername" : {
+      "Description" : "The master user name for the database instance.",
+      "Type" : "String",
+      "Default" : "mperdeck"
+    },
+
+    "MasterUserPassword" : {
+      "Description" : "The master password for the database instance.",
+      "Type" : "String",
+	  "NoEcho" : "true",
+      "Default" : "Slameer1!"
     }
   },
 
@@ -49,18 +83,17 @@
     "rdsdbinstance1": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
-        "MultiAZ" : "true",
-		"OptionGroupName": "sqlserver-mirroring",
+		"OptionGroupName": { "Ref" : "OptionGroupName" },
         "AutoMinorVersionUpgrade": "true",
-        "DBInstanceClass": "db.m1.small",
+        "DBInstanceClass": { "Ref" : "DBInstanceClass" },
         "Port": "1433",
-        "AllocatedStorage": "200",
+        "AllocatedStorage": { "Ref" : "AllocatedStorage" },
         "BackupRetentionPeriod": "7",
         "Engine": "sqlserver-se",
         "EngineVersion": "11.00.2100.60.v1",
         "LicenseModel": "license-included",
-        "MasterUsername": "mperdeck",
-        "MasterUserPassword": "MyPassword",
+        "MasterUsername": { "Ref" : "MasterUsername" },
+        "MasterUserPassword": { "Ref" : "MasterUserPassword" },
         "PreferredBackupWindow": "03:25-03:55",
         "PreferredMaintenanceWindow": "mon:05:26-mon:05:56",
         "VPCSecurityGroups": [
@@ -95,7 +128,7 @@
             "IpProtocol": "tcp",
             "FromPort": "1433",
             "ToPort": "1433",
-            "CidrIp": "124.149.118.60/32"
+            "CidrIp": "124.171.5.210/32"
           }
         ],
         "SecurityGroupEgress": [
@@ -160,6 +193,7 @@
 				"Set-ItemProperty \"IIS:\\AppPools\\v4.0\" managedRuntimeVersion \"v4.0\" \n",
 				"new-website -name Test -port 80 -physicalpath c:\\inetpub\\Test -ApplicationPool \"v4.0\" -force \n",
 				"remove-website -name \"Default Web Site\" \n",
+                "do { Start-Sleep -m 50 } while (Test-Path \"IIS:\\Sites\\Default Web Site\") \n",
 				"start-website -name Test \n",
 			"</powershell>\n"
 		  ]] } }

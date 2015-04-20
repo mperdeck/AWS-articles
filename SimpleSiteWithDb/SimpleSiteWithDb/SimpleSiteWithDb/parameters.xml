@@ -1,0 +1,6 @@
+﻿<parameters>
+  <parameter name="IIS Web Application Name" defaultValue="Default Web Site/SimpleSiteWithDb_deploy" tags="IisApp">
+    <parameterEntry kind="ProviderPath" scope="IisApp" match="^D:\\Dev\\AWS-articles\\SimpleSiteWithDb\\SimpleSiteWithDb\\obj\\Release\\Package\\PackageTmp$" />
+    <parameterEntry kind="ProviderPath" scope="setAcl" match="^D:\\Dev\\AWS-articles\\SimpleSiteWithDb\\SimpleSiteWithDb\\obj\\Release\\Package\\PackageTmp$" />
+  </parameter>
+</parameters>

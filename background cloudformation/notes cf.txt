@@ -1,6 +1,22 @@
 Do not have a scaling group wait for init of the first instance. It will only start the first instance after it received the signal (deadlock)
 http://stackoverflow.com/questions/21721397/cloudformation-error-waitcondition-timed-out-received-0-conditions-when-expect
 ============================
+To create a database (rds) with multi-az:
+* do not set multi-az in the template - you will get an error and rollback even if you set the option group
+* before you run the template, create an option group with mirroring
+* Assign that option group to the db instance. That in itself will make it multi-az!
+========================================
+http://www.ipaddressguide.com/cidr#range
+========================================
+
+
+d:
+cd "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb"
+del *.zip
+msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
+
+
+============================
 db instances
 
 dbinstance1
