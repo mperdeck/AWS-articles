@@ -44,7 +44,7 @@ TCP
 
 (Test-Path "IIS:\Sites\Default Web Site")
 
-
+Set-ItemProperty "IIS:\Sites\Default Web Site" -name physicalPath -value "C:\blah\Web"
 
 do {
   $Input = Read-Host "Your homepage"

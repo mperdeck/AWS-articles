@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+     <parameters>
+<parameter 
+  name="BookStoreConnectionString" 
+  defaultValue="DataSource={dbServer};Database={dbName};uid={dbUsername};Pwd={dbPassword};" 
+  tags="Hidden"> 
+  <parameterEntry 
+    type="XmlFile" 
+    scope="\\web.config$" 
+    match="/configuration/connectionStrings/add[@name='BookStoreConnectionString']/@connectionString" /> 
+</parameter> 
+</parameters>
+

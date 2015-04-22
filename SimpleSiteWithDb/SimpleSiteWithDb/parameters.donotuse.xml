@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+ <parameters>
+	<parameter name="@@DbServer@@" tags="DbServer">
+		<parameterEntry type="TextFile" scope="\\web.config$"  match="@@DbServer@@" />
+	</parameter>
+	<parameter name="DbUsername" tags="DbUsername">
+		<parameterEntry type="TextFile" scope="\\web.config$"  match="@@DbUsername@@" />
+	</parameter>
+	<parameter name="DbPassword" tags="DbUserPassword">
+		<parameterEntry type="TextFile" scope="\\web.config$"  match="@@DbPassword@@" />
+	</parameter>
+</parameters>
+

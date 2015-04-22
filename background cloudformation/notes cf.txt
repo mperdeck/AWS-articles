@@ -6,14 +6,62 @@ To create a database (rds) with multi-az:
 * before you run the template, create an option group with mirroring
 * Assign that option group to the db instance. That in itself will make it multi-az!
 ========================================
-http://www.ipaddressguide.com/cidr#range
 ========================================
+http://www.ipaddressguide.com/cidr#range
 
 
 d:
 cd "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb"
-del *.zip
-msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
+Remove-Item d:\temp\test2.8.0\* -Force -Recurse
+Remove-Item d:\temp\test2.8.0 -Force -Recurse
+#Get-ChildItem -Path d:\temp\test2.8.0 -Recurse | Remove-Item -force -recurse
+
+msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=d:\temp\test2.8.0\SimpleSiteWithDb\SimpleSiteWithDb.zip /p:AutoParameterizationWebConfigConnectionStrings=False
+# msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
+
+-----------------
+# Create .net 4 app pool and assign to default web site
+d:
+cd "D:\temp\test2.8.0\SimpleSiteWithDb" 
+New-WebAppPool "v4.0" -force 
+Set-ItemProperty "IIS:\AppPools\v4.0" managedRuntimeVersion "v4.0"
+Set-ItemProperty 'IIS:\Sites\Default Web Site' ApplicationPool "v4.0"
+
+# run in cmd, not in powershell
+del SimpleSiteWithDb.SetParameters.xml
+CMD /C SimpleSiteWithDb.deploy.cmd /Y  "-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zz-----z' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy z----zz2' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz----3' -setparam:name='IIS Web Application Name',kind=providerpath,scope=apphostconfig,value='default web site'"
+-------------------
+
+invoke-item "SimpleSiteWithDb.deploy.cmd /Y  ""-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zzz' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy zzz2' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz3'"""
+SimpleSiteWithDb.deploy.cmd /Y
+
+
++++++++++++++++++++++++++++++++++++++++++
+d:
+cd "D:\temp\test2.8.0\SimpleSiteWithDb"
+SimpleSiteWithDb.deploy.cmd /Y "-setParam:kind=XmlFile,scope=\\web.config$,match=/configuration/appSettings/add[@name='UnobtrusiveJavaScriptEnabled']/@value,value='xxx yyy zzz00' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zzz' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy zzz2' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz3'"
+
+
+
+ -dest:dirPath=D:\temp\test2.8.0\site
+ 
+ 
+ 
+d:
+cd "D:\temp\test2.8.0\SimpleSiteWithDb"
+SimpleSiteWithDb.deploy.cmd /T "-setParam:@@DbServer@@='xxx yyy zzz' -setParam:@@DbUsername@@='xxx yyy zzz2' -setParam:@@DbUserPassword@@='xxx yyy zzz3'"
+
+
+d:
+cd "D:\temp\test2.8.0\SimpleSiteWithDb"
+SimpleSiteWithDb.deploy.cmd /T -setParam:kind=XmlFile,scope=\\web.config$,match=/configuration/appSettings/add[@name='UnobtrusiveJavaScriptEnabled']/@value,value="xxx yyy zzz" -setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value="xxx yyy zzz" -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value="xxx yyy zzz2" -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUserPassword@@,value="xxx yyy zzz3"
+
+
+
+
+d:
+cd "D:\temp\test2.8.0\SimpleSiteWithDb"
+SimpleSiteWithDb.deploy.cmd /T -setParam:kind=XmlFile,scope=\\web.config$,match=/configuration/connectionStrings/add[@name='BookStoreConnectionString']/@connectionString,value=c:\physicalDirectory
 
 
 ============================
@@ -24,14 +72,57 @@ mperdeck
 Morehits 1!
 
 =============================
+-- Create .net 4 app pool and assign to default web site
+New-WebAppPool "v4.0" -force 
+Set-ItemProperty "IIS:\AppPools\v4.0" managedRuntimeVersion "v4.0"
+Set-ItemProperty 'IIS:\Sites\Default Web Site' ApplicationPool "v4.0"
+
+
+
+Set-ItemProperty "IIS:\Sites\Default Web Site" -name physicalPath -value "C:\blah\Web"
+Set-ItemProperty IIS:\Sites\Staging -name physicalPath  -value "C:\blah\Web"
+
+
+
+$s = "Default Web Site"
+$x = @"
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="$s" />
+</parameters>
+"@
+
+$x | Out-File SimpleSiteWithDb.SetParameters.xml
 
 
 
 
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="Default Web Site" />
+</parameters>
 
+$s = "Default Web Site"
+$x = @"
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="$s" />
+</parameters>
+"@
+$x | Out-File SimpleSiteWithDb.SetParameters.xml
+
+
+-----------------------
 Set-ExecutionPolicy Unrestricted
 y
 import-module webadministration
+-----------------------
+
+
+
+
+
+
 
 ==============
 add-windowsfeature web-webserver -includeallsubfeature -logpath $env:temp\webserver_addrole.log
