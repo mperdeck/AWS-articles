@@ -13,6 +13,7 @@ http://www.ipaddressguide.com/cidr#range
 d:
 cd "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb"
 Remove-Item d:\temp\test2.8.0\* -Force -Recurse
+Remove-Item d:\temp\test2.8.0 -Force -Recurse
 #Get-ChildItem -Path d:\temp\test2.8.0 -Recurse | Remove-Item -force -recurse
 
 msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=d:\temp\test2.8.0\SimpleSiteWithDb\SimpleSiteWithDb.zip /p:AutoParameterizationWebConfigConnectionStrings=False
@@ -22,25 +23,22 @@ msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLo
 # Create .net 4 app pool and assign to default web site
 d:
 cd "D:\temp\test2.8.0\SimpleSiteWithDb" 
-
-# Stop the Default Web Site
 stop-website -name "Default Web Site"
 
-# Give it an application pool that runs .Net 4.0
 New-WebAppPool "v4.0" -force 
 Set-ItemProperty "IIS:\AppPools\v4.0" managedRuntimeVersion "v4.0"
 Set-ItemProperty 'IIS:\Sites\Default Web Site' ApplicationPool "v4.0"
 
 ############## wait unitl web site stopped. Then wipe its files
-do { Start-Sleep -m 50; $defaultWebSiteState = Get-ItemProperty 'IIS:\Sites\Default Web Site' State } while ($defaultWebSiteState.Value -ne "Stopped")
+do { Start-Sleep -m 50 } while (Test-Path "IIS:\Sites\Default Web Site")
 
 # remove all files from the Default Web Site
 $physicalPath = Get-ItemProperty 'IIS:\Sites\Default Web Site' physicalPath
 Remove-Item $physicalPath\* -recurse
 
-# Find the .cmd file and execute it.
+# Find the .cmd file, store its name in $x, then execute it.
 $x = Get-ChildItem -Path . -Filter *.cmd
-CMD /C $x /Y  "-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zz-----z' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy z----zz2aaa' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz----3aaaaa' -setparam:name='IIS Web Application Name',kind=providerpath,scope=apphostconfig,value='default web site'"
+CMD /C $x /Y  "-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zz-----z' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy z----zz2' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz----3' -setparam:name='IIS Web Application Name',kind=providerpath,scope=apphostconfig,value='default web site'"
 
 start-website -name "Default Web Site"
 -------------------
@@ -61,13 +59,7 @@ $physicalPath
 Get-ItemProperty 'IIS:\Sites\Default Web Site' State
 
 
-$defaultWebSiteState = Get-ItemProperty 'IIS:\Sites\Default Web Site' State
-$defaultWebSiteState  | Get-Member
-$defaultWebSiteState.Value
-$defaultWebSiteState.Value -ne "Stopped"
 
-
- } while ("Stopped" -eq ())
 
 
 $defaultWebSite = Get-Website -name "Default Web Site"
