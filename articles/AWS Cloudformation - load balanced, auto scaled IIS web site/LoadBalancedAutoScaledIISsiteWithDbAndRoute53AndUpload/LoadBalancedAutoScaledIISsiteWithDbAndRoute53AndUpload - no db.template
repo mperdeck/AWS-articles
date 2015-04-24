@@ -128,14 +128,6 @@
 			  "cfn-init.exe -v -s ", {"Ref" : "AWS::StackId"}, " -r LaunchConfig --region ", {"Ref" : "AWS::Region"}, "\n",
 			"</script>\n",
 			"<powershell>\n",
-				"add-windowsfeature web-webserver -includeallsubfeature -logpath $env:temp\\webserver_addrole.log \n",
-				"add-windowsfeature web-mgmt-tools -includeallsubfeature -logpath $env:temp\\mgmttools_addrole.log \n",
-				"New-WebAppPool \"v4.0\" -force \n",
-				"Set-ItemProperty \"IIS:\\AppPools\\v4.0\" managedRuntimeVersion \"v4.0\" \n",
-				"new-website -name Test -port 80 -physicalpath c:\\inetpub\\Test -ApplicationPool \"v4.0\" -force \n",
-				"remove-website -name \"Default Web Site\" \n",
-                "do { Start-Sleep -m 50 } while (Test-Path \"IIS:\\Sites\\Default Web Site\") \n",
-				"start-website -name Test \n",
 			"</powershell>\n"
 		  ]] } }
   	    }

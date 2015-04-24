@@ -1,0 +1,41 @@
+
+#>>>>>>>>>>>>>>>>> Run code below during deploy to deploy the files out of the zip file from the bucket
+#using appcmd rather than nice powershell commands, because the pwoershell commands require
+#the module 'WebAdministration' to be loaded.
+
+
+# Must be done once
+Add-Type -Assembly "System.IO.Compression.FileSystem" ;
+
+Function UnzipInPlace([string]$zipFile)
+{
+	$unzippedDir = Split-Path $zipFilePath
+	[System.IO.Compression.ZipFile]::ExtractToDirectory($zipFile, $unzippedDir);
+	Remove-Item $zipFile
+}
+
+
+
+
+# -----------------------------------
+# Assuming that 0.1500.zip is in temp dir
+$zipFile = $env:temp + '\0.1500.zip'
+$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
+
+[System.IO.Compression.ZipFile]::ExtractToDirectory($zipFile, $tempDir) ;
+
+# -----------------------
+# aws does above for you
+
+# Unzip all .zip files 
+get-childitem $tempDir -recurse -force | ?{$_.extension -eq ".zip"} | ForEach-Object { UnzipInPlace $_.FullName }
+
+# Run all deploy.ps1 files
+get-childitem $tempDir -recurse -force | ?{$_.name -eq "deploy.ps1"} | ForEach-Object { UnzipInPlace $_.FullName }
+
+# Ensure that current dir is not $tempDir, to prevent locking problems
+cd $env:temp
+
+# clean up
+Remove-Item $zipFile
+Remove-Item $tempDir -recurse

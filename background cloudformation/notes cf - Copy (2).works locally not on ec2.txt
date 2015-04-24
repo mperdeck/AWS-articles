@@ -75,9 +75,6 @@ CMD /C $x /Y  "-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,va
 start-website -name "Default Web Site"
 *********************************************************************************************************
 >>>>>>>>>>>>>>>>> Run code below during deploy to deploy the files out of the zip file from the bucket
-using appcmd rather than nice powershell commands, because the pwoershell commands require
-the module 'WebAdministration' to be loaded.
-
 
 add-windowsfeature web-webserver -includeallsubfeature -logpath $env:temp\webserver_addrole.log
 add-windowsfeature web-mgmt-tools -includeallsubfeature -logpath $env:temp\mgmttools_addrole.log
@@ -93,10 +90,11 @@ Add-Type -Assembly "System.IO.Compression.FileSystem" ;
 cd $tempDir 
 
 # Stop the Default Web Site
-cmd /c %systemroot%\system32\inetsrv\appcmd stop site /site.name:"Default Web Site"
+stop-website -name "Default Web Site"
 
 # Give it an application pool that runs .Net 4.0
-cmd /c %systemroot%\system32\inetsrv\appcmd add apppool /name:"v4.0" /managedRuntimeVersion:"v4.0" /managedPipelineMode:Integrated
+New-WebAppPool "v4.0" -force 
+Set-ItemProperty "IIS:\AppPools\v4.0" managedRuntimeVersion "v4.0"
 Set-ItemProperty 'IIS:\Sites\Default Web Site' ApplicationPool "v4.0"
 
 ############## wait unitl web site stopped. Then wipe its files
@@ -104,15 +102,13 @@ do { Start-Sleep -m 50; $defaultWebSiteState = Get-ItemProperty 'IIS:\Sites\Defa
 
 # remove all files from the Default Web Site
 $physicalPath = Get-ItemProperty 'IIS:\Sites\Default Web Site' physicalPath
-$physicalPath = [System.Environment]::ExpandEnvironmentVariables("$physicalPath") + '\*'
-Remove-Item $physicalPath -recurse
+Remove-Item $physicalPath\* -recurse
 
 # Deploy the files to the root directory of the Default Web Site
 CMD /C release.deploy.cmd /Y  "-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zz-----z' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy z----zz2aaa' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz----3aaaaa' -setparam:name='IIS Web Application Name',kind=providerpath,scope=apphostconfig,value='default web site'"
 
 # Start the Default Web Site
 start-website -name "Default Web Site"
-cmd /c %systemroot%\system32\inetsrv\appcmd start site /site.name:"Default Web Site"
 
 # clean up
 cd $env:temp
@@ -124,6 +120,7 @@ Remove-Item $tempDir -recurse
 
 -------------------
 
+cmd /c %systemroot%\system32\inetsrv\appcmd add apppool /name:"v4.0" /managedRuntimeVersion:"v4.0" /managedPipelineMode:Integrated
 
 
 invoke-item "SimpleSiteWithDb.deploy.cmd /Y  ""-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zzz' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy zzz2' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz3'"""
