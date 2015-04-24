@@ -10,7 +10,8 @@ msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLo
 
 # Put resulting deployment files in a single zip file
 $zipFile = $env:temp + '\0.1500.zip'
-Remove-Item $zipFile
+If (Test-Path $zipFile) { Remove-Item $zipFile }
+
 Add-Type -Assembly "System.IO.Compression.FileSystem" ;
 [System.IO.Compression.ZipFile]::CreateFromDirectory($tempDir, $zipFile, [System.IO.Compression.CompressionLevel]::NoCompression, $false);
 

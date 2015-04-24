@@ -7,14 +7,6 @@
 # Must be done once
 Add-Type -Assembly "System.IO.Compression.FileSystem" ;
 
-Function UnzipInPlace([string]$zipFile)
-{
-	[System.IO.Compression.ZipFile]::ExtractToDirectory($zipFile, Split-Path $zipFilePath);
-	Remove-Item $zipFile
-}
-
-
-
 
 # -----------------------------------
 # Assuming that 0.1500.zip is in temp dir
@@ -26,9 +18,10 @@ $tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 # -----------------------
 # aws does above for you
 
-# Unzip all .zip files 
+# Unzip all .zip files. The resulting directories sit in the same directory as the zip file.
+# Note that this is not recurrrent. 
 get-childitem $tempDir -recurse -force | ?{$_.extension -eq ".zip"} | 
-    ForEach-Object { [System.IO.Compression.ZipFile]::ExtractToDirectory($_.FullName, $_.DirectoryName) }
+    ForEach-Object { [System.IO.Compression.ZipFile]::ExtractToDirectory($_.FullName, $_.FullName + '_dir') }
 
 # Run all deploy.ps1 files
 get-childitem $tempDir -recurse -force | ?{$_.name -eq "deploy.ps1"} | ForEach-Object { Invoke-Expression $_.FullName }
