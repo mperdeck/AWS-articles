@@ -9,8 +9,7 @@ Add-Type -Assembly "System.IO.Compression.FileSystem" ;
 
 Function UnzipInPlace([string]$zipFile)
 {
-	$unzippedDir = Split-Path $zipFilePath
-	[System.IO.Compression.ZipFile]::ExtractToDirectory($zipFile, $unzippedDir);
+	[System.IO.Compression.ZipFile]::ExtractToDirectory($zipFile, Split-Path $zipFilePath);
 	Remove-Item $zipFile
 }
 
@@ -28,10 +27,11 @@ $tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 # aws does above for you
 
 # Unzip all .zip files 
-get-childitem $tempDir -recurse -force | ?{$_.extension -eq ".zip"} | ForEach-Object { UnzipInPlace $_.FullName }
+get-childitem $tempDir -recurse -force | ?{$_.extension -eq ".zip"} | 
+    ForEach-Object { [System.IO.Compression.ZipFile]::ExtractToDirectory($_.FullName, $_.DirectoryName) }
 
 # Run all deploy.ps1 files
-get-childitem $tempDir -recurse -force | ?{$_.name -eq "deploy.ps1"} | ForEach-Object { UnzipInPlace $_.FullName }
+get-childitem $tempDir -recurse -force | ?{$_.name -eq "deploy.ps1"} | ForEach-Object { Invoke-Expression $_.FullName }
 
 # Ensure that current dir is not $tempDir, to prevent locking problems
 cd $env:temp

@@ -1,10 +1,19 @@
-# This file must be part of the project, so will be packaged and deployed
+# This file must be part of the project, 
+# and must have property "Copy to Output Directory" set to "Copy always".
+# That way it will be packaged and deployed.
 
+    Write-Host ">>> dewploy"
 
 $scriptpath = $MyInvocation.MyCommand.Path
 $scriptpath
 $scriptDir = Split-Path $scriptpath
 $scriptDir
+
+    Write-Host "<<< dewploy"
+return
+
+
+
 
 
 cd $scriptDir
