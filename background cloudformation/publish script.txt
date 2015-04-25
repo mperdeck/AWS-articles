@@ -1,4 +1,4 @@
->>>>>>>>>>>>>>>>>>>>  Run powershell below to create deployment zip file
+# >>>>>>>>>>>>>>>>>>>>  Run powershell below to create deployment zip file
 
 d:
 cd "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb"
