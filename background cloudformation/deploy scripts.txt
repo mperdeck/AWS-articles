@@ -27,7 +27,7 @@ get-childitem $tempDir -recurse -force | ?{$_.extension -eq ".zip"} |
 get-childitem $tempDir -recurse -force | ?{$_.name -eq "deploy.ps1"} | ForEach-Object { Invoke-Expression $_.FullName }
 
 # Ensure that current dir is not $tempDir, to prevent locking problems
-cd $env:temp
+# cd $env:temp
 
 # clean up
 Remove-Item $zipFile

@@ -2,7 +2,7 @@
 # and must have property "Copy to Output Directory" set to "Copy always".
 # That way it will be packaged and deployed.
 
-Function WaitUntilWebsiteReachesState([string]$siteName, [string]$state)
+Function wait-until-website-has-state([string]$siteName, [string]$state)
 {
 	do { 
 		Start-Sleep -m 50; 
@@ -10,8 +10,11 @@ Function WaitUntilWebsiteReachesState([string]$siteName, [string]$state)
 	} while ($webSiteState.Trim() -ne $state)
 }
 
-
-
+Function get-website-physicalpath([string]$siteName)
+{
+	$webSitePhysicalPath = (cmd /c %systemroot%\system32\inetsrv\APPCMD list vdirs "$siteName/" /text:physicalPath) | Out-String
+	Return $webSitePhysicalPath.Trim()
+}
 
     Write-Host ">>> dewploy"
 
@@ -20,6 +23,7 @@ $scriptpath = $MyInvocation.MyCommand.Path
 $scriptDir = Split-Path $scriptpath
 
 # -------------------
+Import-Module ServerManager
 add-windowsfeature web-webserver -includeallsubfeature -logpath $env:temp\webserver_addrole.log
 add-windowsfeature web-mgmt-tools -includeallsubfeature -logpath $env:temp\mgmttools_addrole.log
 
@@ -32,15 +36,11 @@ cmd /c %systemroot%\system32\inetsrv\appcmd add apppool /name:"v4.0" /managedRun
 cmd /c %systemroot%\system32\inetsrv\appcmd set site /site.name:"Default Web Site" "/[path='/'].applicationPool:v4.0"
 
 # Wait until the web site has stopped
-do { 
-	Start-Sleep -m 50; 
-	$defaultWebSiteState = (cmd /c %systemroot%\system32\inetsrv\appcmd list site "Default Web Site" /text:state) | Out-String
-	$defaultWebSiteState
-} while ($defaultWebSiteState -ne "Stopped")
+wait-until-website-has-state "Default Web Site" "Stopped"
 
 # Remove all its files
-$physicalPath = Get-ItemProperty 'IIS:\Sites\Default Web Site' physicalPath
-$physicalPathContent = [System.Environment]::ExpandEnvironmentVariables("$physicalPath") + '\*'
+$physicalPath = get-website-physicalpath("Default Web Site")
+$physicalPathContent = $physicalPath + '\*'
 Remove-Item $physicalPathContent -recurse
 
 # Deploy the files to the root directory of the Default Web Site
