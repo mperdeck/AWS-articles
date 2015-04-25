@@ -13,7 +13,7 @@ Function wait-until-website-has-state([string]$siteName, [string]$state)
 Function get-website-physicalpath([string]$siteName)
 {
 	$webSitePhysicalPath = (cmd /c %systemroot%\system32\inetsrv\APPCMD list vdirs "$siteName/" /text:physicalPath) | Out-String
-	Return $webSitePhysicalPath.Trim()
+	Return [System.Environment]::ExpandEnvironmentVariables($webSitePhysicalPath).Trim()
 }
 
 # Find the directory that this script is running in

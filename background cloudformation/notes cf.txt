@@ -18,7 +18,15 @@ Remove-Item d:\temp\test2.8.0\* -Force -Recurse
 msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=d:\temp\test2.8.0\SimpleSiteWithDb\SimpleSiteWithDb.zip /p:AutoParameterizationWebConfigConnectionStrings=False
 # msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
 ****************
-\\tsclient\C\Users\mperdeck\AppData\Local\Temp
+
+
+
+copy \\tsclient\C\Users\mperdeck\AppData\Local\Temp\0.1500.zip C:\Users\Administrator\AppData\Local\Temp\2
+
+
+
+
+
 >>>>>>>>>>>>>>>>>>>>  Run powershell below to create deployment zip file
 
 d:

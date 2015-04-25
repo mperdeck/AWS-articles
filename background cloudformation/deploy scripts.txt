@@ -24,7 +24,10 @@ get-childitem $tempDir -recurse -force | ?{$_.extension -eq ".zip"} |
     ForEach-Object { [System.IO.Compression.ZipFile]::ExtractToDirectory($_.FullName, $_.FullName + '_dir') }
 
 # Run all deploy.ps1 files
+$executionPolicy = Get-ExecutionPolicy
+Set-ExecutionPolicy Bypass -Scope Process -force
 get-childitem $tempDir -recurse -force | ?{$_.name -eq "deploy.ps1"} | ForEach-Object { Invoke-Expression $_.FullName }
+Set-ExecutionPolicy $executionPolicy -Scope Process -force
 
 # Ensure that current dir is not $tempDir, to prevent locking problems
 # cd $env:temp
