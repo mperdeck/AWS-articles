@@ -16,8 +16,6 @@ Function get-website-physicalpath([string]$siteName)
 	Return $webSitePhysicalPath.Trim()
 }
 
-    Write-Host ">>> dewploy"
-
 # Find the directory that this script is running in
 $scriptpath = $MyInvocation.MyCommand.Path
 $scriptDir = Split-Path $scriptpath
@@ -26,7 +24,6 @@ $scriptDir = Split-Path $scriptpath
 Import-Module ServerManager
 add-windowsfeature web-webserver -includeallsubfeature -logpath $env:temp\webserver_addrole.log
 add-windowsfeature web-mgmt-tools -includeallsubfeature -logpath $env:temp\mgmttools_addrole.log
-
 
 # Stop the Default Web Site
 cmd /c %systemroot%\system32\inetsrv\appcmd stop site /site.name:"Default Web Site"
@@ -45,7 +42,6 @@ Remove-Item $physicalPathContent -recurse
 
 # Deploy the files to the root directory of the Default Web Site
 copy-item "$scriptDir\*" $physicalPath -force -recurse
-# CMD /C release.deploy.cmd /Y  "-setParam:kind=TextFile,scope=\\web.config$,match=@@DbServer@@,value='xxx yyy zz-----z' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbUsername@@,value='xxx yyy z----zz2aaa' -setParam:kind=TextFile,scope=\\web.config$,match=@@DbPassword@@,value='xxx yyy zzz----3aaaaa' -setparam:name='IIS Web Application Name',kind=providerpath,scope=apphostconfig,value='default web site'"
 
 # Start the web site again
 cmd /c %systemroot%\system32\inetsrv\appcmd start site /site.name:"Default Web Site"
