@@ -11,13 +11,13 @@ Param(
   [string]$version,
 
   [Parameter(Mandatory=$False, HelpMessage="Name of the database server")]
-  [switch]$dbServer,
+  [string]$dbServer,
 
   [Parameter(Mandatory=$False, HelpMessage="User name to be used when accessing the database")]
-  [switch]$dbUsername,
+  [string]$dbUsername,
 
   [Parameter(Mandatory=$False, HelpMessage="Password to be used when accessing the database")]
-  [switch]$dbUserPassword
+  [string]$dbPassword
 )
 
 # The implementation of this script will work on a standard Windows Server 2012 installation.
@@ -30,7 +30,7 @@ Param(
 # {{Version}}				$version
 # {{DbServer}}				$dbServer
 # {{DbUsername}}			$dbUsername
-# {{DbPassword}}			$dbUserPassword
+# {{DbPassword}}			$dbPassword
 
 # To make this all work, this file must be part of the Visual Studio project. 
 # It must have property "Copy to Output Directory" set to "Do not copy", otherwise it will be copied
@@ -76,11 +76,11 @@ cmd /c %systemroot%\system32\inetsrv\appcmd set site /site.name:"Default Web Sit
 # sit in the root directory of the web site.
 
 $webConfigPath = "$scriptDir\web.config"
-(Get-Content $webConfigPath) | Foreach-Object {$_ 
-	-replace '{{Version}}', $version
-	-replace '{{DbServer}}', $dbServer
-	-replace '{{DbUsername}}', $dbUsername
-	-replace '{{DbPassword}}', $dbUserPassword
+(Get-Content $webConfigPath) | Foreach-Object {$_ `
+	-replace '{{Version}}', $version `
+	-replace '{{DbServer}}', $dbServer `
+	-replace '{{DbUsername}}', $dbUsername `
+	-replace '{{DbPassword}}', $dbPassword `
 } | Out-File $webConfigPath
 
 # Wait until the web site has stopped
