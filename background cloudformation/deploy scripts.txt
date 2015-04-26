@@ -22,6 +22,9 @@ $tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 # Note that this is not recurrrent. 
 get-childitem $tempDir -recurse -force | ?{$_.extension -eq ".zip"} | 
     ForEach-Object { [System.IO.Compression.ZipFile]::ExtractToDirectory($_.FullName, $_.FullName + '_dir') }
+# >>>>>>>>>>>>>>>>>> no longer needed
+
+	
 
 # Run all deploy.ps1 files
 $executionPolicy = Get-ExecutionPolicy
