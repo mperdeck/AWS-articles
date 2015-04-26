@@ -3,16 +3,17 @@
 d:
 cd "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb"
 
-$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 $tempDir 
 
+# Build the package and put the deployment files in a temporary directory
+$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 msbuild SimpleSiteWithDb.csproj /t:Package /p:Configuration=Release /p:PackageLocation=$tempDir\Release.zip /p:AutoParameterizationWebConfigConnectionStrings=False
 
-# Put resulting deployment files in a single zip file
+# Zip the deployment files into a single zip file. 
 $zipFile = $env:temp + '\0.1500.zip'
 If (Test-Path $zipFile) { Remove-Item $zipFile }
-
 Add-Type -Assembly "System.IO.Compression.FileSystem" ;
 [System.IO.Compression.ZipFile]::CreateFromDirectory($tempDir, $zipFile, [System.IO.Compression.CompressionLevel]::NoCompression, $false);
 
-Remove-Item $tempDir -Force -Recurse
+# Remove the temp dir and everything in it
+Get-ChildItem $tempDir -Recurse | Remove-Item -force -Recurse

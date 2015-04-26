@@ -33,7 +33,7 @@ Set-ExecutionPolicy $executionPolicy -Scope Process -force
 # Ensure that current dir is not $tempDir, to prevent locking problems
 # cd $env:temp
 
-# clean up
+# Clean up the zip file and the expanded directory
 Remove-Item $zipFile
-Remove-Item $tempDir -recurse
+Get-ChildItem $tempDir -Recurse | Remove-Item -force -Recurse
 
