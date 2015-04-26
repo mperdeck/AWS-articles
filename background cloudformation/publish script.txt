@@ -44,6 +44,17 @@ Get-ChildItem $tempDir -Recurse | Remove-Item -force -Recurse
 # ==============================
 # no separate zipping
 
+Function exists-bucket([string]$bucketName)
+{
+	Return (Get-S3Bucket -BucketName $bucketName | measure).Count -ne 0
+}
+
+Function upload-bucket([string]$bucketName, [string]$filePath, [string]$keyName)
+{
+	if (!(exists-bucket($bucketName))) { New-S3Bucket -BucketName $bucketName }
+	Write-S3Object -BucketName $bucketName -Key "$keyName" -File $filePath
+}
+
 # d:
 # cd "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb"
 
@@ -60,6 +71,10 @@ msbuild $csProjPath /t:Package /p:Configuration=Release /p:PackageLocation=$rele
 # Add-Type -Assembly "System.IO.Compression.FileSystem" ;
 # [System.IO.Compression.ZipFile]::CreateFromDirectory($tempDir, $zipFile, [System.IO.Compression.CompressionLevel]::NoCompression, $false);
 
+# Specify that commands in this script will use credentials from credential store "teamcity" and apply to us-east-1
+# See http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html
+Initialize-AWSDefaults -ProfileName teamcity -Region us-east-1
+
 
 
 
@@ -67,6 +82,43 @@ msbuild $csProjPath /t:Package /p:Configuration=Release /p:PackageLocation=$rele
 Get-ChildItem $tempDir -Recurse | Remove-Item -force -Recurse
 
 
+# ==============================
+# no separate zipping
 
+Function exists-bucket([string]$bucketName)
+{
+	Return (Get-S3Bucket -BucketName $bucketName | measure).Count -ne 0
+}
 
+Function upload-bucket([string]$bucketName, [string]$filePath, [string]$keyName)
+{
+	if (!(exists-bucket($bucketName))) { New-S3Bucket -BucketName $bucketName }
+	Write-S3Object -BucketName $bucketName -Key "$keyName" -File $filePath
+}
+
+# $csProjPath - path to the csproj file of the web site to be deployed
+# $version - version of the web site
+# $bucketName - S3 bucket where the deployment files will be stored
+Function upload-deployment([string]$csProjPath, [string]$version, [string]$bucketName)
+{
+	$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
+	$releaseZip = "$tempDir\Release.zip"
+
+	msbuild $csProjPath /t:Package /p:Configuration=Release /p:PackageLocation=$releaseZip /p:AutoParameterizationWebConfigConnectionStrings=False
+
+	# Specify that commands in this script will use credentials from credential store "teamcity" and apply to us-east-1
+	# See http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html
+	Initialize-AWSDefaults -ProfileName teamcity -Region us-east-1
+
+	# Upload deployment file to S3 bucket where it will be picked up by CloudFormation template
+	upload-bucket $bucketName $releaseZip $version
+
+	# Remove the temp dir and everything in it
+	Get-ChildItem $tempDir -Recurse | Remove-Item -force -Recurse
+}
+
+$csProjPath = "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj"
+$version = "1.34"
+$bucketName = "mperdeck-releases"
+upload-deployment $csProjPath $version $bucketName
 
