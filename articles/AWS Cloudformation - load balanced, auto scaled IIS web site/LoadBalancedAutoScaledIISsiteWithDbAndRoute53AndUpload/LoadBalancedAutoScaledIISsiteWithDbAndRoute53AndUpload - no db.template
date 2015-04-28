@@ -63,12 +63,6 @@
       "Default" : "Slameer1!"
     },
 	
-	 "DeploymentBucketAccessRole" : {
-      "Default" : "s3-full-access-role",
-      "Description" : "Name of a role that provides read access to the bucket with the deployment file",
-      "Type" : "String"
-    },
-	
 	 "DeploymentBucketName" : {
       "Default" : "mperdeck-releases",
       "Description" : "Name of bucket containing the zip file with deployed files",
@@ -98,7 +92,64 @@
   },
 
   "Resources": {
-    "WebServerGroup" : {
+
+       "InstanceRole":{
+         "Type":"AWS::IAM::Role",
+         "Properties":{
+            "AssumeRolePolicyDocument":{
+               "Statement":[
+                  {
+                     "Effect":"Allow",
+                     "Principal":{
+                        "Service":[
+                           "ec2.amazonaws.com"
+                        ]
+                     },
+                     "Action":[
+                        "sts:AssumeRole"
+                     ]
+                  }
+               ]
+            },
+            "Path":"/"
+         }
+      },
+      "RolePolicies":{
+         "Type":"AWS::IAM::Policy",
+         "Properties":{
+            "PolicyName":"S3Download",
+            "PolicyDocument":{
+               "Statement":[
+                  {
+                     "Action":[
+                        "s3:GetObject"
+                     ],
+                     "Effect":"Allow",
+                     "Resource": { "Fn::Join" : ["", [
+						"arn:aws:s3:::", { "Ref" : "DeploymentBucketName" }, "/", { "Ref" : "BuildNumber" }, ".zip"]]}
+                  }
+               ]
+            },
+            "Roles":[
+               {
+                  "Ref":"InstanceRole"
+               }
+            ]
+         }
+      },
+      "InstanceProfile":{
+         "Type":"AWS::IAM::InstanceProfile",
+         "Properties":{
+            "Path":"/",
+            "Roles":[
+               {
+                  "Ref":"InstanceRole"
+               }
+            ]
+         }
+      },
+
+  "WebServerGroup" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "Properties" : {
         "AvailabilityZones" : { "Fn::GetAZs" : ""},
@@ -125,7 +176,7 @@
           "default" : {
             "type" : "s3",
             "buckets" : [{ "Ref" : "DeploymentBucketName" }],
-            "roleName" : { "Ref" : "DeploymentBucketAccessRole" }
+            "roleName" : { "Ref" : "InstanceRole" }
            }
         },
 		"AWS::CloudFormation::Init" : {
@@ -142,7 +193,7 @@
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2012r2" ]},
         "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" } ],
         "InstanceType" : { "Ref" : "InstanceType" },
-		"IamInstanceProfile"  : { "Ref" : "DeploymentBucketAccessRole" },
+		"IamInstanceProfile"  : { "Ref" : "InstanceProfile" },
 		  "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
 			"<script>\n",
 			  "cfn-init.exe -v -s ", {"Ref" : "AWS::StackId"}, " -r LaunchConfig --region ", {"Ref" : "AWS::Region"}, "\n",
