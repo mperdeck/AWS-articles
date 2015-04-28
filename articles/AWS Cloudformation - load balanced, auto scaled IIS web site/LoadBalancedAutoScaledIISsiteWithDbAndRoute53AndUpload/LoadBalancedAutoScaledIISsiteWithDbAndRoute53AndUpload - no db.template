@@ -142,6 +142,7 @@
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2012r2" ]},
         "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" } ],
         "InstanceType" : { "Ref" : "InstanceType" },
+		"IamInstanceProfile"  : { "Ref" : "DeploymentBucketAccessRole" },
 		  "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
 			"<script>\n",
 			  "cfn-init.exe -v -s ", {"Ref" : "AWS::StackId"}, " -r LaunchConfig --region ", {"Ref" : "AWS::Region"}, "\n",
