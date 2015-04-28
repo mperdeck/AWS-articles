@@ -75,7 +75,7 @@
       "Type" : "String"
     },
 	
-	 "DeploymentVersion" : {
+	 "BuildNumber" : {
       "Default" : "1.34",
       "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files",
       "Type" : "String"
@@ -120,6 +120,7 @@
     "LaunchConfig" : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
 	  "Metadata" : {
+		"BuildNumber" : { "Ref" : "BuildNumber" },
 		"AWS::CloudFormation::Authentication" : {
           "default" : {
             "type" : "s3",
@@ -131,7 +132,7 @@
 		  "config" : {
 			"sources" : {
 				"c:\\inetpub\\test" : { "Fn::Join" : ["", [
-						"https://", { "Ref" : "DeploymentBucketName" }, ".s3.amazonaws.com/", { "Ref" : "DeploymentVersion" }, ".zip"]]}
+						"https://", { "Ref" : "DeploymentBucketName" }, ".s3.amazonaws.com/", { "Ref" : "BuildNumber" }, ".zip"]]}
 			}
 		  }
 		} 
