@@ -7,7 +7,7 @@ Function exists-bucket([string]$bucketName)
 Function upload-bucket([string]$bucketName, [string]$filePath, [string]$keyName)
 {
 	if (!(exists-bucket($bucketName))) { New-S3Bucket -BucketName $bucketName }
-	Write-S3Object -BucketName $bucketName -Key "$keyName" -File $filePath
+	Write-S3Object -BucketName $bucketName -Key "$keyName.zip" -File $filePath
 }
 
 # $csProjPath - path to the csproj file of the web site to be deployed
