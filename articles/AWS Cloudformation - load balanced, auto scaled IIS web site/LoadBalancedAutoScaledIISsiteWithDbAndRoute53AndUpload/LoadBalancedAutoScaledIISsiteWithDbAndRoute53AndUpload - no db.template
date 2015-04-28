@@ -250,34 +250,6 @@
           "SourceSecurityGroupName" : {"Fn::GetAtt" : ["ElasticLoadBalancer", "SourceSecurityGroup.GroupName"]}
         } ]
       }
-    },
-	"DNS": {
-	  "Type": "AWS::Route53::HostedZone",
-	  "Properties": {
-		"HostedZoneConfig": {
-		  "Comment": "My hosted zone for example.com"
-		},
-		"Name": "aspdotnetperformance.org."
-	  }
-	},
-    "dnsaspdotnetperformanceorg": {
-      "Type": "AWS::Route53::RecordSetGroup",
-      "Properties": {
-        "HostedZoneId": { "Ref": "DNS" },
-        "RecordSets": [
-          {
-            "Name": "aspdotnetperformance.org.",
-            "Type": "A",
-            "ResourceRecords": [
-
-            ],
-            "AliasTarget": {
-              "HostedZoneId": {"Fn::GetAtt" : ["ElasticLoadBalancer", "CanonicalHostedZoneNameID"]},
-              "DNSName": {"Fn::GetAtt" : ["ElasticLoadBalancer", "DNSName"]}
-            }
-          }
-        ]
-      }
     }
   },
 
