@@ -131,7 +131,7 @@
 		"AWS::CloudFormation::Init" : {
 		  "config" : {
 			"sources" : {
-				"c:\\inetpub\\test" : { "Fn::Join" : ["", [
+				"%temp%\\inetpub\\test" : { "Fn::Join" : ["", [
 						"https://", { "Ref" : "DeploymentBucketName" }, ".s3.amazonaws.com/", { "Ref" : "BuildNumber" }, ".zip"]]}
 			}
 		  }
