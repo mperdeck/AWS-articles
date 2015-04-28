@@ -61,6 +61,24 @@
       "Type" : "String",
 	  "NoEcho" : "true",
       "Default" : "Slameer1!"
+    },
+	
+	 "DeploymentBucketAccessRole" : {
+      "Default" : "s3-full-access-role",
+      "Description" : "Name of a role that provides read access to the bucket with the deployment file",
+      "Type" : "String"
+    },
+	
+	 "DeploymentBucketName" : {
+      "Default" : "mperdeck-releases",
+      "Description" : "Name of bucket containing the zip file with deployed files",
+      "Type" : "String"
+    },
+	
+	 "DeploymentVersion" : {
+      "Default" : "1.34",
+      "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files",
+      "Type" : "String"
     }
   },
 
@@ -102,25 +120,25 @@
     "LaunchConfig" : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
 	  "Metadata" : {
+		"AWS::CloudFormation::Authentication" : {
+          "default" : {
+            "type" : "s3",
+            "buckets" : [{ "Ref" : "DeploymentBucketName" }],
+            "roleName" : { "Ref" : "DeploymentBucketAccessRole" }
+           }
+        },
 		"AWS::CloudFormation::Init" : {
 		  "config" : {
-			"files" : {
-			  "c:\\inetpub\\Test\\index.html" : {
-				"content": { "Fn::Join" : ["", [
-				  "<html>\n",
-				  "<body>\n",
-				  "<h1>Cloud formation works</h1>\n",
-				  "</body>\n",
-				  "</html>\n"
-				]]}
-			  }
+			"sources" : {
+				"c:\\inetpub\\test" : { "Fn::Join" : ["", [
+						"https://", { "Ref" : "DeploymentBucketName" }, ".s3.amazonaws.com/", { "Ref" : "DeploymentVersion" }, ".zip"]]}
 			}
 		  }
 		} 
 	  },
       "Properties" : {
         "KeyName" : { "Ref" : "KeyName" },
-        "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2008r2" ]},
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2012r2" ]},
         "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" } ],
         "InstanceType" : { "Ref" : "InstanceType" },
 		  "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
