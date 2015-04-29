@@ -68,29 +68,35 @@ cmd /c %systemroot%\Microsoft.NET\Framework\v4.0.30319\aspnet_regiis.exe -i
 # Stop the Default Web Site
 cmd /c %systemroot%\system32\inetsrv\appcmd stop site /site.name:"Default Web Site"
 
-# Not needed, Default App Pool already 4.0.  Give it an application pool that runs .Net 4.0
-# cmd /c %systemroot%\system32\inetsrv\appcmd add apppool /name:"v4.0" /managedRuntimeVersion:"v4.0" /managedPipelineMode:Integrated
-# cmd /c %systemroot%\system32\inetsrv\appcmd set site /site.name:"Default Web Site" "/[path='/'].applicationPool:v4.0"
-
 # Replace placeholders in the web.config file. Both this Deploy.ps1 file and web.config are assumed to
 # sit in the root directory of the web site.
+# Note that you must set the encoding to UTF8. If you do not do that, Out-File uses Unicode. As a result, IIS will not be able to
+# read the web.config and show a 500.19 - Internal Server Error page
 
-
-
-
-
-
+$webConfigPath = "$scriptDir\web.config"
+(Get-Content $webConfigPath) | Foreach-Object {$_ `
+	-replace '{{Version}}', $version `
+	-replace '{{DbServer}}', $dbServer `
+	-replace '{{DbUsername}}', $dbUsername `
+	-replace '{{DbPassword}}', $dbPassword `
+} | Out-File $webConfigPath -encoding UTF8
 
 # Wait until the web site has stopped
 wait-until-website-has-state "Default Web Site" "Stopped"
 
 # Remove all its files
-# $physicalPath = get-website-physicalpath("Default Web Site")
-# Get-ChildItem $physicalPath -Recurse | Remove-Item -force -Recurse
+$physicalPath = get-website-physicalpath("Default Web Site")
+Get-ChildItem $physicalPath -Recurse | Remove-Item -force -Recurse
 
 # Deploy the files to the root directory of the Default Web Site
 copy-item "$scriptDir\*" $physicalPath -force -recurse
 
 # Start the web site again
 cmd /c %systemroot%\system32\inetsrv\appcmd start site /site.name:"Default Web Site"
+
+# Clean up the $scriptDir directory. Leave the rest of the deploy directory in place, it will have a .config file for the DefaultAppPool.
+Get-ChildItem $scriptDir -Recurse | Remove-Item -force -Recurse
+
+
+
 

@@ -32,7 +32,7 @@ Function upload-deployment([string]$csProjPath, [string]$version, [string]$bucke
 }
 
 $csProjPath = "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj"
-$version = "1.35"
+$version = "1.37"
 $bucketName = "mperdeck-releases"
 upload-deployment $csProjPath $version $bucketName
 
