@@ -85,8 +85,8 @@ cmd /c %systemroot%\system32\inetsrv\appcmd stop site /site.name:"Default Web Si
 wait-until-website-has-state "Default Web Site" "Stopped"
 
 # Remove all its files
-$physicalPath = get-website-physicalpath("Default Web Site")
-Get-ChildItem $physicalPath -Recurse | Remove-Item -force -Recurse
+# $physicalPath = get-website-physicalpath("Default Web Site")
+# Get-ChildItem $physicalPath -Recurse | Remove-Item -force -Recurse
 
 # Deploy the files to the root directory of the Default Web Site
 copy-item "$scriptDir\*" $physicalPath -force -recurse
