@@ -70,7 +70,7 @@
     },
 	
 	 "BuildNumber" : {
-      "Default" : "1.34",
+      "Default" : "1.35",
       "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files",
       "Type" : "String"
     }
@@ -182,7 +182,7 @@
 		"AWS::CloudFormation::Init" : {
 		  "config" : {
 			"sources" : {
-				"c:\\inetpub\\test" : { "Fn::Join" : ["", [
+				"c:\\inetpub\\temp" : { "Fn::Join" : ["", [
 						"https://", { "Ref" : "DeploymentBucketName" }, ".s3.amazonaws.com/", { "Ref" : "BuildNumber" }, ".zip"]]}
 			}
 		  }
@@ -199,6 +199,15 @@
 			  "cfn-init.exe -v -s ", {"Ref" : "AWS::StackId"}, " -r LaunchConfig --region ", {"Ref" : "AWS::Region"}, "\n",
 			"</script>\n",
 			"<powershell>\n",
+			"# Run all deploy.ps1 files\n",
+			"$executionPolicy = Get-ExecutionPolicy\n",
+			"Set-ExecutionPolicy Bypass -Scope Process -force\n",
+            "get-childitem c:\\inetpub\\temp -recurse -force | ?{$_.name -eq \"deploy.ps1\"} | \n",
+            "    ForEach-Object { Invoke-Expression \"$($_.FullName) -version 'vvvvv' -dbServer 'sssss' -dbUsername 'uuuuuu' -dbPassword 'ppppp'\" }\n",
+			"Set-ExecutionPolicy $executionPolicy -Scope Process -force\n",
+			"",
+			"# Clean up the temp directory\n",
+			"Get-ChildItem c:\\inetpub\\temp -Recurse | Remove-Item -force -Recurse\n",
 			"</powershell>\n"
 		  ]] } }
   	    }
