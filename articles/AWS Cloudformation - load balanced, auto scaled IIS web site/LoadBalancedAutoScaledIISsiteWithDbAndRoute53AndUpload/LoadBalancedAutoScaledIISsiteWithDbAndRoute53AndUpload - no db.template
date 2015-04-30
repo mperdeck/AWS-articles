@@ -69,7 +69,7 @@
       "Type" : "String"
     },
 	
-	 "BuildNumber" : {
+	 "Version" : {
       "Default" : "1.38",
       "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files",
       "Type" : "String"
@@ -126,7 +126,7 @@
                      ],
                      "Effect":"Allow",
                      "Resource": { "Fn::Join" : ["", [
-						"arn:aws:s3:::", { "Ref" : "DeploymentBucketName" }, "/", { "Ref" : "BuildNumber" }, ".zip"]]}
+						"arn:aws:s3:::", { "Ref" : "DeploymentBucketName" }, "/", { "Ref" : "Version" }, ".zip"]]}
                   }
                ]
             },
@@ -171,7 +171,7 @@
     "LaunchConfig" : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
 	  "Metadata" : {
-		"BuildNumber" : { "Ref" : "BuildNumber" },
+		"Version" : { "Ref" : "Version" },
 		"AWS::CloudFormation::Authentication" : {
           "default" : {
             "type" : "s3",
@@ -183,7 +183,7 @@
 		  "config" : {
 			"sources" : {
 				"c:\\inetpub\\deploy" : { "Fn::Join" : ["", [
-						"https://", { "Ref" : "DeploymentBucketName" }, ".s3.amazonaws.com/", { "Ref" : "BuildNumber" }, ".zip"]]}
+						"https://", { "Ref" : "DeploymentBucketName" }, ".s3.amazonaws.com/", { "Ref" : "Version" }, ".zip"]]}
 			}
 		  }
 		} 
