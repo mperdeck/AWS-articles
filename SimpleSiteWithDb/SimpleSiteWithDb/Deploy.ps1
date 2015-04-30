@@ -94,9 +94,6 @@ copy-item "$scriptDir\*" $physicalPath -force -recurse
 # Start the web site again
 cmd /c %systemroot%\system32\inetsrv\appcmd start site /site.name:"Default Web Site"
 
-# Clean up the $scriptDir directory. Leave the rest of the deploy directory in place, it will have a .config file for the DefaultAppPool.
-Get-ChildItem $scriptDir -Recurse | Remove-Item -force -Recurse
-
 
 
 

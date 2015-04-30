@@ -70,7 +70,7 @@
     },
 	
 	 "BuildNumber" : {
-      "Default" : "1.37",
+      "Default" : "1.38",
       "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files",
       "Type" : "String"
     }
@@ -205,7 +205,8 @@
             "get-childitem c:\\inetpub\\deploy -recurse -force | ?{$_.name -eq \"deploy.ps1\"} | \n",
             "    ForEach-Object { Invoke-Expression \"$($_.FullName) -version 'vvvvv' -dbServer 'sssss' -dbUsername 'uuuuuu' -dbPassword 'ppppp'\" }\n",
 			"Set-ExecutionPolicy $executionPolicy -Scope Process -force\n",
-			"# Do not remove the deploy directory. It will have a .config file for the DefaultAppPool.",
+            "# Clean up the deploy directory\n",
+			"Get-ChildItem c:\\inetpub\\deploy -Recurse | Remove-Item -force -Recurse\n",
 			"</powershell>\n"
 		  ]] } }
   	    }
