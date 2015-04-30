@@ -26,6 +26,50 @@ Function exists-stack([string]$stackName)
 	Return $found
 }
 
+# $stackName - name of the stack. You can use this function to both update a stack and to create a new one.
+# $version - version of the web site
+# $bucketName - S3 bucket where the deployment files will be stored
+# $templatePath - path of the template file
+Function launch-stack([string]$stackName, [string]$version, [string]$bucketName, [string]$templatePath)
+{
+	# Version tag
+	$versionTag = new-object Amazon.CloudFormation.Model.Tag    
+	$versionTag.Key = "Version"
+	$versionTag.Value = $version
+
+	# parameter DeploymentBucketNameParameter
+	$deploymentBucketNameParameter = new-object Amazon.CloudFormation.Model.Parameter    
+	$deploymentBucketNameParameter.ParameterKey = "DeploymentBucketNameParameter"
+	$deploymentBucketNameParameter.ParameterValue = $bucketName
+
+	# parameter Version
+	$versionParameter = new-object Amazon.CloudFormation.Model.Parameter    
+	$versionParameter.ParameterKey = "Version"
+	$versionParameter.ParameterValue = $version
+
+
+
+
+
+
+	if (exists-stack($stackName))
+	{
+	
+	
+	
+	}
+	else
+	{
+		New-CFNStack
+			-StackName $stackName
+			-Capability @( CAPABILITY_IAM )
+			-Parameter @( $deploymentBucketNameParameter, $versionParameter )
+			-Tag @( $versionTag )
+			-TemplateBody <String>
+			-Force $FALSE
+	}
+}
+
 
 # $csProjPath - path to the csproj file of the web site to be deployed
 # $version - version of the web site
