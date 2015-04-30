@@ -10,6 +10,23 @@ Function upload-bucket([string]$bucketName, [string]$filePath, [string]$keyName)
 	Write-S3Object -BucketName $bucketName -Key "$keyName.zip" -File $filePath
 }
 
+Function exists-stack([string]$stackName)
+{
+	$found = $TRUE
+	Try
+	{
+		# throws an exception when stack does not exist
+		Get-CFNStack -StackName $stackName
+	}
+	Catch
+	{
+		$found = $FALSE
+	}
+
+	Return $found
+}
+
+
 # $csProjPath - path to the csproj file of the web site to be deployed
 # $version - version of the web site
 # $bucketName - S3 bucket where the deployment files will be stored
@@ -32,7 +49,7 @@ Function upload-deployment([string]$csProjPath, [string]$version, [string]$bucke
 }
 
 $csProjPath = "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj"
-$version = "1.37"
+$version = "1.38"
 $bucketName = "mperdeck-releases"
 upload-deployment $csProjPath $version $bucketName
 
