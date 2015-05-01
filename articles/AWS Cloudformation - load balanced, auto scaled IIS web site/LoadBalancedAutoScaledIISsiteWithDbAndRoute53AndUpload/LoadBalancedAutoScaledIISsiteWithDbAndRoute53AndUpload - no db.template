@@ -156,6 +156,11 @@
         "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
         "MinSize" : "1",
         "MaxSize" : "3",
+		"Tags" : [ {
+			 "Key" : "Version",
+			 "Value" : { "Ref" : "Version" },
+			 "PropagateAtLaunch" : "true"
+        } ],
         "LoadBalancerNames" : [ { "Ref" : "ElasticLoadBalancer" } ]
       },
       "UpdatePolicy": {

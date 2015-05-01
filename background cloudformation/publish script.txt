@@ -32,11 +32,6 @@ Function exists-stack([string]$stackName)
 # $templatePath - path of the template file
 Function launch-stack([string]$stackName, [string]$version, [string]$bucketName, [string]$templatePath)
 {
-	# Version tag
-	$versionTag = new-object Amazon.CloudFormation.Model.Tag    
-	$versionTag.Key = "Version"
-	$versionTag.Value = $version
-
 	# parameter DeploymentBucketNameParameter
 	$deploymentBucketNameParameter = new-object Amazon.CloudFormation.Model.Parameter    
 	$deploymentBucketNameParameter.ParameterKey = "DeploymentBucketName"
@@ -51,9 +46,20 @@ Function launch-stack([string]$stackName, [string]$version, [string]$bucketName,
 
 	if (exists-stack($stackName))
 	{
+		New-CFNStack `
+			-StackName $stackName `
+			-Capability @( "CAPABILITY_IAM" ) `
+			-Parameter @( $deploymentBucketNameParameter, $versionParameter ) `
+			-Tag @( $versionTag ) `
+			-TemplateBody $template
 	
 	
 	
+	
+	
+	# $stackName = "ii5u"
+	# Get-EC2Instance | select -expandproperty RunningInstance | where-object { $_.Tags | where-object { $_.Key -eq "aws:cloudformation:stack-name" -and $_.Value -eq $stackName } } | foreach { Stop-EC2Instance -instance $_.InstanceId -Terminate }
+
 	}
 	else
 	{
@@ -61,7 +67,6 @@ Function launch-stack([string]$stackName, [string]$version, [string]$bucketName,
 			-StackName $stackName `
 			-Capability @( "CAPABILITY_IAM" ) `
 			-Parameter @( $deploymentBucketNameParameter, $versionParameter ) `
-			-Tag @( $versionTag ) `
 			-TemplateBody $template
 	}
 }
@@ -91,7 +96,7 @@ Function upload-deployment([string]$csProjPath, [string]$version, [string]$bucke
 $csProjPath = "D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj"
 $version = "1.38"
 $bucketName = "mperdeck-releases"
-$stackName = "ii5u"
+$stackName = "ii6b"
 $templatePath = "D:\Dev\AWS-articles\articles\AWS Cloudformation - load balanced, auto scaled IIS web site\LoadBalancedAutoScaledIISsiteWithDbAndRoute53AndUpload\LoadBalancedAutoScaledIISsiteWithDbAndRoute53AndUpload - no db.template"
 
 launch-stack $stackName $version $bucketName $templatePath
