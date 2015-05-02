@@ -65,13 +65,18 @@
 	
 	 "DeploymentBucketName" : {
       "Default" : "mperdeck-releases",
-      "Description" : "Name of bucket containing the zip file with deployed files",
+      "Description" : "Name of bucket containing the zip file with deployed files.",
+      "Type" : "String"
+    },
+	
+	 "WebsiteDomain" : {
+      "Default" : "aspdotnetperformance.org",
+      "Description" : "Domain of the web site, using Route 53.",
       "Type" : "String"
     },
 	
 	 "Version" : {
       "Default" : "1.38",
-      "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files",
       "Type" : "String"
     }
   },
@@ -321,7 +326,6 @@
 
   "Outputs" : {
     "URL" : {
-      "Description" : "The URL of the website",
       "Value" :  { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ]}]]}
     }
   }
