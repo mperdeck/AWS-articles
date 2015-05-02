@@ -21,10 +21,39 @@ Function exists-bucket([string]$bucketName)
 	Return (Get-S3Bucket -BucketName $bucketName | measure).Count -ne 0
 }
 
+# Uploads a file to an S3 bucket.
+# If there is already an object in the bucket with the given key name and it has the same
+# checksum, the file is not uploaded.
 Function upload-bucket-object([string]$bucketName, [string]$filePath, [string]$keyName)
 {
-	if (!(exists-bucket $bucketName)) { New-S3Bucket -BucketName $bucketName }
-	Write-S3Object -BucketName $bucketName -Key "$keyName.zip" -File $filePath
+    # First figure out whether the object already exists
+    # Also, if the bucket itself doesn't exist, create it
+
+    $objectExists = $False
+	if (!(exists-bucket $bucketName)) 
+    { 
+        New-S3Bucket -BucketName $bucketName 
+    }
+    else
+    {
+        $s3object = Get-S3Object -BucketName $bucketName -Key $keyName
+        if ($s3object)
+        {
+            # Object with given key does exist. Make sure it has the same content by comparing MD5 checksums.
+            # The "ETag" property of an S3 object is simply the MD5 checksum
+
+            # Note that Get-FileHash returns an MD5 in all uppercase, while the ETag is in lowercase.
+            # The MD5 in the ETag is surrounded by quotes. Luckily, -eq is not case sensitive.
+
+            $newFileEtagObject = Get-FileHash $filePath -Algorithm MD5
+            $newFileEtag = $newFileEtagObject.Hash
+            $objectExists = ("""$newFileEtag""" -eq $s3object.ETag)
+        }
+    }
+
+    if ($objectExists) { Return }
+
+	Write-S3Object -BucketName $bucketName -Key $keyName -File $filePath
 }
 
 Function get-stack-status([string]$stackName)
@@ -162,7 +191,7 @@ Function upload-deployment([string]$version, [string]$stackName, [string]$templa
 	    Initialize-AWSDefaults -ProfileName teamcity -Region us-east-1
 
 	    # Upload deployment file to S3 bucket where it will be picked up by CloudFormation template
-	    upload-bucket-object $bucketName $releaseZip $version
+	    upload-bucket-object $bucketName $releaseZip "$version.zip"
 
         $success = launch-stack $stackName $version $bucketName $templatePath
         Return $success
