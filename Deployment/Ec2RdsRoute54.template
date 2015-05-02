@@ -321,7 +321,7 @@
           "SourceSecurityGroupName" : {"Fn::GetAtt" : ["ElasticLoadBalancer", "SourceSecurityGroup.GroupName"]}
         } ]
       }
-    }
+    },
 	"HostedZone": {
 	  "Type": "AWS::Route53::HostedZone",
 	  "Properties": {
