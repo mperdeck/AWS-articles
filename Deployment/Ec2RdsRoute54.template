@@ -76,7 +76,7 @@
     },
 	
 	 "Version" : {
-      "Default" : "1.38",
+      "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files.",
       "Type" : "String"
     }
   },
@@ -322,10 +322,39 @@
         } ]
       }
     }
+	"HostedZone": {
+	  "Type": "AWS::Route53::HostedZone",
+	  "Properties": {
+		"HostedZoneConfig": {
+		  "Comment": "My hosted zone for example.com"
+		},
+		"Name": { "Fn::Join" : ["", [ { "Ref" : "WebsiteDomain" }, "." ]]}
+	  }
+	},
+    "RecordSetGroup": {
+      "Type": "AWS::Route53::RecordSetGroup",
+      "Properties": {
+        "HostedZoneId": { "Ref": "HostedZone" },
+        "RecordSets": [
+          {
+            "Name": { "Fn::Join" : ["", [ { "Ref" : "WebsiteDomain" }, "." ]]},
+            "Type": "A",
+            "ResourceRecords": [
+
+            ],
+            "AliasTarget": {
+              "HostedZoneId": {"Fn::GetAtt" : ["ElasticLoadBalancer", "CanonicalHostedZoneNameID"]},
+              "DNSName": {"Fn::GetAtt" : ["ElasticLoadBalancer", "DNSName"]}
+            }
+          }
+        ]
+      }
+    }
   },
 
   "Outputs" : {
     "URL" : {
+      "Description" : "The URL of the load balancer",
       "Value" :  { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ]}]]}
     }
   }
