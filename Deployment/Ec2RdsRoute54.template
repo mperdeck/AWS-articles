@@ -111,24 +111,37 @@
         "LicenseModel": "license-included",
         "MasterUsername": { "Ref" : "MasterUsername" },
         "MasterUserPassword": { "Ref" : "MasterUserPassword" },
-        "DBSecurityGroups"  : [{ "Ref" : "DbSecurityGroup" } ]
+		
+		
+		"DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
+
+		
+		
+        "DBSecurityGroups"  : [{ "Ref" : "DbSecurityGroup" } ]  @@@@@@@@@@@@@@@@@@@
       },
 	  "DeletionPolicy" : "Snapshot"
     },
-    "DbSecurityGroup": {
-      "Type": "AWS::RDS::DBSecurityGroup",
+	
+	
+	
+    "DBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
       "Properties": {
-        "DBSecurityGroupIngress": [
-			{ "EC2SecurityGroupName": { "Ref": "WebInstanceSecurityGroup"} },
-			{ "EC2SecurityGroupName": { "Ref": "SSMSSecurityGroup"} }
-		],
-        "GroupDescription": "Web server, SSMS Access"
+        "DBSubnetGroupDescription": "default",
+        "SubnetIds": [
+          "subnet-2f1c7858",
+          "subnet-c9064ef3",
+          "subnet-1965c732",
+          "subnet-b3fc79ea"
+        ]
       }
     },
+
     "SSMSSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Enable SSMS only",
+        "VpcId": "vpc-9d6921f8",
         "SecurityGroupIngress" : [ 
 		{
 		  "IpProtocol" : "tcp", 
@@ -138,7 +151,31 @@
 		} ]
       }
     },
-    
+
+	
+	
+	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    "DbSecurityGroup": {
+      "Type": "AWS::RDS::DBSecurityGroup",
+      "Properties": {
+        "DBSecurityGroupIngress": [
+			{ "EC2SecurityGroupName": { "Ref": "WebInstanceSecurityGroup"} },
+			{ "EC2SecurityGroupName": { "Ref": "SSMSSecurityGroup"} }@@@@@@@@@@@ just define IP address of admin
+		],
+        "GroupDescription": "Web server, SSMS Access"
+      }
+    },
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	"InstanceRole":{
          "Type":"AWS::IAM::Role",
          "Properties":{
