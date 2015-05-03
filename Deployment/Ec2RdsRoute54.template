@@ -97,8 +97,67 @@
   },
 
   "Resources": {
-
-       "InstanceRole":{
+    "rdsdbinstance1": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+		"OptionGroupName": { "Ref" : "OptionGroupName" },
+        "AutoMinorVersionUpgrade": "true",
+        "DBInstanceClass": { "Ref" : "DBInstanceClass" },
+        "Port": "1433",
+        "AllocatedStorage": { "Ref" : "AllocatedStorage" },
+        "BackupRetentionPeriod": "7",
+        "Engine": "sqlserver-se",
+        "EngineVersion": "11.00.2100.60.v1",
+        "LicenseModel": "license-included",
+        "MasterUsername": { "Ref" : "MasterUsername" },
+        "MasterUserPassword": { "Ref" : "MasterUserPassword" },
+        "PreferredBackupWindow": "03:25-03:55",
+        "PreferredMaintenanceWindow": "mon:05:26-mon:05:56",
+        "VPCSecurityGroups": [
+          {
+            "Ref": "sgrdslaunchwizard2"
+          }
+        ],
+        "DBSubnetGroupName": {
+          "Ref": "dbsubnetdefault"
+        }
+      }
+    },
+    "dbsubnetdefault": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "default",
+        "SubnetIds": [
+          "subnet-2f1c7858",
+          "subnet-c9064ef3",
+          "subnet-1965c732",
+          "subnet-b3fc79ea"
+        ]
+      }
+    },
+    "sgrdslaunchwizard2": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Created from the RDS Management Console",
+        "VpcId": "vpc-9d6921f8",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "1433",
+            "ToPort": "1433",
+            "CidrIp": "124.171.5.210/32"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    
+	"InstanceRole":{
          "Type":"AWS::IAM::Role",
          "Properties":{
             "AssumeRolePolicyDocument":{
