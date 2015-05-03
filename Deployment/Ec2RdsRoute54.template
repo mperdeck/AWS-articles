@@ -97,7 +97,7 @@
   },
 
   "Resources": {
-    "rdsdbinstance1": {
+    "DbInstance": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
 		"OptionGroupName": { "Ref" : "OptionGroupName" },
@@ -111,19 +111,13 @@
         "LicenseModel": "license-included",
         "MasterUsername": { "Ref" : "MasterUsername" },
         "MasterUserPassword": { "Ref" : "MasterUserPassword" },
-		
-		
 		"DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
-
-		
-		
-        "DBSecurityGroups"  : [{ "Ref" : "DbSecurityGroup" } ]  @@@@@@@@@@@@@@@@@@@
+        "VPCSecurityGroups": [
+          { "Ref": "SSMSSecurityGroup" }
+        ]
       },
 	  "DeletionPolicy" : "Snapshot"
     },
-	
-	
-	
     "DBSubnetGroup": {
       "Type": "AWS::RDS::DBSubnetGroup",
       "Properties": {
@@ -136,7 +130,6 @@
         ]
       }
     },
-
     "SSMSSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
@@ -151,30 +144,6 @@
 		} ]
       }
     },
-
-	
-	
-	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    "DbSecurityGroup": {
-      "Type": "AWS::RDS::DBSecurityGroup",
-      "Properties": {
-        "DBSecurityGroupIngress": [
-			{ "EC2SecurityGroupName": { "Ref": "WebInstanceSecurityGroup"} },
-			{ "EC2SecurityGroupName": { "Ref": "SSMSSecurityGroup"} }@@@@@@@@@@@ just define IP address of admin
-		],
-        "GroupDescription": "Web server, SSMS Access"
-      }
-    },
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	"InstanceRole":{
          "Type":"AWS::IAM::Role",
