@@ -14,13 +14,13 @@
 
     "KeyName" : {
       "Default" : "N-Virginia",
-      "Description" : "The EC2 Key Pair to allow SSH access to the instances",
+      "Description" : "The EC2 Key Pair to allow RDP access to the instances",
       "Type" : "AWS::EC2::KeyPair::KeyName",
       "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
     },
 
-    "SourceCidrForRDP" : {
-      "Description" : "IP Cidr from which you are likely to RDP into the instances. You can add rules later by modifying the created security groups e.g. 54.32.98.160/32",
+    "AdminCidr" : {
+      "Description" : "IP Cidr that is allowed to RDP to EC2 instances and SSMS into RDS instances",
       "Type" : "String",
       "Default" : "124.171.5.210/32",
       "MinLength" : "9",
@@ -111,49 +111,31 @@
         "LicenseModel": "license-included",
         "MasterUsername": { "Ref" : "MasterUsername" },
         "MasterUserPassword": { "Ref" : "MasterUserPassword" },
-        "PreferredBackupWindow": "03:25-03:55",
-        "PreferredMaintenanceWindow": "mon:05:26-mon:05:56",
-        "VPCSecurityGroups": [
-          {
-            "Ref": "sgrdslaunchwizard2"
-          }
-        ],
-        "DBSubnetGroupName": {
-          "Ref": "dbsubnetdefault"
-        }
+        "DBSecurityGroups"  : [{ "Ref" : "DbSecurityGroup" } ]
+      },
+	  "DeletionPolicy" : "Snapshot"
+    },
+    "DbSecurityGroup": {
+      "Type": "AWS::RDS::DBSecurityGroup",
+      "Properties": {
+        "DBSecurityGroupIngress": [
+			{ "EC2SecurityGroupName": { "Ref": "WebInstanceSecurityGroup"} },
+			{ "EC2SecurityGroupName": { "Ref": "SSMSSecurityGroup"} }
+		],
+        "GroupDescription": "Web server, SSMS Access"
       }
     },
-    "dbsubnetdefault": {
-      "Type": "AWS::RDS::DBSubnetGroup",
-      "Properties": {
-        "DBSubnetGroupDescription": "default",
-        "SubnetIds": [
-          "subnet-2f1c7858",
-          "subnet-c9064ef3",
-          "subnet-1965c732",
-          "subnet-b3fc79ea"
-        ]
-      }
-    },
-    "sgrdslaunchwizard2": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Created from the RDS Management Console",
-        "VpcId": "vpc-9d6921f8",
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "1433",
-            "ToPort": "1433",
-            "CidrIp": "124.171.5.210/32"
-          }
-        ],
-        "SecurityGroupEgress": [
-          {
-            "IpProtocol": "-1",
-            "CidrIp": "0.0.0.0/0"
-          }
-        ]
+    "SSMSSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable SSMS only",
+        "SecurityGroupIngress" : [ 
+		{
+		  "IpProtocol" : "tcp", 
+          "FromPort": "1433",
+          "ToPort": "1433",
+		  "CidrIp" : { "Ref" : "AdminCidr" }
+		} ]
       }
     },
     
@@ -260,7 +242,7 @@
       "Properties" : {
         "KeyName" : { "Ref" : "KeyName" },
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2012r2" ]},
-        "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" } ],
+        "SecurityGroups" : [ { "Ref" : "WebInstanceSecurityGroup" } ],
         "InstanceType" : { "Ref" : "InstanceType" },
 		"IamInstanceProfile"  : { "Ref" : "InstanceProfile" },
 		  "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -361,7 +343,7 @@
       }
     },
 
-    "InstanceSecurityGroup" : {
+    "WebInstanceSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Enable RDP, and HTTP from the load balancer only",
@@ -370,7 +352,7 @@
 		  "IpProtocol" : "tcp", 
 		  "FromPort" : "3389", 
 		  "ToPort" : "3389", 
-		  "CidrIp" : { "Ref" : "SourceCidrForRDP" }
+		  "CidrIp" : { "Ref" : "AdminCidr" }
 		},
         {
           "IpProtocol" : "tcp",
@@ -381,6 +363,7 @@
         } ]
       }
     },
+
 	"HostedZone": {
 	  "Type": "AWS::Route53::HostedZone",
 	  "Properties": {
