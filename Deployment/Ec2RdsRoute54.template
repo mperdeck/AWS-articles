@@ -4,14 +4,17 @@
   "Description" : "AWS CloudFormation Sample Template AutoScalingMultiAZWithNotifications: Create a multi-az, load balanced and Auto Scaled sample web site running on an IIS web server. The application is configured to span all Availability Zones in the region and is Auto-Scaled based on the CPU utilization of the web servers.The instances are load balanced with a simple health check against the default web page.",
 
   "Parameters" : {
-    "InstanceType" : {
-      "Description" : "WebServer EC2 instance type",
-      "Type" : "String",
-      "Default" : "t2.micro",
-      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
-      "ConstraintDescription" : "must be a valid EC2 instance type."
+	 "Version" : {
+      "Description" : "Code version to be deployed. This doubles as the key of the zip file with deployed files in the S3 bucket.",
+      "Type" : "String"
     },
-
+	
+	 "WebsiteDomain" : {
+      "Default" : "aspdotnetperformance.org",
+      "Description" : "Domain of the web site, using Route 53.",
+      "Type" : "String"
+    },
+	
     "KeyName" : {
       "Default" : "N-Virginia",
       "Description" : "The EC2 Key Pair to allow RDP access to the instances",
@@ -26,6 +29,33 @@
       "MinLength" : "9",
       "MaxLength" : "18",
       "AllowedPattern" : "^([0-9]+\\.){3}[0-9]+\\/[0-9]+$"
+    },
+
+    "MasterUsername" : {
+      "Description" : "The master user name for the database instance.",
+      "Type" : "String",
+      "Default" : "mperdeck"
+    },
+
+    "MasterUserPassword" : {
+      "Description" : "The master password for the database instance.",
+      "Type" : "String",
+	  "NoEcho" : "true",
+      "Default" : "wiu67!kmdg$oiuqt"
+    },
+	
+	 "DeploymentBucketName" : {
+      "Default" : "mperdeck-releases",
+      "Description" : "Name of bucket containing the zip file with deployed files.",
+      "Type" : "String"
+    },
+	
+    "InstanceType" : {
+      "Description" : "WebServer EC2 instance type",
+      "Type" : "String",
+      "Default" : "t2.micro",
+      "AllowedValues" : [ "t1.micro", "t2.micro", "t2.small", "t2.medium", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
     "DBInstanceClass" : {
@@ -50,34 +80,30 @@
       "Default" : "sqlserver-mirroring"
     },
 
-    "MasterUsername" : {
-      "Description" : "The master user name for the database instance.",
+    "VpcId" : {
       "Type" : "String",
-      "Default" : "mperdeck"
+      "Default" : "vpc-9d6921f8"
     },
 
-    "MasterUserPassword" : {
-      "Description" : "The master password for the database instance.",
+    "VpcSubnetId1" : {
+      "Description" : "Id of subnet in an availability zone in your region.",
       "Type" : "String",
-	  "NoEcho" : "true",
-      "Default" : "Slameer1!"
+      "Default" : "subnet-2f1c7858"
     },
-	
-	 "DeploymentBucketName" : {
-      "Default" : "mperdeck-releases",
-      "Description" : "Name of bucket containing the zip file with deployed files.",
-      "Type" : "String"
+    "VpcSubnetId2" : {
+      "Description" : "Id of subnet in an availability zone in your region.",
+      "Type" : "String",
+      "Default" : "subnet-c9064ef3"
     },
-	
-	 "WebsiteDomain" : {
-      "Default" : "aspdotnetperformance.org",
-      "Description" : "Domain of the web site, using Route 53.",
-      "Type" : "String"
+    "VpcSubnetId3" : {
+      "Description" : "Id of subnet in an availability zone in your region.",
+      "Type" : "String",
+      "Default" : "subnet-1965c732"
     },
-	
-	 "Version" : {
-      "Description" : "Version to be deployed. This doubles as the key of the zip file with deployed files.",
-      "Type" : "String"
+    "VpcSubnetId4" : {
+      "Description" : "Id of subnet in an availability zone in your region.",
+      "Type" : "String",
+      "Default" : "subnet-b3fc79ea"
     }
   },
 
@@ -123,10 +149,10 @@
       "Properties": {
         "DBSubnetGroupDescription": "default",
         "SubnetIds": [
-          "subnet-2f1c7858",
-          "subnet-c9064ef3",
-          "subnet-1965c732",
-          "subnet-b3fc79ea"
+          { "Ref": "VpcSubnetId1" },
+          { "Ref": "VpcSubnetId2" },
+          { "Ref": "VpcSubnetId3" },
+          { "Ref": "VpcSubnetId4" }
         ]
       }
     },
@@ -134,7 +160,7 @@
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Enable SSMS only",
-        "VpcId": "vpc-9d6921f8",
+        "VpcId": { "Ref": "VpcId" },
         "SecurityGroupIngress" : [ 
 		{
 		  "IpProtocol" : "tcp", 
