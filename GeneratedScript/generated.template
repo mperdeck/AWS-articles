@@ -1,0 +1,378 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "vpc9d6921f8": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "172.31.0.0/16",
+        "InstanceTenancy": "default",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true"
+      }
+    },
+    "subnet1965c732": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.48.0/20",
+        "AvailabilityZone": "us-east-1d",
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "subnetb3fc79ea": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.16.0/20",
+        "AvailabilityZone": "us-east-1b",
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "subnetc9064ef3": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.0.0/20",
+        "AvailabilityZone": "us-east-1e",
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "subnet2f1c7858": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.32.0/20",
+        "AvailabilityZone": "us-east-1a",
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "igwcc8d06a9": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+      }
+    },
+    "doptb3e201d6": {
+      "Type": "AWS::EC2::DHCPOptions",
+      "Properties": {
+        "DomainName": "ec2.internal",
+        "DomainNameServers": [
+          "AmazonProvidedDNS"
+        ]
+      }
+    },
+    "acl8f0447ea": {
+      "Type": "AWS::EC2::NetworkAcl",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "rtb364c6953": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "versionapplication2envbVersion5": {
+      "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+      "Properties": {
+        "ApplicationName": "application2",
+        "SourceBundle": {
+          "S3Bucket": "elasticbeanstalk-us-east-1-907733184528",
+          "S3Key": "2015080Kmp-simplesite.zip"
+        }
+      }
+    },
+    "rdsaa1uiur3dqq858w": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "AllocatedStorage": "20",
+        "AllowMajorVersionUpgrade": "false",
+        "AutoMinorVersionUpgrade": "true",
+        "DBInstanceClass": "db.t1.micro",
+        "Port": "1433",
+        "PubliclyAccessible": "true",
+        "StorageType": "standard",
+        "BackupRetentionPeriod": "1",
+        "MasterUsername": "mperdeck",
+        "MasterUserPassword": "MyPassword",
+        "PreferredBackupWindow": "04:34-05:04",
+        "PreferredMaintenanceWindow": "wed:06:46-wed:07:16",
+        "DBName": "MyDatabase",
+        "Engine": "sqlserver-ex",
+        "EngineVersion": "11.00.2100.60.v1",
+        "LicenseModel": "license-included",
+        "DBSubnetGroupName": {
+          "Ref": "dbsubnetdefault"
+        },
+        "VPCSecurityGroups": [
+          {
+            "Ref": "sgrdsawsebe4waaa2s7dzstackawsebrdsdbsecuritygroup1ktcn8z810v94hmlv"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "beanstalk1-env"
+          },
+          {
+            "Key": "elasticbeanstalk:environment-name",
+            "Value": "beanstalk1-env"
+          },
+          {
+            "Key": "Version",
+            "Value": "bean1.0"
+          },
+          {
+            "Key": "elasticbeanstalk:environment-id",
+            "Value": "e-4waaa2s7dz"
+          }
+        ]
+      }
+    },
+    "dbsubnetdefault": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "default",
+        "SubnetIds": [
+          {
+            "Ref": "subnet2f1c7858"
+          },
+          {
+            "Ref": "subnetc9064ef3"
+          },
+          {
+            "Ref": "subnet1965c732"
+          },
+          {
+            "Ref": "subnetb3fc79ea"
+          }
+        ]
+      }
+    },
+    "sgdefault": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "default VPC security group",
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "sgrdsawsebe4waaa2s7dzstackawsebrdsdbsecuritygroup1ktcn8z810v94hmlv": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for RDS DB Security Group awseb-e-4waaa2s7dz-stack-awsebrdsdbsecuritygroup-1ktcn8z810v94",
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        }
+      }
+    },
+    "dbsgawsebe4waaa2s7dzstackawsebrdsdbsecuritygroup1ktcn8z810v94": {
+      "Type": "AWS::RDS::DBSecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable database access to Beanstalk application",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "beanstalk1-env"
+          },
+          {
+            "Key": "elasticbeanstalk:environment-name",
+            "Value": "beanstalk1-env"
+          },
+          {
+            "Key": "Version",
+            "Value": "bean1.0"
+          },
+          {
+            "Key": "elasticbeanstalk:environment-id",
+            "Value": "e-4waaa2s7dz"
+          }
+        ],
+        "DBSecurityGroupIngress": [
+          {
+            "EC2SecurityGroupName": "awseb-e-4waaa2s7dz-stack-awsebsecuritygroup-3d6nn4h0j7yp",
+            "EC2SecurityGroupOwnerId": ""
+          }
+        ]
+      }
+    },
+    "dbsgdefault": {
+      "Type": "AWS::RDS::DBSecurityGroup",
+      "Properties": {
+        "GroupDescription": "default"
+      }
+    },
+    "acl1": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "CidrBlock": "0.0.0.0/0",
+        "Egress": "true",
+        "Protocol": "-1",
+        "RuleAction": "allow",
+        "RuleNumber": "100",
+        "NetworkAclId": {
+          "Ref": "acl8f0447ea"
+        }
+      }
+    },
+    "acl2": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "CidrBlock": "0.0.0.0/0",
+        "Protocol": "-1",
+        "RuleAction": "allow",
+        "RuleNumber": "100",
+        "NetworkAclId": {
+          "Ref": "acl8f0447ea"
+        }
+      }
+    },
+    "subnetacl1": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl8f0447ea"
+        },
+        "SubnetId": {
+          "Ref": "subnetb3fc79ea"
+        }
+      }
+    },
+    "subnetacl2": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl8f0447ea"
+        },
+        "SubnetId": {
+          "Ref": "subnetc9064ef3"
+        }
+      }
+    },
+    "subnetacl3": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl8f0447ea"
+        },
+        "SubnetId": {
+          "Ref": "subnet2f1c7858"
+        }
+      }
+    },
+    "subnetacl4": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl8f0447ea"
+        },
+        "SubnetId": {
+          "Ref": "subnet1965c732"
+        }
+      }
+    },
+    "gw1": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        },
+        "InternetGatewayId": {
+          "Ref": "igwcc8d06a9"
+        }
+      }
+    },
+    "route1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "rtb364c6953"
+        },
+        "GatewayId": {
+          "Ref": "igwcc8d06a9"
+        }
+      },
+      "DependsOn": "gw1"
+    },
+    "dchpassoc1": {
+      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc9d6921f8"
+        },
+        "DhcpOptionsId": {
+          "Ref": "doptb3e201d6"
+        }
+      }
+    },
+    "ingress1": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgdefault"
+        },
+        "IpProtocol": "-1",
+        "SourceSecurityGroupId": {
+          "Ref": "sgdefault"
+        },
+        "SourceSecurityGroupOwnerId": "907733184528"
+      }
+    },
+    "ingress2": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgrdsawsebe4waaa2s7dzstackawsebrdsdbsecuritygroup1ktcn8z810v94hmlv"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "1433",
+        "ToPort": "1433",
+        "SourceSecurityGroupId": "sg-a7712ec3",
+        "SourceSecurityGroupOwnerId": "907733184528"
+      }
+    },
+    "ingress3": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgrdsawsebe4waaa2s7dzstackawsebrdsdbsecuritygroup1ktcn8z810v94hmlv"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "1433",
+        "ToPort": "1433",
+        "CidrIp": "124.171.5.210/32"
+      }
+    },
+    "egress1": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgdefault"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress2": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgrdsawsebe4waaa2s7dzstackawsebrdsdbsecuritygroup1ktcn8z810v94hmlv"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    }
+  },
+  "Description": "hopefully this does work"
+}

@@ -220,7 +220,7 @@ Param(
 
 cd "D:\Dev\AWS-articles\Deployment"
 
-.\publish.ps1 3 teststack4 mperdeck-releases D:\Dev\AWS-articles\Deployment\Ec2RdsRoute54.template D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj
+.\publish.ps1 3 teststack4b mperdeck-releases D:\Dev\AWS-articles\Deployment\Ec2RdsRoute54.template D:\Dev\AWS-articles\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj
 
 
 

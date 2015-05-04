@@ -66,14 +66,6 @@
       "ConstraintDescription" : "must be a valid database server instance type."
     },
 
-    "DBEngine" : {
-      "Description" : "The name of the database engine that the DB instance uses.",
-      "Type" : "String",
-      "Default" : "sqlserver-ex",
-      "AllowedValues" : ["sqlserver-ex","sqlserver-web","sqlserver-se","sqlserver-ee"],
-      "ConstraintDescription" : "must be a valid database engine type."
-    },
-	
     "AllocatedStorage" : {
       "Description" : "The allocated storage size specified in gigabytes (GB).",
       "Type" : "Number",
@@ -83,10 +75,9 @@
     },
 
     "OptionGroupName" : {
-      "Description" : "Set to sqlserver-mirroring to have an option group with mirroring option for a multi az deployment. This does not work with Sql Server Express and Web.",
+      "Description" : "Option group with mirroring option.",
       "Type" : "String",
-      "AllowedValues" : ["","sqlserver-mirroring"],
-      "Default" : ""
+      "Default" : "sqlserver-mirroring"
     },
 
     "VpcId" : {
@@ -141,7 +132,7 @@
         "Port": "1433",
         "AllocatedStorage": { "Ref" : "AllocatedStorage" },
         "BackupRetentionPeriod": "7",
-        "Engine": { "Ref" : "DBEngine" },
+        "Engine": "sqlserver-se",
         "EngineVersion": "11.00.2100.60.v1",
         "LicenseModel": "license-included",
         "MasterUsername": { "Ref" : "MasterUsername" },
