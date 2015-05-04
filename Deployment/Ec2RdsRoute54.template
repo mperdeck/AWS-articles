@@ -169,14 +169,41 @@
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Enable SSMS only",
-        "VpcId": { "Ref": "VpcId" },
-        "SecurityGroupIngress" : [ 
-		{
-		  "IpProtocol" : "tcp", 
-          "FromPort": "1433",
-          "ToPort": "1433",
-		  "CidrIp" : { "Ref" : "AdminCidr" }
-		} ]
+        "VpcId": { "Ref": "VpcId" }
+      }
+    },
+    "ingress2": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "SSMSSecurityGroup"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "1433",
+        "ToPort": "1433",
+        "SourceSecurityGroupId": {"Fn::GetAtt" : ["WebInstanceSecurityGroup", "GroupId"]}
+      }
+    },
+    "ingress3": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "SSMSSecurityGroup"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "1433",
+        "ToPort": "1433",
+        "CidrIp": { "Ref" : "AdminCidr" }
+      }
+    },
+    "egress2": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "SSMSSecurityGroup"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
       }
     },
 	
