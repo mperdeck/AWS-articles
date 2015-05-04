@@ -59,10 +59,10 @@
     },
 
     "DBInstanceClass" : {
-      "Description" : "The name of the compute and memory capacity class of the DB instance.",
+      "Description" : "The name of the compute and memory capacity class of the DB instance. Must be db.m1.small or bigger for SQL Server Standard.",
       "Type" : "String",
-      "Default" : "db.m1.small",
-      "AllowedValues" : ["db.m1.small","db.m1.medium","db.m1.large","db.m1.xlarge","db.m3.medium","db.m3.large","db.m3.xlarge","db.m3.2xlarge","db.r3.large","db.r3.xlarge","db.r3.2xlarge","db.m2.xlarge","db.m2.2xlarge","db.m2.4xlarge"],
+      "Default" : "db.t1.micro",
+      "AllowedValues" : ["db.t1.micro","db.m1.small","db.m1.medium","db.m1.large","db.m1.xlarge","db.m3.medium","db.m3.large","db.m3.xlarge","db.m3.2xlarge","db.r3.large","db.r3.xlarge","db.r3.2xlarge","db.m2.xlarge","db.m2.2xlarge","db.m2.4xlarge"],
       "ConstraintDescription" : "must be a valid database server instance type."
     },
 
@@ -75,11 +75,11 @@
     },
 	
     "AllocatedStorage" : {
-      "Description" : "The allocated storage size specified in gigabytes (GB).",
+      "Description" : "The allocated storage size specified in gigabytes (GB). Must be at least 20GB for Sql Server Express, at least 200GB for Sql Server Standard.",
       "Type" : "Number",
-      "Default" : "200",
-      "MinValue" : "200",
-      "ConstraintDescription" : "Allocated storage must be at least 200GB."
+      "Default" : "20",
+      "MinValue" : "20",
+      "ConstraintDescription" : "Allocated storage must be at least 20GB."
     },
 
     "OptionGroupName" : {
