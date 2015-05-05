@@ -31,13 +31,13 @@
       "AllowedPattern" : "^([0-9]+\\.){3}[0-9]+\\/[0-9]+$"
     },
 
-    "MasterUsername" : {
+    "DbMasterUsername" : {
       "Description" : "The master user name for the database instance.",
       "Type" : "String",
       "Default" : "mperdeck"
     },
 
-    "MasterUserPassword" : {
+    "DbMasterUserPassword" : {
       "Description" : "The master password for the database instance.",
       "Type" : "String",
 	  "NoEcho" : "true",
@@ -74,7 +74,7 @@
       "ConstraintDescription" : "must be a valid database engine type."
     },
 	
-    "AllocatedStorage" : {
+    "DbAllocatedStorage" : {
       "Description" : "The allocated storage size specified in gigabytes (GB). Must be at least 20GB for Sql Server Express, at least 200GB for Sql Server Standard.",
       "Type" : "Number",
       "Default" : "20",
@@ -82,7 +82,7 @@
       "ConstraintDescription" : "Allocated storage must be at least 20GB."
     },
 
-    "OptionGroupName" : {
+    "DbOptionGroupName" : {
       "Description" : "For a multi-az deployment, set this to the name of an option group that has the SQL Server mirroring option. Sql Server Express and Web do not support mirroring and so cannot be used in a multi-az deployment. Set this parameter to empty string for those engines.",
       "Type" : "String",
       "AllowedValues" : ["","sqlserver-mirroring"],
@@ -135,12 +135,12 @@
     "DbInstance": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
-		"OptionGroupName": { "Ref" : "OptionGroupName" },
+		"OptionGroupName": { "Ref" : "DbOptionGroupName" },
         "AllowMajorVersionUpgrade": "false",
         "AutoMinorVersionUpgrade": "true",
         "DBInstanceClass": { "Ref" : "DBInstanceClass" },
         "Port": "1433",
-        "AllocatedStorage": { "Ref" : "AllocatedStorage" },
+        "AllocatedStorage": { "Ref" : "DbAllocatedStorage" },
         "PubliclyAccessible": "true",
         "StorageType": "standard",
         "BackupRetentionPeriod": "7",
@@ -149,8 +149,8 @@
         "LicenseModel": "license-included",
 		"PreferredBackupWindow": "04:34-05:04",
         "PreferredMaintenanceWindow": "wed:06:46-wed:07:16",
-        "MasterUsername": { "Ref" : "MasterUsername" },
-        "MasterUserPassword": { "Ref" : "MasterUserPassword" },
+        "MasterUsername": { "Ref" : "DbMasterUsername" },
+        "MasterUserPassword": { "Ref" : "DbMasterUserPassword" },
 		"DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
         "VPCSecurityGroups": [
           { "Ref": "SSMSSecurityGroup" }
@@ -330,8 +330,8 @@
             "    ForEach-Object { Invoke-Expression ($_.FullName + '",
 			" -version ''", {"Ref" : "Version"}, "''",
 			" -dbServer ''", {"Fn::GetAtt" : ["DbInstance", "Endpoint.Address"]}, "''",
-			" -dbUsername ''", {"Ref" : "MasterUsername"}, "''",
-			" -dbPassword ''", {"Ref" : "MasterUserPassword"}, "''",
+			" -dbUsername ''", {"Ref" : "DbMasterUsername"}, "''",
+			" -dbPassword ''", {"Ref" : "DbMasterUserPassword"}, "''",
 			"') }\n",
 			"Set-ExecutionPolicy $executionPolicy -Scope Process -force\n",
             "# Clean up the deploy directory\n",
