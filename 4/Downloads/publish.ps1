@@ -71,14 +71,6 @@ Function waitfor-stack-status([string]$stackName, [string[]]$stackStatuses)
     Return $stackStatus
 }
 
-# Terminates all EC2 instances that belong to the given stack
-Function terminate-ec2-by-stack([string]$stackName)
-{
-	Get-EC2Instance | select -expandproperty RunningInstance | `
-        where-object { $_.Tags | where-object { $_.Key -eq "aws:cloudformation:stack-name" -and $_.Value -eq $stackName } } | `
-        foreach { Stop-EC2Instance -instance $_.InstanceId -Terminate }
-}
-
 Function exists-stack([string]$stackName)
 {
 	$found = $TRUE
@@ -141,15 +133,6 @@ Function launch-stack([string]$stackName, [string]$version, [string]$bucketName,
 
     $stackStatus = waitfor-stack-status $stackName $finalStackStatuses
     $success = ($successStatuses -contains $stackStatus)
-
-    # If we just did an update, and that update went fine, terminate all ec2 instances
-    # in the stack. The auto scaling group will then create new instances which will have the
-    # new code base.
-    if ($success -and $stackExistedPrior)
-    {
-        Write-Host "Terminating old ec2 instances for stack $stackName, so new ones with the new code will be spun up."
-        terminate-ec2-by-stack $stackName
-    }
 
     Return $success
 }
