@@ -19,6 +19,21 @@ Param(
   [Parameter(Mandatory=$True, HelpMessage="The name of the CloudFormation stack")]
   [string]$stackName,
 
+  [Parameter(Mandatory=$True, HelpMessage="Domain of the web site, using Route 53")]
+  [string]$websiteDomain,
+
+  [Parameter(Mandatory=$True, HelpMessage="The name of the EC2 Key Pair to allow RDP access to the instances")]
+  [string]$keyName,
+
+  [Parameter(Mandatory=$True, HelpMessage="Cidr that is allowed to RDP to EC2 instances and SSMS into RDS instances")]
+  [string]$adminCidr,
+
+  [Parameter(Mandatory=$True, HelpMessage="The master user name for the database instance")]
+  [string]$dbMasterUsername,
+
+  [Parameter(Mandatory=$True, HelpMessage="The master password for the database instance")]
+  [string]$dbMasterUserPassword,
+
   [Parameter(Mandatory=$True, HelpMessage="S3 bucket where the deployment files will be stored")]
   [string]$bucketName,
 
@@ -87,21 +102,32 @@ Function exists-stack([string]$stackName)
 	Return $found
 }
 
+Function create-parameter([string]$key, [string]$value)
+{
+	$p = new-object Amazon.CloudFormation.Model.Parameter    
+	$p.ParameterKey = $key
+	$p.ParameterValue = $value
+
+    Return $p
+}
+
 # $stackName - name of the stack. You can use this function to both update a stack and to create a new one.
 # $version - version of the web site
 # $bucketName - S3 bucket where the deployment files will be stored
 # $templatePath - path of the template file
-Function launch-stack([string]$stackName, [string]$version, [string]$bucketName, [string]$templatePath)
+Function launch-stack([string]$stackName, [string]$version, `
+    [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
+    [string]$bucketName, [string]$templatePath)
 {
-	# parameter DeploymentBucketNameParameter
-	$deploymentBucketNameParameter = new-object Amazon.CloudFormation.Model.Parameter    
-	$deploymentBucketNameParameter.ParameterKey = "DeploymentBucketName"
-	$deploymentBucketNameParameter.ParameterValue = $bucketName
+    $parameters = @( `
+        create-parameter('DeploymentBucketName', $bucketName), `
+        create-parameter('Version', $version), `
+        create-parameter('WebsiteDomain', $websiteDomain), `
+        create-parameter('KeyName', $keyName), `
+        create-parameter('AdminCidr', $adminCidr), `
+        create-parameter('DbMasterUsername', $dbMasterUsername), `
+        create-parameter('DbMasterUserPassword', $dbMasterUserPassword) )
 
-	# parameter Version
-	$versionParameter = new-object Amazon.CloudFormation.Model.Parameter    
-	$versionParameter.ParameterKey = "Version"
-	$versionParameter.ParameterValue = $version
 
 	$template = [system.io.file]::ReadAllText($templatePath)
     $stackExistedPrior = exists-stack $stackName
@@ -112,7 +138,7 @@ Function launch-stack([string]$stackName, [string]$version, [string]$bucketName,
 		Update-CFNStack `
 			-StackName $stackName `
 			-Capability @( "CAPABILITY_IAM" ) `
-			-Parameter @( $deploymentBucketNameParameter, $versionParameter ) `
+			-Parameter $parameters `
 			-TemplateBody $template
 	}
 	else
@@ -121,7 +147,7 @@ Function launch-stack([string]$stackName, [string]$version, [string]$bucketName,
 		New-CFNStack `
 			-StackName $stackName `
 			-Capability @( "CAPABILITY_IAM" ) `
-			-Parameter @( $deploymentBucketNameParameter, $versionParameter ) `
+			-Parameter $parameters `
 			-TemplateBody $template
 	}
 
@@ -145,7 +171,9 @@ Function launch-stack([string]$stackName, [string]$version, [string]$bucketName,
 # $bucketName - S3 bucket where the deployment files will be stored
 #
 # Returns $True if deployment went good, $False otherwise
-Function upload-deployment([string]$version, [string]$stackName, [string]$templatePath, [string]$csProjPath, [string]$bucketName)
+Function upload-deployment([string]$version, [string]$stackName, `
+    [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
+    [string]$templatePath, [string]$csProjPath, [string]$bucketName)
 {
 	$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 	$releaseZip = "$tempDir\Release.zip"
@@ -164,7 +192,7 @@ Function upload-deployment([string]$version, [string]$stackName, [string]$templa
 	    # Upload deployment file to S3 bucket where it will be picked up by CloudFormation template
 	    upload-bucket-object $bucketName $releaseZip "$version.zip"
 
-        $success = launch-stack $stackName $version $bucketName $templatePath
+        $success = launch-stack $stackName $version $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $bucketName $templatePath
         Return $success
     }
     Finally {
@@ -175,7 +203,14 @@ Function upload-deployment([string]$version, [string]$stackName, [string]$templa
 
 set-strictmode -version Latest
 Add-Type -Path "C:\Program Files (x86)\AWS SDK for .NET\bin\Net45\AWSSDK.dll"
-upload-deployment $version $stackName $templatePath $csProjPath $bucketName
+upload-deployment $version $stackName $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $templatePath $csProjPath $bucketName
+
+
+
+
+
+
+
 
 
 
