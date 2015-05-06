@@ -119,15 +119,21 @@ Function launch-stack([string]$stackName, [string]$version, `
     [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
     [string]$bucketName, [string]$templatePath)
 {
-    $parameters = @( `
-        create-parameter('DeploymentBucketName', $bucketName), `
-        create-parameter('Version', $version), `
-        create-parameter('WebsiteDomain', $websiteDomain), `
-        create-parameter('KeyName', $keyName), `
-        create-parameter('AdminCidr', $adminCidr), `
-        create-parameter('DbMasterUsername', $dbMasterUsername), `
-        create-parameter('DbMasterUserPassword', $dbMasterUserPassword) )
+    $vpcId = (Get-EC2Vpc).VpcId
 
+    # comma delimited list of all subnets in the current region
+    $subnets = (Get-EC2Subnet | Select -ExpandProperty SubnetId) -Join ","
+
+    $parameters = @( `
+        (create-parameter 'DeploymentBucketName' $bucketName), `
+        (create-parameter 'Version' $version), `
+        (create-parameter 'WebsiteDomain' $websiteDomain), `
+        (create-parameter 'KeyName' $keyName), `
+        (create-parameter 'AdminCidr' $adminCidr), `
+        (create-parameter 'DbMasterUsername' $dbMasterUsername), `
+        (create-parameter 'DbMasterUserPassword' $dbMasterUserPassword), `
+        (create-parameter 'VpcId' $vpcId), `
+        (create-parameter 'VpcSubnetIds' $subnets) )
 
 	$template = [system.io.file]::ReadAllText($templatePath)
     $stackExistedPrior = exists-stack $stackName

@@ -140,7 +140,7 @@
       "Type": "AWS::RDS::DBSubnetGroup",
       "Properties": {
         "DBSubnetGroupDescription": "default",
-        "SubnetIds": [ { "Ref": "VpcSubnetIds" } ]
+        "SubnetIds": { "Ref": "VpcSubnetIds" }
       }
     },
     "SSMSSecurityGroup" : {
