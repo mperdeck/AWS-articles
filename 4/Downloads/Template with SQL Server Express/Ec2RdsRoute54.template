@@ -10,13 +10,11 @@
     },
 	
 	 "WebsiteDomain" : {
-      "Default" : "aspdotnetperformance.org",
       "Description" : "Domain of the web site, using Route 53.",
       "Type" : "String"
     },
 	
     "KeyName" : {
-      "Default" : "N-Virginia",
       "Description" : "The EC2 Key Pair to allow RDP access to the instances",
       "Type" : "AWS::EC2::KeyPair::KeyName",
       "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
@@ -25,7 +23,6 @@
     "AdminCidr" : {
       "Description" : "IP Cidr that is allowed to RDP to EC2 instances and SSMS into RDS instances",
       "Type" : "String",
-      "Default" : "124.171.5.210/32",
       "MinLength" : "9",
       "MaxLength" : "18",
       "AllowedPattern" : "^([0-9]+\\.){3}[0-9]+\\/[0-9]+$"
@@ -33,19 +30,16 @@
 
     "DbMasterUsername" : {
       "Description" : "The master user name for the database instance.",
-      "Type" : "String",
-      "Default" : "mperdeck"
+      "Type" : "String"
     },
 
     "DbMasterUserPassword" : {
       "Description" : "The master password for the database instance.",
       "Type" : "String",
-	  "NoEcho" : "true",
-      "Default" : "wiu67!kmdg$oiuqt"
+	  "NoEcho" : "true"
     },
 	
 	 "DeploymentBucketName" : {
-      "Default" : "mperdeck-releases",
       "Description" : "Name of bucket containing the zip file with deployed files.",
       "Type" : "String"
     },
@@ -90,29 +84,13 @@
     },
 
     "VpcId" : {
-      "Type" : "String",
-      "Default" : "vpc-9d6921f8"
+      "Description" : "Id of your VPC.",
+      "Type" : "String"
     },
 
-    "VpcSubnetId1" : {
-      "Description" : "Id of subnet in an availability zone in your region.",
-      "Type" : "String",
-      "Default" : "subnet-2f1c7858"
-    },
-    "VpcSubnetId2" : {
-      "Description" : "Id of subnet in an availability zone in your region.",
-      "Type" : "String",
-      "Default" : "subnet-c9064ef3"
-    },
-    "VpcSubnetId3" : {
-      "Description" : "Id of subnet in an availability zone in your region.",
-      "Type" : "String",
-      "Default" : "subnet-1965c732"
-    },
-    "VpcSubnetId4" : {
-      "Description" : "Id of subnet in an availability zone in your region.",
-      "Type" : "String",
-      "Default" : "subnet-b3fc79ea"
+    "VpcSubnetIds" : {
+      "Description" : "Ids of the subnets in your region.",
+      "Type" : "CommaDelimitedList"
     }
   },
 
@@ -162,12 +140,7 @@
       "Type": "AWS::RDS::DBSubnetGroup",
       "Properties": {
         "DBSubnetGroupDescription": "default",
-        "SubnetIds": [
-          { "Ref": "VpcSubnetId1" },
-          { "Ref": "VpcSubnetId2" },
-          { "Ref": "VpcSubnetId3" },
-          { "Ref": "VpcSubnetId4" }
-        ]
+        "SubnetIds": [ { "Ref": "VpcSubnetIds" } ]
       }
     },
     "SSMSSecurityGroup" : {
