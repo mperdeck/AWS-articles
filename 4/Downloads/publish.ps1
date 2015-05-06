@@ -140,11 +140,38 @@ Function launch-stack([string]$stackName, [string]$version, `
 
 	if ($stackExistedPrior)
 	{
+        # Stack policy to prevent updates to Route53 and RDS resources that replace them or delete them.
+        # This to keep the name servers the same and to prevent data loss.
+        $stackPolicy = @"
+        {
+          "Statement" : [
+              {
+                "Effect" : "Deny",
+                "Principal" : "*",
+                "Action" : ["Update:Replace", "Update:Delete"],
+                "Resource" : "*",
+                "Condition" : {
+                  "StringEquals" : {
+                    "ResourceType" : ["AWS::Route53::*", "AWS::RDS::DBInstance"]
+                  }
+                }
+              },
+              {
+                "Effect" : "Allow",
+                "Principal" : "*",
+                "Action" : "Update:*",
+                "Resource" : "*"
+              }
+          ]
+        }
+"@
+
         Write-Host "Updating stack $stackName"
 		Update-CFNStack `
 			-StackName $stackName `
 			-Capability @( "CAPABILITY_IAM" ) `
 			-Parameter $parameters `
+            -StackPolicyBody $stackPolicy `
 			-TemplateBody $template
 	}
 	else
