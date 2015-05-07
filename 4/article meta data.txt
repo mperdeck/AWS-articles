@@ -2,6 +2,10 @@
 title:
 Amazon Web Services part 4 - Cloudformation template for load balanced IIS web site with sql server database
 
+subtitle:
+Cloudformation template that generates a load balanced IIS based web site with SQL Server database, plus PowerShell script to deploy your web site code.
+
+ 
 
 
 

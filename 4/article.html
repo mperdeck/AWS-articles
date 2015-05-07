@@ -1,0 +1,54 @@
+﻿<h2>Introduction</h2>
+<p>
+    This is part 4 of a 
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">series of articles</a>
+     about deploying your site to 
+    <a href="http://aws.amazon.com/" target="_blank">Amazon Web Services</a> (AWS), 
+    Amazon's counterpart to <a href="http://azure.microsoft.com/en-us/" target="_blank">Windows Azure</a>.
+</p>
+<p>
+    In parts 1, 2 and 3, you saw how to deploy a load balanced IIS based web site with a SQL Server database and its own domain name.
+</p>
+<a id="architecture"></a>
+<img src="architecture.png" width="400" />
+
+<p>
+    Those parts showed how to do this using 
+the AWS service
+                <a href="http://aws.amazon.com/elasticbeanstalk/" target="_blank">Elastic Beanstalk</a>. 
+    This allows you to define a configuration with EC2 servers, database server, etc. by completing a series of menus.
+</p>
+<p>
+    This article introduces AWS 
+    <a href="http://aws.amazon.com/cloudformation/" target="_blank">CloudFormation</a>.
+    This service too lets you create servers and deploy code. But instead of completing menus, you express your desired configuration
+    in a text file called a template. 
+</p>
+<p>
+    CloudFormation gives you much more control than Elastic Beanstalk, but there are many more details to get right - and many ways
+    to get it wrong. I found that the learning curve can be quite steep.
+</p>
+<p>
+    The downloads with this article contains a fully working and tested template to configure a load balanced web site with 
+    an 
+    <a href="http://aws.amazon.com/rds/" target="_blank">RDS</a>
+    based
+    SQL Server
+    database and a 
+    <a href="http://aws.amazon.com/route53/" target="_blank">Route 53</a>
+    hosted zone for your domain name.
+You might be able to use this template as a starting point for your own CloudFormation templates.
+</p>
+
+<h2>Why use CloudFormation?</h2>
+<p>
+
+</p>
+
+
+
+
+
+
+
+
