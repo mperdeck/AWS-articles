@@ -22,7 +22,13 @@ the AWS service
     This article introduces AWS 
     <a href="http://aws.amazon.com/cloudformation/" target="_blank">CloudFormation</a>.
     This service too lets you create servers and deploy code. But instead of completing menus, you express your desired configuration
-    in a text file called a template. 
+    in a text file called a template. You then tell CloudFormation to &quot;launch&quot; this template to create a &quot;stack&quot; - AWS 
+    speak for the servers, etc. you specified in the template.
+</p>
+<p>
+    Each stack has a name, such as &quot;Live&quot; or &quot;Test&quot;. To change the server configuration
+    for a stack, you first change the template and then tell CloudFormation to update the stack. It will then
+    migrate your stack to the desired configuration expressed in your new template, with as little disruption as possible.  
 </p>
 <p>
     CloudFormation gives you much more control than Elastic Beanstalk, but there are many more details to get right - and many ways
@@ -42,8 +48,29 @@ You might be able to use this template as a starting point for your own CloudFor
 
 <h2>Why use CloudFormation?</h2>
 <p>
-
+    Why would you express your desired server configuration in a text file and then
+    have 
+    CloudFormation
+    build that configuration for you? Why not launch the servers yourself from the AWS management console?
 </p>
+<ul>
+<li>
+    <b>Repeatable</b> - Having your configuration in a text file makes it trivial to create
+    a new environment with the same configuration. For example, make a carbon copy of your live environment
+    for testing purposed.
+</li>
+<li>
+    <b>Source control</b> - 
+    A text file can easily be stored in your 
+    favorite source control system, such as GIT or TFS. Keep track of changes,
+    roll back to previous versions, etc.
+</li>
+<li>
+    <b>Documentation</b> -
+    A text files makes it easier to figure out what bits and pieces of infrastructure
+    you have lying around.
+</li>
+    </ul>
 
 
 
