@@ -119,6 +119,9 @@ Function launch-stack([string]$stackName, [string]$version, `
     [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
     [string]$bucketName, [string]$templatePath)
 {
+    # Amazon regularly updates the images supplied by them. Get the latest from AWS, don't hard code.
+    $imageId = (Get-EC2ImageByName -Names WINDOWS_2012R2_BASE | Select -ExpandProperty ImageId)
+
     $vpcId = (Get-EC2Vpc).VpcId
 
     # comma delimited list of all subnets in the current region
@@ -132,6 +135,7 @@ Function launch-stack([string]$stackName, [string]$version, `
         (create-parameter 'AdminCidr' $adminCidr), `
         (create-parameter 'DbMasterUsername' $dbMasterUsername), `
         (create-parameter 'DbMasterUserPassword' $dbMasterUserPassword), `
+        (create-parameter 'ImageId' $imageId), `
         (create-parameter 'VpcId' $vpcId), `
         (create-parameter 'VpcSubnetIds' $subnets) )
 
