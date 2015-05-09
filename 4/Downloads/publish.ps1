@@ -44,7 +44,10 @@ Param(
   [string]$csProjPath,
 
   [Parameter(Mandatory=$False, HelpMessage="Option group to be attached to the RDS database. Leave empty if there is no option group.")]
-  [string]$dbOptionGroupName = ""
+  [string]$dbOptionGroupName = "",
+
+  [Parameter(Mandatory=$False, HelpMessage="Path to JSON file with stack policy. Leave empty if there is no stack policy.")]
+  [string]$stackPolicyPath = ""
 )
 
 Function exists-bucket([string]$bucketName)
@@ -120,7 +123,7 @@ Function create-parameter([string]$key, [string]$value)
 # $templatePath - path of the template file
 Function launch-stack([string]$stackName, [string]$version, `
     [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
-    [string]$bucketName, [string]$templatePath, [string]$dbOptionGroupName)
+    [string]$bucketName, [string]$templatePath, [string]$dbOptionGroupName, [string]$stackPolicyPath)
 {
     # Amazon regularly updates the images supplied by them. Get the latest from AWS, don't hard code.
     $imageId = (Get-EC2ImageByName -Names WINDOWS_2012R2_BASE | Select -ExpandProperty ImageId)
@@ -148,31 +151,11 @@ Function launch-stack([string]$stackName, [string]$version, `
 
 	if ($stackExistedPrior)
 	{
-        # Stack policy to prevent updates to Route53 and RDS resources that replace them or delete them.
-        # This to keep the name servers the same and to prevent data loss.
-        $stackPolicy = @"
+        $stackPolicy = ""
+        if ($stackPolicyPath -ne "")
         {
-          "Statement" : [
-              {
-                "Effect" : "Deny",
-                "Principal" : "*",
-                "Action" : ["Update:Replace", "Update:Delete"],
-                "Resource" : "*",
-                "Condition" : {
-                  "StringEquals" : {
-                    "ResourceType" : ["AWS::Route53::*", "AWS::RDS::DBInstance"]
-                  }
-                }
-              },
-              {
-                "Effect" : "Allow",
-                "Principal" : "*",
-                "Action" : "Update:*",
-                "Resource" : "*"
-              }
-          ]
+	        $stackPolicy = [system.io.file]::ReadAllText($stackPolicyPath)
         }
-"@
 
         Write-Host "Updating stack $stackName"
 		Update-CFNStack `
@@ -214,7 +197,7 @@ Function launch-stack([string]$stackName, [string]$version, `
 # Returns $True if deployment went good, $False otherwise
 Function upload-deployment([string]$version, [string]$stackName, `
     [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
-    [string]$templatePath, [string]$csProjPath, [string]$bucketName, [string]$dbOptionGroupName)
+    [string]$templatePath, [string]$csProjPath, [string]$bucketName, [string]$dbOptionGroupName, [string]$stackPolicyPath)
 {
 	$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 	$releaseZip = "$tempDir\Release.zip"
@@ -231,9 +214,9 @@ Function upload-deployment([string]$version, [string]$stackName, `
 	    Initialize-AWSDefaults -ProfileName mycredentials -Region us-east-1
 
 	    # Upload deployment file to S3 bucket where it will be picked up by CloudFormation template
-	    upload-bucket-object $bucketName $releaseZip "$version.zip"
+#####	    upload-bucket-object $bucketName $releaseZip "$version.zip"
 
-        $success = launch-stack $stackName $version $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $bucketName $templatePath $dbOptionGroupName
+        $success = launch-stack $stackName $version $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $bucketName $templatePath $dbOptionGroupName $stackPolicyPath
         Return $success
     }
     Finally {
@@ -244,7 +227,7 @@ Function upload-deployment([string]$version, [string]$stackName, `
 
 set-strictmode -version Latest
 Add-Type -Path "C:\Program Files (x86)\AWS SDK for .NET\bin\Net45\AWSSDK.dll"
-upload-deployment $version $stackName $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $templatePath $csProjPath $bucketName $dbOptionGroupName
+upload-deployment $version $stackName $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $templatePath $csProjPath $bucketName $dbOptionGroupName $stackPolicyPath
 
 
 
