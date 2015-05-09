@@ -6,8 +6,8 @@
 		"Action" : ["Update:Replace", "Update:Delete"],
 		"Resource" : "*",
 		"Condition" : {
-		  "StringLike" : {
-			"ResourceType" : ["AWS::Route53::*", "AWS::RDS::DBInstance"]
+		  "StringEquals" : {
+			"ResourceType" : ["AWS::RDS::DBInstance"]
 		  }
 		}
 	  },
