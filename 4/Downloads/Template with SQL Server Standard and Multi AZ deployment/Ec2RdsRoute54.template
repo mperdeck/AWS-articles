@@ -84,8 +84,7 @@
     "DbOptionGroupName" : {
       "Description" : "For a multi-az deployment, set this to the name of an option group that has the SQL Server mirroring option. Sql Server Express and Web do not support mirroring and so cannot be used in a multi-az deployment. Set this parameter to empty string for those engines.",
       "Type" : "String",
-      "AllowedValues" : ["","sqlserver-mirroring"],
-      "Default" : "sqlserver-mirroring"
+      "Default" : ""
     },
 
     "VpcId" : {
