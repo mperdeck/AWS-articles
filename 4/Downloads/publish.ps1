@@ -41,7 +41,10 @@ Param(
   [string]$templatePath,
 
   [Parameter(Mandatory=$True, HelpMessage="Path to the csproj file of the web site to be deployed")]
-  [string]$csProjPath
+  [string]$csProjPath,
+
+  [Parameter(Mandatory=$False, HelpMessage="Option group to be attached to the RDS database. Leave empty if there is no option group.")]
+  [string]$dbOptionGroupName = ""
 )
 
 Function exists-bucket([string]$bucketName)
@@ -117,7 +120,7 @@ Function create-parameter([string]$key, [string]$value)
 # $templatePath - path of the template file
 Function launch-stack([string]$stackName, [string]$version, `
     [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
-    [string]$bucketName, [string]$templatePath)
+    [string]$bucketName, [string]$templatePath, [string]$dbOptionGroupName)
 {
     # Amazon regularly updates the images supplied by them. Get the latest from AWS, don't hard code.
     $imageId = (Get-EC2ImageByName -Names WINDOWS_2012R2_BASE | Select -ExpandProperty ImageId)
@@ -136,6 +139,7 @@ Function launch-stack([string]$stackName, [string]$version, `
         (create-parameter 'DbMasterUsername' $dbMasterUsername), `
         (create-parameter 'DbMasterUserPassword' $dbMasterUserPassword), `
         (create-parameter 'ImageId' $imageId), `
+        (create-parameter 'DbOptionGroupName' $dbOptionGroupName), `
         (create-parameter 'VpcId' $vpcId), `
         (create-parameter 'VpcSubnetIds' $subnets) )
 
@@ -210,7 +214,7 @@ Function launch-stack([string]$stackName, [string]$version, `
 # Returns $True if deployment went good, $False otherwise
 Function upload-deployment([string]$version, [string]$stackName, `
     [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
-    [string]$templatePath, [string]$csProjPath, [string]$bucketName)
+    [string]$templatePath, [string]$csProjPath, [string]$bucketName, [string]$dbOptionGroupName)
 {
 	$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
 	$releaseZip = "$tempDir\Release.zip"
@@ -229,7 +233,7 @@ Function upload-deployment([string]$version, [string]$stackName, `
 	    # Upload deployment file to S3 bucket where it will be picked up by CloudFormation template
 	    upload-bucket-object $bucketName $releaseZip "$version.zip"
 
-        $success = launch-stack $stackName $version $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $bucketName $templatePath
+        $success = launch-stack $stackName $version $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $bucketName $templatePath $dbOptionGroupName
         Return $success
     }
     Finally {
@@ -240,7 +244,7 @@ Function upload-deployment([string]$version, [string]$stackName, `
 
 set-strictmode -version Latest
 Add-Type -Path "C:\Program Files (x86)\AWS SDK for .NET\bin\Net45\AWSSDK.dll"
-upload-deployment $version $stackName $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $templatePath $csProjPath $bucketName
+upload-deployment $version $stackName $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $templatePath $csProjPath $bucketName $dbOptionGroupName
 
 
 
