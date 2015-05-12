@@ -2,6 +2,7 @@
 <li><a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">Download templates, scripts, sample app</a></li>
 </ul>
 
+<a id="introduction"></a>
 <h2>Introduction</h2>
 <p>
     This is part 4 of a 
@@ -39,6 +40,7 @@ the AWS service
     to get it wrong. I found that the learning curve can be quite steep.
 </p>
 
+<a id="thisarticle"></a>
 <h2>What is in this article</h2>
 <p>
     This article shows how to:
@@ -82,6 +84,7 @@ the AWS service
     </li>
 </ul>
 
+<a id="whycloudformation"></a>
 <h2>Why use CloudFormation?</h2>
 <p>
     Why would you express your desired server configuration in a text file and then
@@ -112,28 +115,156 @@ the AWS service
     the code base of your web site.
 </p>
 
-<h2>Solution Overview</h2>
-
-<h3>Infrastructure goal</h3>
+<a id="infrastructuregoal"></a>
+<h2>Infrastructure goal</h2>
 <p>
     The goal is to deploy a web site that uses a database and that has its own domain. The infrastructure
     is going to look like this:
 </p>
 <img src="cfarchitecture.png" width="500" />
 
+<p>
+    Lets start from the center of the picture:
+</p>
+<ul>
+    <li>
+        <b>Web servers on EC2 instances</b> -
+        The web site will run on one or more <a href="http://aws.amazon.com/ec2/" target="_blank">EC2 instances</a> - virtual machines in the AWS cloud
+        running IIS.
+    </li>
+    <li>
+        <b>SQL Server database server</b> -
+        The web sites access one or more SQL Server databases hosted on an 
+        <a href="http://aws.amazon.com/rds/" target="_blank">RDS</a> (Relational Database Service) instance. 
+        RDS is a fully managed database server as a service with automatic 
+        backups, etc. 
+    </li>
+    <li>
+        <b>SQL Server failover replica</b> -
+        To achieve high availability, you can have a hot standby that automatically takes over when the database server fails.
+        This solution is probably too expensive for a personal site, but very reasonably priced for a company.
+        @@@@@@@ pricing details @@@@@@@@
+
+        In the downloads you'll find templates for both the solution with replica and the solution without replica. 
+    </li>
+    <li>
+        <b>Auto Scaling group</b> -
+        The <a href="http://aws.amazon.com/autoscaling/" target="_blank">Auto Scaling group</a> starts more EC2 instances when the existing
+        instances get overloaded, and terminates instances when there is little to do. 
+    </li>
+    <li>
+        <b>Code package stored in S3 bucket</b> -
+        Seeing that the Auto Scaling group starts and terminates EC2 instances at will, there is no point in deploying software to
+        individual servers. Instead, a package file with all the code is stored in an 
+        <a href="http://aws.amazon.com/s3/" target="_blank">S3</a> bucket (the S3 service lets you store files in the cloud).
+        When the Auto Scaling group starts a new EC2 instance, it retrieves the package from the S3 bucket and installs it on the new instance. 
+    </li>
+    <li>
+        <b>Load Balancer</b> -
+        The <a href="http://aws.amazon.com/elasticloadbalancing/" target="_blank">ELB</a> (Elastic Load Balancer)
+        receives web requests from the Internet and parcels them out to the available web servers.
+    </li>
+    <li>
+        <b>DNS Name Servers</b> -
+        To translate your domain name to the IP address of the load balancer,
+        we'll use the  
+        <a href="http://aws.amazon.com/route53/" target="_blank">Route 53</a> service
+        to provide the required name servers.
+        You will have to manually update the settings of your domain at your registrar
+        so it uses these new name servers. This is a one off.
+    </li>
+</ul>
+
+<a id="solutioncomponents"></a>
+<h2>Solution Components</h2>
+<p>
+    Lets have a look at the bits of code that will create all this.
+    These are all in the 
+    <a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">downloads</a>.
+Detailed installation instructions are in the 
+    <a href="#installation">next section</a>.
+</p>
+
+<ul>
+    <li>
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+            target="_blank">CloudFormation template</a> that describes in detail all the bits of infrastructure we're after.
+        This template spins up a SQL Server Express database server without failover replica.
+        <p />
+    </li>
+    <li>
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
+            target="_blank">CloudFormation template</a> that 
+        spins up a SQL Server Standard Edition database server with failover replica.
+        <p />
+    </li>
+    <li>
+        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4/Downloads/SimpleSiteWithDb" target="_blank">Very simple sample web site</a>
+        that uses a database. You may want to use this to experiment before moving to something more complicated.
+        <p />
+    </li>
+    <li>
+        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4/Downloads/SimpleSiteWithDb" target="_blank">Very simple sample web site</a>
+        that uses a database. You may want to use this to experiment before moving to something more complicated.
+        <p />
+    </li>
+    <li>
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Deploy.ps1" target="_blank"
+            >Deploy.ps1</a> PowerShell script. Sits in the root directory of the web site. Is executed after the Auto Scaling group
+        has placed your web site code on a newly created web server. Responsible for starting IIS, etc. When you decide to deploy some other
+        web site, be sure to copy over this PowerShell script to its root directory.
+        <p />
+    </li>
+   <li>
+       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1">Publish.ps1</a>
+       PowerShell script that packages up your web site code, stores it in the S3 bucket and calls the CloudFormation service
+       to deploy the infrastructure. Also used to update an existing stack. 
+        <p />
+   </li>
+   <li>
+       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/stackpolicy.txt">Stack policy</a>
+       that determines what servers can be replaced during an update.
+       When you update your stack, then some changes may involve CloudFormation terminating a server and starting a new
+       one with the new configuration. That's ok for a web server, but not for a database server where you'd lose all your data
+       (<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html" target="_blank">more about stack policies</a>).
+        <p />
+   </li>
+   <li>
+       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/user%20policy.txt">User policy</a>
+       that provides the Publish.ps1 script all the permissions it needs to spin up all the infrastructure.
+   </li>
+</ul>
 
 
 
 
 
-
-
-
-
-
-
-
+<a id="installation"></a>
 <h2>Detailed installation steps</h2>
+
+<p>
+    First some preliminaries:
+</p>
+
+<ol>
+    <li>
+        <b>AWS Account</b> - I'm assuming you have an AWS account 
+        (<a href="http://aws.amazon.com/free/" target="_blank">get one</a>),
+        and that you have a key pair
+        (<a href="http://www.codeproject.com/Articles/889059/Amazon-Web-Services-part-How-to-deploy-a-load-bala#keypair" target="_blank">get one</a>).
+    </li>
+    <li>
+        <b>Download</b> all the 
+        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">components</a>
+         to a directory on your computer.
+        It may be easiest to simply 
+        <a href="https://github.com/mperdeck/AWS-articles" target="_blank">download the entire Github project</a>
+         with all the articles in this series and then grab the components.
+    </li>
+
+
+
+</ol>
 
 
 

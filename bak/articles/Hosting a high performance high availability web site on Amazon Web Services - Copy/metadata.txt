@@ -1,8 +1,0 @@
-
-Hosting a high performance high availability web site on Amazon Web Services
-
-How to quickly create a load balanced, auto scaled web site with a SQL Server database with a standby replica and automatic failover
-
-
-
-
