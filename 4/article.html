@@ -1,4 +1,8 @@
-﻿<h2>Introduction</h2>
+﻿<ul class="download">
+<li><a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">Download templates, scripts, sample app</a></li>
+</ul>
+
+<h2>Introduction</h2>
 <p>
     This is part 4 of a 
     <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">series of articles</a>
@@ -47,11 +51,14 @@ the AWS service
         And then deploy the code of an ASP.NET web site;
     </li>
     <li>
+        Update the web.config of the site with the server name and login details of the RDS database;
+    </li>
+    <li>
         Get IIS, etc. started on the web servers so the site is up and running;
     </li>
-<li>
-    All fully hands off, by running a single PowerShell script.
-</li>
+    <li>
+        All fully hands off, by running a single PowerShell script.
+    </li>
 </ul>
 <p>
     After you've deployed your servers and web sites, you can use the same PowerShell script to update your configuration:
@@ -106,6 +113,27 @@ the AWS service
 </p>
 
 <h2>Solution Overview</h2>
+
+<h3>Infrastructure goal</h3>
+<p>
+    The goal is to deploy a web site that uses a database and that has its own domain. The infrastructure
+    is going to look like this:
+</p>
+<img src="cfarchitecture.png" width="500" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2>Detailed installation steps</h2>
 
 
 
