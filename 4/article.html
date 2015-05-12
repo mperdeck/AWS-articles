@@ -34,17 +34,46 @@ the AWS service
     CloudFormation gives you much more control than Elastic Beanstalk, but there are many more details to get right - and many ways
     to get it wrong. I found that the learning curve can be quite steep.
 </p>
+
+<h2>What is in this article</h2>
 <p>
-    The downloads with this article contains a fully working and tested template to configure a load balanced web site with 
-    an 
-    <a href="http://aws.amazon.com/rds/" target="_blank">RDS</a>
-    based
-    SQL Server
-    database and a 
-    <a href="http://aws.amazon.com/route53/" target="_blank">Route 53</a>
-    hosted zone for your domain name.
-You might be able to use this template as a starting point for your own CloudFormation templates.
+    This article shows how to:
 </p>
+<ul>
+    <li>
+        Deploy all web and database servers and other infrastructure, as specified in a CloudFormation template (a text file);
+    </li>
+    <li>
+        And then deploy the code of an ASP.NET web site;
+    </li>
+    <li>
+        Get IIS, etc. started on the web servers so the site is up and running;
+    </li>
+<li>
+    All fully hands off, by running a single PowerShell script.
+</li>
+</ul>
+<p>
+    After you've deployed your servers and web sites, you can use the same PowerShell script to update your configuration:
+</p>
+<ul>
+    <li>
+        If you changed your CloudFormation template, for example to add or remove servers,
+        all required changes will be made automatically with minimal disruption;
+    </li>
+    <li>
+        If you created a new version of your web site code, the web servers will be upgraded automatically:
+        <ul>
+            <li>
+        Rather than taking all servers off line, the servers are upgraded one by one to minimize disruption.
+            </li>
+            <li>
+        Instead of upgrading servers in place, new servers are created running the new software and servers running the old software 
+        are terminated. This ensures your servers are all in the same known state after an upgrade. 
+            </li>
+        </ul>
+    </li>
+</ul>
 
 <h2>Why use CloudFormation?</h2>
 <p>
