@@ -175,6 +175,13 @@ the AWS service
     </li>
 </ul>
 
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+web.config placeholders
+
+
+
+
 <a id="solutioncomponents"></a>
 <h2>Solution Components</h2>
 <p>
@@ -211,13 +218,13 @@ Detailed installation instructions are in the
         <p />
     </li>
    <li>
-       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1">Publish.ps1</a>
+       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
        PowerShell script that packages up your web site code, stores it in the S3 bucket and calls the CloudFormation service
        to deploy the infrastructure. Also used to update an existing stack. 
         <p />
    </li>
    <li>
-       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/stackpolicy.txt">Stack policy</a>
+       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/stackpolicy.txt" target="_blank">Stack policy</a>
        that determines what servers can be replaced during an update.
        When you update your stack, then some changes may involve CloudFormation terminating a server and starting a new
        one with the new configuration. That's ok for a web server, but not for a database server where you'd lose all your data
@@ -225,7 +232,7 @@ Detailed installation instructions are in the
         <p />
    </li>
    <li>
-       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/user%20policy.txt">User policy</a>
+       <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/user%20policy.txt" target="_blank">User policy</a>
        that provides the Publish.ps1 script all the permissions it needs to spin up all the infrastructure.
    </li>
 </ul>
@@ -285,7 +292,7 @@ You then attach that policy to the user.
     </li>
     <li>
         Open the
-        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/user%20policy.txt">user policy</a> file
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/user%20policy.txt" target="_blank">user policy</a> file
         you just downloaded and copy and paste its content to the <i>Policy Document</i>. You'll see that a policy is simply a JSON object.
     </li>
     <li>
@@ -312,7 +319,7 @@ Click <i>Users</i>;
     </li>
 </ol>
 
-<h3>4. Store credentials in credentials store</h3>
+<h3><a id="credentialsstore"></a>4. Store credentials in credentials store</h3>
 <p>
     When you run an AWS PowerShell command, you have to specify your credentials.
     You could pass your credentials to each command, but that means your credentials are exposed in your PowerShell scripts.
@@ -343,6 +350,7 @@ Click <i>Users</i>;
 </p>
 <pre>Set-AWSCredentials -ProfileName &lt;store name&gt; </pre>
 
+<a id="optiongroup"></a>
 <h3>5. Create RDS option group to switch on SQL Server mirroring</h3>
 
 <p>
@@ -404,6 +412,167 @@ Click <i>Users</i>;
     </li>
 </ol>
 
+<h3>6. Run Publish.ps1 script</h3>
+<p>
+    With the preliminaries done, you can now run the 
+    <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
+    script to spin up all the infrastructure
+    and deploy the web site.
+</p>
+<p>
+
+    @@@@@@@@@@@@@@@@
+    start times (50min for fail over!)
+
+    @@@@@@@@@@@@@@@@@@@
+    pricing
+</p>
+
+
+
+<p>
+    Usage of the Publish.ps1 script:
+</p>
+<pre>.\publish.ps1 -version &lt;code version&gt; -stackName &lt;stack name&gt; -websiteDomain &lt;web site domain&gt; -keyName &lt;key name&gt; 
+    -credentialsStoreName &lt;credential store name&gt; -adminCidr &lt;admin cidr&gt; -dbMasterUsername &lt;database username&gt; 
+    -dbMasterUserPassword &lt;database password&gt; -bucketName &lt;S3 bucket to store code&gt; -templatePath &lt;template file&gt; 
+    -csProjPath &lt;.csproj file of your web site&gt; -dbOptionGroupName &lt;option group name&gt; -stackPolicyPath &lt;file with stack policy&gt</pre>
+
+<dl>
+  <dt>version</dt>
+  <dd>
+      Version of the code you're deploying. For example &quot;2.1.0&quot;. Each time you deploy a new version of your code,
+      use a new version. The version doubles as the name of the code package in the S3 bucket, so make sure it is unique.
+  </dd>
+
+  <dt>stackName</dt>
+  <dd>
+      The set of servers, etc. you create with a template is called a stack. You can create a different set of servers
+      by passing in a different stack name. For example, you could create a stack &quot;Test&quot; and another stack called
+      &quot;Live&quot;.
+  </dd>
+
+  <dt>websiteDomain</dt>
+  <dd>
+      Domain of the web site. For example, &quot;mydomain.com&quot; for your Live stack, or &quot;test-domain.com&quot; for your Test stack.
+  </dd>
+
+  <dt>keyName</dt>
+  <dd>
+      Name of the key pair that you'll use to log into your EC2 instances. Remember that key pairs are tied to a region.
+      To find a key pair name, click <i>Services</i> | <i>Key Pairs</i>.
+  </dd>
+
+  <dt>credentialsStoreName</dt>
+  <dd>
+      Name of the credentials store where you stored your credentials 
+      <a href="#credentialsstore">earlier</a>.
+  </dd>
+
+  <dt>adminCidr</dt>
+  <dd>
+      You don't want everybody in the world to be able to try and log into your EC2 instances
+      or database servers via SSMS.
+      Here you pass the
+      <a href="http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" target="_blank">CIDR</a>
+      from which someone can log in. Typically, that would be the CIDR of your own machine
+      (<a href="http://www.findmyip.org/" target="_blank">Your IP address</a> | 
+      <a href="http://www.ipaddressguide.com/cidr#range" target="_blank">Convert IP to CIDR</a>).
+  </dd>
+
+  <dt>dbMasterUsername</dt>
+  <dt>dbMasterUserPassword</dt>
+  <dd>
+      RDS only supports SQL Server Authentication. These are the username and password that will be able
+      to access your new database server via SSMS, and that will be inserted into your web.config.
+  </dd>
+
+  <dt>bucketName</dt>
+  <dd>
+      S3 bucket where the code packages will be stored. This name must be unique across all S3 buckets
+      hosted by AWS. To make sure a given S3 bucket name is available, create the S3 bucket yourself: click<i>Services</i> | <i>S3</i>.
+  </dd>
+
+  <dt>templatePath</dt>
+  <dd>
+      Path to the template file. 
+      @@@@@@@@@@@@@ use .... or ....
+
+  </dd>
+
+  <dt>csProjPath</dt>
+  <dd>
+      Path of the .csproj file of the web site you're deploying. The publish.ps1 script will build the site in release mode,
+      package up the code and store the package in the S3 bucket.
+  </dd>
+
+  <dt>dbOptionGroupName</dt>
+  <dd>
+      Name of the option group you created 
+      <a href="#optiongroup">earlier</a>. Only use this if you're creating a database server with failover.
+      The template that creates a database server without failover  @@@@@@@@@@@@@
+      uses SQL Server Express which doesn't support mirroring. If you try to use mirroring with SQL Server Express,
+      your stack creationg will fail. 
+  </dd>
+
+  <dt>stackPolicyPath</dt>
+  <dd>
+@@@@@@@@@@@@@@@@@@@
+
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+  <dt></dt>
+  <dd>
+  </dd>
+
+</dl>
+
+
+<h3>7. Set nameservers</h3>
+
+@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+<h2>Implementation notes</h2>
+
+@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
