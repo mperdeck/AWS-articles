@@ -214,7 +214,7 @@ Function upload-deployment([string]$version, [string]$stackName, `
 	    Initialize-AWSDefaults -ProfileName mycredentials -Region us-east-1
 
 	    # Upload deployment file to S3 bucket where it will be picked up by CloudFormation template
-#####	    upload-bucket-object $bucketName $releaseZip "$version.zip"
+	    upload-bucket-object $bucketName $releaseZip "$version.zip"
 
         $success = launch-stack $stackName $version $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $bucketName $templatePath $dbOptionGroupName $stackPolicyPath
         Return $success
