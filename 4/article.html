@@ -317,7 +317,39 @@ Click <i>Users</i>;
     </li>
 </ol>
 
-<h3>4. Set user policy</h3>
+<h3>4. Store credentials in credentials store</h3>
+<p>
+    When you run an AWS PowerShell command, you have to specify your credentials.
+    You could pass your credentials to each command, but that means your credentials are exposed in your PowerShell scripts.
+</p>
+<p>
+    A better way is to store your credentials in a 
+    <a href="http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html" target="_blank">credentials store</a>.
+    This is file stored on your machine. You give that credentials store a name. Inside your script, you can then specify that name
+    to get all PowerShell commands to use your credentials.
+</p>
+
+<p>
+    To make this work, you need the access key and secret key of the user that will run your Publish.ps1 script
+    (<a href="http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html" target="_blank">how to get these</a>).
+</p>
+<p>
+    You also need to think of a name for your new credentials store. Maybe something like &quot;mycredentials&quot;.
+</p>
+<p>
+    Now open a PowerShell command window and enter:
+</p>
+<pre>Set-AWSCredentials -AccessKey &lt;acess key&gt; -SecretKey &lt;secret key&gt; -StoreAs &lt;store name&gt;</pre>
+
+<p>
+    If you have a look at the 
+    <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1">Publish.ps1</a>
+    script, it uses this line to make the credentials available to the PowerShell commands in the current session:
+</p>
+<pre>Set-AWSCredentials -ProfileName &lt;store name&gt; </pre>
+
+
+
 
 
 
