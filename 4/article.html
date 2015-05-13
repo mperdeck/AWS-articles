@@ -242,32 +242,82 @@ Detailed installation instructions are in the
 <a id="installation"></a>
 <h2>Detailed installation steps</h2>
 
+<h3>1. AWS Account</h3>
 <p>
-    First some preliminaries:
-</p>
-
-<ol>
-    <li>
-        <b>AWS Account</b> - I'm assuming you have an AWS account 
+I'm assuming you have an AWS account 
         (<a href="http://aws.amazon.com/free/" target="_blank">get one</a>),
         and that you have a key pair
         (<a href="http://www.codeproject.com/Articles/889059/Amazon-Web-Services-part-How-to-deploy-a-load-bala#keypair" target="_blank">get one</a>).
-    </li>
-    <li>
-        <b>Download</b> all the 
+    </p>
+<h3>2. Download</h3>
+<p>
+Download all the 
         <a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">components</a>
          to a directory on your computer.
         It may be easiest to simply 
         <a href="https://github.com/mperdeck/AWS-articles" target="_blank">download the entire Github project</a>
          with all the articles in this series and then grab the components.
+
+</p>
+
+<h3>3. Set user policy</h3>
+<p>
+The user (probably yourself) that will run the Publish.ps1 script
+        needs to have all the permissions required to spin up all the different infrastructure elements.
+</p>
+<p>
+    You express these permissions in the form of an
+    <a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/PoliciesOverview.html" target="_blank">IAM policy</a>.
+You then attach that policy to the user.
+</p>
+<p>
+    First create the policy:
+</p>
+
+<ol>
+    <li>
+        Sign into the <a href="aws.amazon.com" target="_blank">AWS Console</a>;
     </li>
     <li>
-        <b>Set user policy</b>
-
+        Click <i>Services</i> (top of the screen) | <i>IAM</i> | <i>Policies</i> | <i>Create Policy</i>;
     </li>
-
-
+    <li>
+        Click <i>Select</i> for <i>Create your own policy</i>;
+    </li>
+    <li>
+        Make up a nice name for your new policy, such as &quot;Publish-CloudFormation-Stack&quot;. 
+        Whatever name you choose, write it down somewhere.
+    </li>
+    <li>
+        Open the
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/user%20policy.txt">user policy</a> file
+        you just downloaded and copy and paste its content to the <i>Policy Document</i>. You'll see that a policy is simply a JSON object.
+    </li>
+    <li>
+        Click <i>Create Policy</i>;
+    </li>
 </ol>
+
+<p>
+    Then attach your new policy to the user:
+</p>
+
+<ol>
+    <li>
+Click <i>Users</i>;
+    </li>
+<li>
+    Click the user that will be running the Publish.ps1 script;
+</li>
+    <li>
+        Click <i>Attach Policy</i>;
+    </li>
+    <li>
+        Enter the policy you just created in the filter. Select your policy. Click <i>Attach Policy</i>; 
+    </li>
+</ol>
+
+<h3>4. Set user policy</h3>
 
 
 
