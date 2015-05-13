@@ -204,11 +204,6 @@ Detailed installation instructions are in the
         <p />
     </li>
     <li>
-        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4/Downloads/SimpleSiteWithDb" target="_blank">Very simple sample web site</a>
-        that uses a database. You may want to use this to experiment before moving to something more complicated.
-        <p />
-    </li>
-    <li>
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Deploy.ps1" target="_blank"
             >Deploy.ps1</a> PowerShell script. Sits in the root directory of the web site. Is executed after the Auto Scaling group
         has placed your web site code on a newly created web server. Responsible for starting IIS, etc. When you decide to deploy some other
@@ -348,7 +343,66 @@ Click <i>Users</i>;
 </p>
 <pre>Set-AWSCredentials -ProfileName &lt;store name&gt; </pre>
 
+<h3>5. Create RDS option group to switch on SQL Server mirroring</h3>
 
+<p>
+    You only need to do this if you want your SQL Server database server to have automatic fail over
+    to a hot standby.
+</p>
+<p>
+    AWS refers to this as a 
+    <a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">Multi-AZ deployment</a>
+    (<a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html" target="_blank">more details</a>).
+    It is based on the 
+    <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring</a>
+    feature, available in 
+    <a href="https://msdn.microsoft.com/en-us/library/cc645993.aspx" target="_blank">SQL Server Standard Edition</a>
+    and higher (but not SQL Server Express or SQL Server Web).
+</p>
+<p>
+    To switch on mirroring,
+    you need to associate an 
+    <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.SQLServer.Options.html#Appendix.SQLServer.Options.Mirroring" target="_blank">option group</a>
+     that has the mirroring option enabled
+    with your SQL Server database server.
+</p>
+<p>
+    The Publish.ps1 script takes care of attaching the option group.
+    And it would have been natural to specify the option group along with all the other infrastructure 
+    in the CloudFormation template. However, oddly, CloudFormation doesn't let you create option groups.
+    You'll have to create one manually once off.
+</p>
+<p>
+    To create the option group:
+</p>
+<ol>
+    <li>
+        In the AWS console, click <i>Services</i> | <i>RDS</i> | <i>Option Groups</i> | <i>Create Group</i>;
+    </li>
+<li>
+    Fill in a name and description. Write down the name, you'll need it later on;
+</li>
+    <li>
+        Set <i>Engine</i> to <i>sqlserver-se</i> (Standard Edition) or <i>sqlserver-ee</i> (Enterprise Edition);
+    </li>
+    <li>
+        Set <i>Major Engine Version</i> to version 11 (which is the same as the <i>EngineVersion</i> specified in the
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
+            target="_blank">CloudFormation template</a>);
+    </li>
+    <li>
+        Click <i>Create</i>. This creates your option group and takes you back to the option groups list;
+    </li>
+    <li>
+        Select your new option group;
+    </li>
+    <li>
+        Click <i>Add Option</i> (near top of the page);
+    </li>
+    <li>
+        <i>Mirroring</i> is the only option. You probably want to set <i>Apply Immediately</i> to <i>Yes</i>. Click <i>Add Option</i>.
+    </li>
+</ol>
 
 
 
