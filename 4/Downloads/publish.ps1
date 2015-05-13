@@ -25,6 +25,9 @@ Param(
   [Parameter(Mandatory=$True, HelpMessage="The name of the EC2 Key Pair to allow RDP access to the instances")]
   [string]$keyName,
 
+  [Parameter(Mandatory=$True, HelpMessage="The name of the credentials store where you stored your access key and secret key")]
+  [string]$credentialsStoreName,
+
   [Parameter(Mandatory=$True, HelpMessage="Cidr that is allowed to RDP to EC2 instances and SSMS into RDS instances")]
   [string]$adminCidr,
 
@@ -196,7 +199,7 @@ Function launch-stack([string]$stackName, [string]$version, `
 #
 # Returns $True if deployment went good, $False otherwise
 Function upload-deployment([string]$version, [string]$stackName, `
-    [string]$websiteDomain, [string]$keyName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
+    [string]$websiteDomain, [string]$keyName, [string]$credentialsStoreName, [string]$adminCidr, [string]$dbMasterUsername, [string]$dbMasterUserPassword, `
     [string]$templatePath, [string]$csProjPath, [string]$bucketName, [string]$dbOptionGroupName, [string]$stackPolicyPath)
 {
 	$tempDir = $env:temp + '\' + [system.guid]::newguid().tostring()
@@ -209,9 +212,10 @@ Function upload-deployment([string]$version, [string]$stackName, `
     if (! $?) { Return $False }
 
     Try {
-	    # Specify that commands in this script will use credentials from credential store "mycredentials" and apply to us-east-1
+	    # Specify that commands in this script will use credentials from credential store whose name is passed in via 
+        # parameter credentialsStoreName
 	    # See http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html
-	    Initialize-AWSDefaults -ProfileName mycredentials -Region us-east-1
+	    Set-AWSCredentials -ProfileName $credentialsStoreName
 
 	    # Upload deployment file to S3 bucket where it will be picked up by CloudFormation template
 	    upload-bucket-object $bucketName $releaseZip "$version.zip"
@@ -227,7 +231,7 @@ Function upload-deployment([string]$version, [string]$stackName, `
 
 set-strictmode -version Latest
 Add-Type -Path "C:\Program Files (x86)\AWS SDK for .NET\bin\Net45\AWSSDK.dll"
-upload-deployment $version $stackName $websiteDomain $keyName $adminCidr $dbMasterUsername $dbMasterUserPassword $templatePath $csProjPath $bucketName $dbOptionGroupName $stackPolicyPath
+upload-deployment $version $stackName $websiteDomain $keyName $credentialsStoreName $adminCidr $dbMasterUsername $dbMasterUserPassword $templatePath $csProjPath $bucketName $dbOptionGroupName $stackPolicyPath
 
 
 
