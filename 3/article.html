@@ -1,4 +1,5 @@
 
+<a id="introduction"></a>
 <h2>Introduction</h2>
 <p>
     This is part 3 of a series of articles about deploying your site to 
@@ -26,6 +27,7 @@ This is because your domain will actually point at the load balancer, which take
     distributes them to the web servers.
 </p>
 
+<a id="domainnamesystem"></a>
 <h2>About the domain name system</h2>
 <p>
     The objective here is that if someone enters your domain in their browser, the browser requests a page 
@@ -151,6 +153,7 @@ Who controls
 
 
 
+<a id="route53"></a>
 <h2>Your own name server with Route 53</h2>
 <p>
     What this all means is that in order to point 
@@ -168,12 +171,14 @@ Who controls
     for DNS servers.
 </p>
 
+<a id="route53costs"></a>
 <h2>Costs</h2>
 <p>
     Route 53 is cheap but not free
     (<a href="http://aws.amazon.com/route53/pricing/" target="_blank">pricing</a>).
 </p>
 
+<a id="pointdomaintolb"></a>
 <h2>Point your domain to your load balancer</h2>
 <p>
     The following assumes you already have a domain registered with a registrar such as GoDaddy.
