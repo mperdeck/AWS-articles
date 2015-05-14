@@ -165,6 +165,7 @@ the AWS service
         receives web requests from the Internet and parcels them out to the available web servers.
     </li>
     <li>
+        <a id="infrastructuregoal-route53"></a>
         <b>DNS Name Servers</b> -
         To translate your domain name to the IP address of the load balancer,
         we'll use the  
@@ -538,14 +539,27 @@ Click <i>Users</i>;
 
 <h3>7. Set nameservers</h3>
 
-@@@@@@@@@@@@@@@@@@@@@@@
+    <p>
+        After you've created your stack, you need to change the configuration of your
+        domain name so it uses your 
+        <a href="#infrastructuregoal-route53">new Route53 name servers</a>.
+    </p>
+    <p>
+        Part 3 of this series described how to do that
+        <a href="http://www.codeproject.com/Articles/891202/Amazon-Web-Services-part-How-to-point-your-domain#pointdomaintolb" target="_blank">here</a>.
+    </p>
 
 <h3>8. Copy data and schema from old database</h3>
 
-@@@@@@@@@@@@@@@@@@@@@@@
-
-
-
+    <p>
+        If you have an existing database, you'll want to copy its schema and data to your new RDS database.
+        Part 2 of this series described how to do that 
+        <a href="http://www.codeproject.com/Articles/889910/Amazon-Web-Services-part-Adding-a-database-to-your#copyschemaanddata" target="_blank">here</a>.
+    </p>
+    <p>
+        Unless you completely delete your stack,
+        this needs to be done only once after the initial creation of your stack.
+    </p>
 
 <h2>Implementation notes</h2>
 
