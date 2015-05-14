@@ -193,7 +193,7 @@ Detailed installation instructions are in the
 </p>
 
 <ul>
-    <li>
+    <li><a id="solutioncomponents-template-nofailover"></a>
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
             target="_blank">CloudFormation template</a> that describes in detail all the bits of infrastructure we're after.
         This template spins up a SQL Server Express database server without failover replica.
@@ -224,6 +224,7 @@ Detailed installation instructions are in the
         <p />
    </li>
    <li>
+       <a id="solutioncomponents-stackpolicy"></a>
        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/stackpolicy.txt" target="_blank">Stack policy</a>
        that determines what servers can be replaced during an update.
        When you update your stack, then some changes may involve CloudFormation terminating a server and starting a new
@@ -495,78 +496,54 @@ Click <i>Users</i>;
 
   <dt>templatePath</dt>
   <dd>
-      Path to the template file. 
-      @@@@@@@@@@@@@ use .... or ....
-
+      Path to the CloudFormation template to use. 
+      You could use one of the 
+      <a href="#solutioncomponents-template-nofailover">templates in the downloads</a>
+      or use your own.
+      <p>
+          If you use your own template and it has 
+          <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html" target="_blank">parameters</a>,
+          be aware that the 
+           <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
+          script sets only a limited set of parameters (in the method <i>launch-stack</i>).
+          All other parameters must be optional and/or have defaults.
+      </p>
   </dd>
 
   <dt>csProjPath</dt>
   <dd>
-      Path of the .csproj file of the web site you're deploying. The publish.ps1 script will build the site in release mode,
+      Path of the .csproj file of the web site you're deploying. The Publish.ps1 script will build the site in release mode,
       package up the code and store the package in the S3 bucket.
   </dd>
 
-  <dt>dbOptionGroupName</dt>
+  <dt>dbOptionGroupName (optional)</dt>
   <dd>
       Name of the option group you created 
-      <a href="#optiongroup">earlier</a>. Only use this if you're creating a database server with failover.
-      The template that creates a database server without failover  @@@@@@@@@@@@@
-      uses SQL Server Express which doesn't support mirroring. If you try to use mirroring with SQL Server Express,
-      your stack creationg will fail. 
+      <a href="#optiongroup">earlier</a> that has mirroring enabled. Only use this if you're 
+      using a template that creates a SQL Server Standard Edition (or higher) database server
+      (such as <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+            target="_blank">this template</a>).
+        <p>
+            If you try to use such an option group with an engine that does not support mirroring, such as SQL Server Express or SQL Server Web Edition,
+            CloudFormation will fail to create your stack.
+        </p>
   </dd>
 
-  <dt>stackPolicyPath</dt>
+  <dt>stackPolicyPath (optional)</dt>
   <dd>
-@@@@@@@@@@@@@@@@@@@
-
+      File path of a <a href="#solutioncomponents-stackpolicy">stack policy</a> to protect for example your database during stack updates
+      (<a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/stackpolicy.txt" target="_blank">example</a>).
+      If you do not use a stack policy, do not use this parameter.
   </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-  <dt></dt>
-  <dd>
-  </dd>
-
-</dl>
-
 
 <h3>7. Set nameservers</h3>
 
 @@@@@@@@@@@@@@@@@@@@@@@
+
+<h3>8. Copy data and schema from old database</h3>
+
+@@@@@@@@@@@@@@@@@@@@@@@
+
 
 
 
