@@ -143,7 +143,6 @@ the AWS service
         <b>SQL Server failover replica</b> -
         To achieve high availability, you can have a hot standby that automatically takes over when the database server fails.
         This solution is probably too expensive for a personal site, but very reasonably priced for a company.
-        @@@@@@@ pricing details @@@@@@@@
 
         In the downloads you'll find templates for both the solution with replica and the solution without replica. 
     </li>
@@ -176,12 +175,39 @@ the AWS service
     </li>
 </ul>
 
+<h2>Software deployment goal</h2>
+<p>
+   I also set myself some software deployment related goals:
+    </p>
+<ul>
+    <li>
+        Automatically package up an ASP.NET web project
+        and store that in the S3 bucket.
+    </li>
+    <li>
+        Ability to deploy new versions of the web project.
+    </li>
+    <li>
+        AWS lets you add tags to infrastructure pieces, such as EC2 instances.
+        A goal was to add tags with the current version number to make it easy to see what version a particular instance is running.
+    </li>
+    <li>
+        During deployment, EC2 instances running the old software are terminated and new EC2 instances created with the new software.
+        This way all EC2 instances are in the same known state, and they all have the latest Windows patches.
+    </li>
+    <li>
+        To minimize disruption during deployment,
+        EC2 instances are replaced one by one, so there are always instances running to serve requests.
+        If there is only one EC2 instance, temporarily a second instance is created.
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-web.config placeholders
-
-
-
+        @@@@@@@@@@@@@ not good. user's requests will go to different servers with different code versions, leading to inconsistencies.
+        It too will cause disruption.
+    </li>
+    <li>
+        During deployment, the web.config file is updated with the server name, user name and user password of the database server.
+        I also wanted to store the  version number in the web.config, so the site knows what version it is.
+    </li>
+</ul>
 
 <a id="solutioncomponents"></a>
 <h2>Solution Components</h2>
@@ -209,12 +235,21 @@ Detailed installation instructions are in the
     <li>
         <a href="https://github.com/mperdeck/AWS-articles/tree/master/4/Downloads/SimpleSiteWithDb" target="_blank">Very simple sample web site</a>
         that uses a database. You may want to use this to experiment before moving to something more complicated.
-        <p />
+        <p>
+            If you have a look at its web.config file, you'll find that it has a web.release.config transform
+            to generate the Release version. That Release version has the placeholders
+            <i>{{DbUsername}}</i>,
+            <i>{{DbPassword}}</i>,
+            <i>{{DbServer}}</i> and
+            <i>{{Version}}</i>.
+During deployment these will be replaced by the actual database server details and the software version. 
+          </p>
     </li>
     <li>
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Deploy.ps1" target="_blank"
             >Deploy.ps1</a> PowerShell script. Sits in the root directory of the web site. Is executed after the Auto Scaling group
-        has placed your web site code on a newly created web server. Responsible for starting IIS, etc. When you decide to deploy some other
+        has placed your web site code on a newly created web server. Responsible for starting IIS, 
+        replacing the placeholders in your web.config, etc. When you decide to deploy some other
         web site, be sure to copy over this PowerShell script to its root directory.
         <p />
     </li>
@@ -239,9 +274,117 @@ Detailed installation instructions are in the
    </li>
 </ul>
 
+<a id="costs"></a>
+<h2>Costs</h2>
+<p>
+    Here are the pages with pricing info for the services that we'll use in this article. 
+    You'll find that playing around with AWS services will cost you money. I found the amounts involved to be tiny given my personal circumstances,
+    except for Multi-AZ deployments - do not leave these running overnight.
+</p>
+<table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
+    <tr>
+        <th style="padding: 5px; border: 1px solid black;">
+            Pricing Page
+        </th>
+        <th style="padding: 5px; border: 1px solid black;">
+            Service is used for
+        </th>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;">
+            <a href="http://aws.amazon.com/cloudformation/pricing/" target="_blank">CloudFormation</a>
+        </td>
+        <td style="padding: 5px; border: 1px solid black;">
+            Deployment configuration
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;">
+            <a href="http://aws.amazon.com/ec2/pricing/" target="_blank">EC2 t2.micro instances</a>
+        </td>
+        <td style="padding: 5px; border: 1px solid black;">
+            Virtual machines running web servers
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;">
+            <a href="http://aws.amazon.com/elasticloadbalancing/pricing/" target="_blank">Elastic Load Balancing</a>
+        </td>
+        <td style="padding: 5px; border: 1px solid black;">
+            Load balancer
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;">
+            <a href="http://aws.amazon.com/autoscaling/pricing/" target="_blank">Auto Scaling</a>
+        </td>
+        <td style="padding: 5px; border: 1px solid black;">
+            Spinning up/down web servers in response to traffic load
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;">
+            <a href="http://aws.amazon.com/route53/pricing/" target="_blank">Route53</a>
+        </td>
+        <td style="padding: 5px; border: 1px solid black;">
+            DNS name servers
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;">
+            <a href="http://aws.amazon.com/s3/pricing/" target="_blank">S3</a>
+        </td>
+        <td style="padding: 5px; border: 1px solid black;">
+            Storing software packages
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; border: 1px solid black;">
+            <a href="http://aws.amazon.com/rds/pricing/" target="_blank">RDS</a>,
+            <a href="http://aws.amazon.com/rds/sqlserver/pricing/" target="_blank">SQL Server licence</a>
+        </td>
+        <td style="padding: 5px; border: 1px solid black;">
+            Database server (see below)
+        </td>
+    </tr>
+</table>
+<h3>
+    Some useful tools
+</h3><ul>
+    <li>
+        <a href="http://calculator.s3.amazonaws.com/index.html" target="_blank">Simple Monthly Calculator</a>
+    </li>
+    <li>
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_EstimateTemplateCost.html" target="_blank">Estimate Template Cost</a>
+    </li>
+    <li>
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-paying.html" 
+            target="_blank">Estimating the Cost of Your AWS CloudFormation Stack</a> (once your stack is running)
+    </li>
 
+</ul>
 
+<h3>Multi-AZ deployment</h3>
 
+<p>
+    Amazon have implemented fail over for SQL Server servers using
+    the 
+    <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring feature</a>. This feature is 
+    <a href="https://msdn.microsoft.com/en-us/library/cc645993.aspx" target="_blank">not available</a>
+     on SQL Server Express.
+</p>
+<p>
+    Your cheapest option that supports mirroring would be a SQL Server Standard Edition database
+    on a db.m1.small instance
+    (<a href="http://aws.amazon.com/rds/previous-generation/" target="_blank">pricing</a>).
+</p><p>
+    Keep in mind that AWS will charge you for the SQL Server Standard Edition licence, while a SQL Server Express licence is free.
+</p><p>
+    Also, you'll be paying for 2 database servers - the main server and the hot standby.
+</p><p>
+    Unless you are rich or someone else is picking up the tab,
+    I wouldn't keep a Multi-AZ deployment running overnight.
+</p>
 
 <a id="installation"></a>
 <h2>Detailed installation steps</h2>
@@ -422,12 +565,12 @@ Click <i>Users</i>;
     and deploy the web site.
 </p>
 <p>
-
-    @@@@@@@@@@@@@@@@
-    start times (50min for fail over!)
-
-    @@@@@@@@@@@@@@@@@@@
-    pricing
+    Running this script takes a while.
+    Spinning up a new stack and deploying the site
+    takes about 20 minutes in my experience.
+    If you go for a stack with a Multi-AZ database deployment, 50 minutes is more like it.
+    Luckily, updates (running the script again for the same stack) take far less time because CloudFormation
+    does the minimum necessary to do the updates. 
 </p>
 
 
@@ -561,19 +704,26 @@ Click <i>Users</i>;
         this needs to be done only once after the initial creation of your stack.
     </p>
 
+    <a id="implementation"></a>
 <h2>Implementation notes</h2>
 
 @@@@@@@@@@@@@@@@@@@@@@@
 
 
 
+<a id="nextparts"></a>
+<h2>Next Parts</h2>
 
----------------------------------------
-@@@@@@@@@@@@@@@@@@
-pricing
-multi-az
-
-
+<p>
+    In 
+    <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw">future parts</a>,
+I am intending to
+    write about deploying a stack from 
+    <a href="https://www.jetbrains.com/teamcity/" target="_blank">TeamCity</a>,
+    <a href="http://martinfowler.com/bliki/BlueGreenDeployment.html" target="_blank">blue/green deployments</a> and
+    breaking large templates into manageable pieces.
+</p>
+
 
 
 
