@@ -105,12 +105,24 @@ You still have to figure many things out on your own.
     to get all the details. This is not too hard and you'll learn a lot.
 </p>
 
+<a id="solution-goals"></a>
+<h2>Goals for this solution</h2>
+
+<p>
+    The solution described in this article
+     sets out to achieve 2 goals: to deploy certain 
+    infrastructure
+    and to 
+    <a href="#solution-goal-software">deploy a web application and its updates</a>.
+</p>
+
 
 <a id="infrastructuregoal"></a>
-<h2>Infrastructure goal</h2>
+<h3>Infrastructure Goal</h3>
+
+
 <p>
-    The goal is to deploy a web site that uses a database and that has its own domain. The infrastructure
-    is going to look like this:
+    The infrastructure goal was to deploy a web site that uses a database and that has its own domain:
 </p>
 <img src="cfarchitecture.png" width="500" />
 
@@ -121,84 +133,109 @@ You still have to figure many things out on your own.
     <li>
         <b>Web servers on EC2 instances</b> -
         The web site will run on one or more <a href="http://aws.amazon.com/ec2/" target="_blank">EC2 instances</a> - virtual machines in the AWS cloud
-        running IIS.
+        acting as web servers.
+        <p />
     </li>
     <li>
         <b>SQL Server database server</b> -
-        The web sites access one or more SQL Server databases hosted on an 
+        The web sites access a SQL Server database hosted on an 
         <a href="http://aws.amazon.com/rds/" target="_blank">RDS</a> (Relational Database Service) instance. 
         RDS is a fully managed database server as a service with automatic 
         backups, etc. 
+        <p />
     </li>
     <li>
-        <b>SQL Server failover replica</b> -
+        <b>SQL Server hot standby</b> -
         To achieve high availability, you can have a hot standby that automatically takes over when the database server fails.
-        This solution is probably too expensive for a personal site, but very reasonably priced for a company.
-
-        In the downloads you'll find templates for both the solution with replica and the solution without replica. 
+        Although reasonably priced for a company, this feature is probably too expensive for a personal site.
+        So I created both a CloudFormation 
+                <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+            target="_blank">template without a standyb</a>
+         and 
+        a 
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
+            target="_blank">template with a standby</a>.
+        <p />
     </li>
     <li>
         <b>Auto Scaling group</b> -
         The <a href="http://aws.amazon.com/autoscaling/" target="_blank">Auto Scaling group</a> starts more EC2 instances when the existing
         instances get overloaded, and terminates instances when there is little to do. 
+        <p />
     </li>
     <li>
         <b>Code package stored in S3 bucket</b> -
         Seeing that the Auto Scaling group starts and terminates EC2 instances at will, there is no point in deploying software to
-        individual servers. Instead, a package file with all the code is stored in an 
+        individual servers. Instead, a package file with the code making up the web application is stored in an 
         <a href="http://aws.amazon.com/s3/" target="_blank">S3</a> bucket (the S3 service lets you store files in the cloud).
         When the Auto Scaling group starts a new EC2 instance, it retrieves the package from the S3 bucket and installs it on the new instance. 
+        <p />
     </li>
     <li>
         <b>Load Balancer</b> -
         The <a href="http://aws.amazon.com/elasticloadbalancing/" target="_blank">ELB</a> (Elastic Load Balancer)
         receives web requests from the Internet and parcels them out to the available web servers.
+        <p />
     </li>
     <li>
         <a id="infrastructuregoal-route53"></a>
         <b>DNS Name Servers</b> -
-        To translate your domain name to the IP address of the load balancer,
-        we'll use the  
-        <a href="http://aws.amazon.com/route53/" target="_blank">Route 53</a> service
-        to provide the required name servers.
-        You will have to manually update the settings of your domain at your registrar
-        so it uses these new name servers. This is a one off.
+        Used to translate your domain name to the IP address of the load balancer.
+       Provided by the <a href="http://aws.amazon.com/route53/" target="_blank">Route 53</a> service.
     </li>
 </ul>
 
-<h2>Software deployment goal</h2>
+<a id="solution-goal-software"></a>
+<h3>Software deployment goal</h3>
 <p>
-   I also set myself some software deployment related goals:
+    The solution also achieves some software deployment related goals:
     </p>
 <ul>
     <li>
-        Automatically package up an ASP.NET web project
-        and store that in the S3 bucket.
+<b>Packaging</b>
+-        Packages up an ASP.NET web project
+        and store the packet in an S3 bucket.
+        <p />
     </li>
     <li>
-        Ability to deploy new versions of the web project.
+<b>Deployment</b> - 
+        Installs IIS, etc. on new EC2 instances with a Deploy.ps1 script.
+        <p />
     </li>
     <li>
-        AWS lets you add tags to infrastructure pieces, such as EC2 instances.
-        A goal was to add tags with the current version number to make it easy to see what version a particular instance is running.
+<b>Version tags</b> -
+        Adds tags with the current software version to the EC2 instances, 
+        to make it easy to see what version a particular instance is running.
+        <p />
     </li>
     <li>
-        During deployment, EC2 instances running the old software are terminated and new EC2 instances created with the new software.
-        This way all EC2 instances are in the same known state, and they all have the latest Windows patches.
+<b>Terminate and Replace</b> -
+        EC2 instances are never updated with new software versions.
+        Instead, instances running old software are terminated and new EC2 instances created with the new software.
+        This ensures that all EC2 instances are in the same known state, and that they all have the latest Windows patches.
+        <p />
     </li>
     <li>
-        To minimize disruption during deployment,
+<b>Rolling updates</b> -
         EC2 instances are replaced one by one, so there are always instances running to serve requests.
-        If there is only one EC2 instance, temporarily a second instance is created.
-
-        @@@@@@@@@@@@@ not good. user's requests will go to different servers with different code versions, leading to inconsistencies.
-        It too will cause disruption.
+        If there is only one EC2 instance, a temporary second instance is created.
+        <p />
     </li>
     <li>
-        During deployment, the web.config file is updated with the server name, user name and user password of the database server.
-        I also wanted to store the  version number in the web.config, so the site knows what version it is.
+        <b>Web.config updated</b>
+        -
+        During deployment, the web.config file is updated with the version number, and the server name, user name and user password of the database server.
     </li>
 </ul>
+
+<p>
+    I didn't look into database schema updates.
+    If you use
+    <a href="https://msdn.microsoft.com/en-au/data/jj193542.aspx" target="_blank">Entity Framework Code First</a>,
+    the web application itself will update the schema for you.
+    However, I appreciate more work would be needed if you can't use Entity Framework or Code First.
+</p>
+
 
 <a id="solutioncomponents"></a>
 <h2>Solution Components</h2>
