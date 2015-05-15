@@ -14,8 +14,6 @@
 <p>
     In parts 1, 2 and 3, you saw how to deploy a load balanced IIS based web site with a SQL Server database and its own domain name.
 </p>
-<a id="architecture"></a>
-<img src="architecture.png" width="400" />
 
 <p>
     Those parts showed how to do this using 
@@ -564,6 +562,9 @@ Click <i>Users</i>;
     script to spin up all the infrastructure
     and deploy the web site.
 </p>
+
+<h4>Time to run</h4>
+
 <p>
     Running this script takes a while.
     Spinning up a new stack and deploying the site
@@ -573,15 +574,24 @@ Click <i>Users</i>;
     does the minimum necessary to do the updates. 
 </p>
 
-
+<h4>Domain</h4>
 
 <p>
-    Usage of the Publish.ps1 script:
+    If you own a spare domain name that you want to use here, you'll pass that to the script
+    via the <a href="#Publish-Parameters-Websitedomain">websiteDomain</a> parameter.
 </p>
+<p>
+    If you don't have a domain to use right now, just use a bogus domain such as &quot;mybogusdomain.com&quot;.
+</p>
+
+<h4>Usage of the Publish.ps1 script</h4>
+
 <pre>.\publish.ps1 -version &lt;code version&gt; -stackName &lt;stack name&gt; -websiteDomain &lt;web site domain&gt; -keyName &lt;key name&gt; 
     -credentialsStoreName &lt;credential store name&gt; -adminCidr &lt;admin cidr&gt; -dbMasterUsername &lt;database username&gt; 
     -dbMasterUserPassword &lt;database password&gt; -bucketName &lt;S3 bucket to store code&gt; -templatePath &lt;template file&gt; 
     -csProjPath &lt;.csproj file of your web site&gt; -dbOptionGroupName &lt;option group name&gt; -stackPolicyPath &lt;file with stack policy&gt</pre>
+
+<h4>Parameters</h4>
 
 <dl>
   <dt>version</dt>
@@ -599,6 +609,7 @@ Click <i>Users</i>;
 
   <dt>websiteDomain</dt>
   <dd>
+      <a id="Publish-Parameters-Websitedomain"></a>
       Domain of the web site. For example, &quot;mydomain.com&quot; for your Live stack, or &quot;test-domain.com&quot; for your Test stack.
   </dd>
 
