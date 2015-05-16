@@ -587,6 +587,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
         In the AWS console, click <i>Services</i> | <i>RDS</i> | <i>Option Groups</i> | <i>Create Group</i>;
     </li>
 <li>
+    Think of a name for your option group, such as &quot;sqlserver-mirroring&quot;.
     Fill in a name and description. Write down the name, you'll need it later on;
 </li>
     <li>
@@ -615,7 +616,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
 <p>
     With the preliminaries done, you can now run the 
     <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
-    script to spin up all the infrastructure
+    script to spin up the infrastructure
     and deploy the web site.
 </p>
 
@@ -626,7 +627,9 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
     Spinning up a new stack and deploying the site
     takes about 20 minutes in my experience.
     If you go for a stack with a Multi-AZ database deployment, 50 minutes is more like it.
-    Luckily, updates (running the script again for the same stack) take far less time because CloudFormation
+</p>
+<p>
+    Luckily, updates (running the script again for the same stack) tend to take far less time because CloudFormation
     does the minimum necessary to do the updates. 
 </p>
 
@@ -647,6 +650,28 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
     -dbMasterUserPassword &lt;database password&gt; -bucketName &lt;S3 bucket to store code&gt; -templatePath &lt;template file&gt; 
     -csProjPath &lt;.csproj file of your web site&gt; -dbOptionGroupName &lt;option group name&gt; -stackPolicyPath &lt;file with stack policy&gt</pre>
 
+<h4>Example</h4>
+<p>
+    This is just an example that spins up infrastructure without a Multi-AZ deployment. Do not copy blindly, but use your own 
+    <a href="#Publish-Parameters">parameter values</a>.
+</p>
+
+<pre>.\publish.ps1 -version 1.0.0 -stackName teststack -websiteDomain mybogusdomain.com -keyName mykeyname 
+    -credentialsStoreName mycredentials -adminCidr 124.171.5.210/32 
+    -dbMasterUsername dbusername -dbMasterUserPassword 'MustBe$uperHardToGu3ss!' 
+    -bucketName must-be-unique-across-all-S3-buckets-in-AWS 
+    -templatePath 'c:\aws\Template with SQL Server Express\Ec2RdsRoute54.template' 
+    -csProjPath 'c:\aws\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj'
+    -stackPolicyPath 'c:\aws\stackpolicy.txt'</pre>
+
+<h4>PowerShell special characters in parameter values</h4>
+<p>
+    If any parameter values contain a $, enclose it with single quotes ('), not with double quotes. That way, PowerShell won't regard the $ as 
+    the start of a variable and try to expand it.
+</p>
+
+
+<a id="Publish-Parameters"></a>
 <h4>Parameters</h4>
 
 <dl>
