@@ -516,41 +516,52 @@ Click <i>Users</i>;
 
 <h3><a id="credentialsstore"></a>4. Store credentials in credentials store</h3>
 <p>
-    When you run an AWS PowerShell command, you have to specify your credentials, similar to logging into AWS.
+    When you run an AWS PowerShell command, it sends a message to AWS to make an update or retrieve information.
+Just as you need to log into AWS before you can do this manually, the 
+    command must carry credentials, so it can be authenticated by AWS.
+</p>
+<p>
     You could pass your credentials to each command, but that means your credentials are exposed in your PowerShell scripts.
 </p>
 <p>
     A better way is to store your credentials in a 
-    <a href="http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html" target="_blank">credentials store</a>.
-    This is file stored on your machine. You give that credentials store a name. Inside your script, you then specify that name
-    to get all PowerShell commands to use your credentials.
+    <a href="http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html" target="_blank">credentials store</a>, 
+    which is simply a file on your machine: 
 </p>
-
-<p>
-    To make this work, you need the access key and secret key of the user that will run your Publish.ps1 script
-    (<a href="http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html" target="_blank">how to get these</a>).
-</p>
-<p>
-    You also need to think of a name for your new credentials store. Maybe something like &quot;mycredentials&quot;.
-</p>
-<p>
-    Now open a PowerShell command window and enter:
-</p>
+<ol>
+    <li>
+    Get the access key and secret key of the user that will run the Publish.ps1 script
+    (<a href="http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html" target="_blank">how</a>).
+<p />
+    </li>
+<li>
+        Think of a name for your new credentials store, such as &quot;mycredentials&quot;.
+<p />
+</li>
+<li>
+    Open a PowerShell command line and run:
+    <p>
 <pre>Set-AWSCredentials -AccessKey &lt;acess key&gt; -SecretKey &lt;secret key&gt; -StoreAs &lt;store name&gt;</pre>
+</p>
 
+</li>
+</ol>    
+    
 <p>
-    If you have a look at the 
+    As an aside, if you have a look at the
     <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1">Publish.ps1</a>
-    script, it uses this line to make the credentials available to the PowerShell commands in the current session:
+    script, you'll see that it uses this command to tell 
+    the PowerShell commands in the current session to use the credentials in the credentials store:
 </p>
 <pre>Set-AWSCredentials -ProfileName &lt;store name&gt; </pre>
+
 
 <a id="optiongroup"></a>
 <h3>5. Create RDS option group to switch on SQL Server mirroring</h3>
 
 <p>
-    You only need to do this if you want your SQL Server database server to have automatic fail over
-    to a hot standby.
+    You only need to do this
+    if you plan to use a Multi-AZ deployment.
 </p>
 <p>
     AWS refers to this as a 
@@ -563,6 +574,12 @@ Click <i>Users</i>;
     and higher (but not SQL Server Express or SQL Server Web).
 </p>
 <p>
+    AWS' implementation of Multi-AZ deployments for SQL Server
+    It is based on the 
+    <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring</a>
+
+
+
     To switch on mirroring,
     you need to associate an 
     <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.SQLServer.Options.html#Appendix.SQLServer.Options.Mirroring" target="_blank">option group</a>
