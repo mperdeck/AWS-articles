@@ -145,8 +145,11 @@ You still have to figure many things out on your own.
         <p />
     </li>
     <li>
-        <b>SQL Server hot standby</b> -
-        To achieve high availability, you can have a hot standby that automatically takes over when the database server fails.
+        <b>SQL Server standby</b> -
+        For enhanced  availability, you can 
+        use a 
+        <a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">Multi-AZ deployment</a>
+        where a standby database server automatically takes over when the main database server fails.
         Although reasonably priced for a company, this feature is probably too expensive for a personal site.
         So I created both a CloudFormation 
                 <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
@@ -156,30 +159,19 @@ You still have to figure many things out on your own.
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
             target="_blank">template with a standby</a>.
         <p />
-
-
-
-            AWS refers to this as a 
-    <a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">Multi-AZ deployment</a>
-    (<a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html" target="_blank">more details</a>).
-
-
-
-
-
     </li>
     <li>
-        <b>Auto Scaling group</b> -
-        The <a href="http://aws.amazon.com/autoscaling/" target="_blank">Auto Scaling group</a> starts more EC2 instances when the existing
+        <b>Auto Scaling Group</b> -
+        The <a href="http://aws.amazon.com/autoscaling/" target="_blank">auto scaling group</a> starts more EC2 instances when the existing
         instances get overloaded, and terminates instances when there is little to do. 
         <p />
     </li>
     <li>
         <b>Code package stored in S3 bucket</b> -
-        Seeing that the Auto Scaling group starts and terminates EC2 instances at will, there is no point in deploying software to
+        Seeing that the auto scaling group starts and terminates EC2 instances at will, there is no point in deploying software to
         individual servers. Instead, a package file with the code making up the web application is stored in an 
         <a href="http://aws.amazon.com/s3/" target="_blank">S3</a> bucket (the S3 service lets you store files in the cloud).
-        When the Auto Scaling group starts a new EC2 instance, it retrieves the package from the S3 bucket and installs it on the new instance. 
+        When the auto scaling group starts a new EC2 instance, it retrieves the package from the S3 bucket and installs it on the new instance. 
         <p />
     </li>
     <li>
@@ -251,24 +243,25 @@ You still have to figure many things out on your own.
 <a id="solutioncomponents"></a>
 <h2>Solution Components</h2>
 <p>
-    Lets have a look at the bits of code that will create all this.
-    These are all in the 
+    The solution consists of a number of templates, scripts, etc., 
+    which are in the 
     <a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">downloads</a>.
-Detailed installation instructions are in the 
-    <a href="#installation">next section</a>.
+The
+    <a href="#installation">next section</a>
+shows how to use those components.
 </p>
 
 <ul>
     <li><a id="solutioncomponents-template-nofailover"></a>
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
-            target="_blank">CloudFormation template</a> that describes in detail all the bits of infrastructure we're after.
-        This template spins up a SQL Server Express database server without failover replica.
+            target="_blank">CloudFormation template without database server standby</a> 
+        that specifies the infrastructure without the database server standby.
         <p />
     </li>
     <li>
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
-            target="_blank">CloudFormation template</a> that 
-        spins up a SQL Server Standard Edition database server with failover replica.
+            target="_blank">CloudFormation template with database server standby</a> that 
+        that specifies the infrastructure with the database server standby.
         <p />
     </li>
     <li>
@@ -286,38 +279,47 @@ During deployment these will be replaced by the actual database server details a
     </li>
     <li>
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Deploy.ps1" target="_blank"
-            >Deploy.ps1</a> PowerShell script. Sits in the root directory of the web site. Is executed after the Auto Scaling group
-        has placed your web site code on a newly created web server. Responsible for starting IIS, 
-        replacing the placeholders in your web.config, etc. When you decide to deploy some other
-        web site, be sure to copy over this PowerShell script to its root directory.
+            >Deploy.ps1</a> PowerShell script.
+        <ul>
+            <li>
+                After a new web server is created by the auto scaling group, any Deploy.ps1 script inside the source tree of your web site is executed 
+                on the new webserver. 
+            </li>
+            <li>
+                Receives software version, database server details, etc. via parameters.
+            </li>
+            <li>
+                Responsible for starting IIS, replacing placeholders in the web.config, etc.
+            </li>
+        </ul>
         <p />
     </li>
    <li>
        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
-       PowerShell script that packages up your web site code, stores it in the S3 bucket and calls the CloudFormation service
-       to deploy the infrastructure. Also used to update an existing stack. 
+       PowerShell script that packages up your web application, stores it in an S3 bucket and calls the CloudFormation service
+      with a template
+        to deploy the infrastructure and web application. Also updates an existing stack. 
         <p />
    </li>
    <li>
        <a id="solutioncomponents-stackpolicy"></a>
        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/stackpolicy.txt" target="_blank">Stack policy</a>
        that determines what servers can be replaced during an update.
-       When you update your stack, then some changes may involve CloudFormation terminating a server and starting a new
-       one with the new configuration. That's ok for a web server, but not for a database server where you'd lose all your data
+       Use this to prevent CloudFormation from for example replacing a database server
        (<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html" target="_blank">more about stack policies</a>).
         <p />
    </li>
    <li>
        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/user%20policy.txt" target="_blank">User policy</a>
-       that provides the Publish.ps1 script all the permissions it needs to spin up all the infrastructure.
+       that provides the Publish.ps1 script all the permissions it needs to spin up the infrastructure.
    </li>
 </ul>
 
 <a id="costs"></a>
 <h2>Costs</h2>
 <p>
-    Here are the pages with pricing info for the services that we'll use in this article. 
-    You'll find that playing around with AWS services will cost you money. I found the amounts involved to be tiny given my personal circumstances,
+    Using AWS services is not free. This section is to spell this out.
+    Personally, I found the amounts involved to be tiny,
     except for Multi-AZ deployments - do not leave these running overnight.
 </p>
 <table style=" border: 1px solid black;  border-spacing: 0px;   border-collapse:collapse">
@@ -406,6 +408,9 @@ During deployment these will be replaced by the actual database server details a
 <h3>Multi-AZ deployment</h3>
 
 <p>
+    Multi-AZ deployments are much more expensive than a database server without standby.
+</p>
+<p>
     Amazon have implemented fail over for SQL Server servers using
     the 
     <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring feature</a>. This feature is 
@@ -413,26 +418,32 @@ During deployment these will be replaced by the actual database server details a
      on SQL Server Express.
 </p>
 <p>
-    Your cheapest option that supports mirroring would be a SQL Server Standard Edition database
+    As of March 2015, Your cheapest option that supports mirroring would be a SQL Server Standard Edition database
     on a db.m1.small instance
     (<a href="http://aws.amazon.com/rds/previous-generation/" target="_blank">pricing</a>).
 </p><p>
     Keep in mind that AWS will charge you for the SQL Server Standard Edition licence, while a SQL Server Express licence is free.
 </p><p>
-    Also, you'll be paying for 2 database servers - the main server and the hot standby.
+    Also, you'll be paying for 2 database servers - the main server and the standby.
 </p><p>
-    Unless you are rich or someone else is picking up the tab,
+    If you're just playing around,
     I wouldn't keep a Multi-AZ deployment running overnight.
 </p>
 
 <a id="installation"></a>
 <h2>Detailed installation steps</h2>
 
+<p>
+    This section shows how to spin up the infrastructure
+    plus deploy a web application. First we need to get some once-off preliminaries out of the way, and then
+    we can run the Publish.ps1 script to create the stack. You can use the same script to update your stack later on.
+</p>
+
 <h3>1. AWS Account</h3>
 <p>
 I'm assuming you have an AWS account 
         (<a href="http://aws.amazon.com/free/" target="_blank">get one</a>),
-        and that you have a key pair
+        and a key pair
         (<a href="http://www.codeproject.com/Articles/889059/Amazon-Web-Services-part-How-to-deploy-a-load-bala#keypair" target="_blank">get one</a>).
     </p>
 <h3>2. Download</h3>
@@ -452,7 +463,7 @@ The user (probably yourself) that will run the Publish.ps1 script
         needs to have all the permissions required to spin up all the different infrastructure elements.
 </p>
 <p>
-    You express these permissions in the form of an
+    You express these permissions as an 
     <a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/PoliciesOverview.html" target="_blank">IAM policy</a>.
 You then attach that policy to the user.
 </p>
@@ -505,13 +516,13 @@ Click <i>Users</i>;
 
 <h3><a id="credentialsstore"></a>4. Store credentials in credentials store</h3>
 <p>
-    When you run an AWS PowerShell command, you have to specify your credentials.
+    When you run an AWS PowerShell command, you have to specify your credentials, similar to logging into AWS.
     You could pass your credentials to each command, but that means your credentials are exposed in your PowerShell scripts.
 </p>
 <p>
     A better way is to store your credentials in a 
     <a href="http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html" target="_blank">credentials store</a>.
-    This is file stored on your machine. You give that credentials store a name. Inside your script, you can then specify that name
+    This is file stored on your machine. You give that credentials store a name. Inside your script, you then specify that name
     to get all PowerShell commands to use your credentials.
 </p>
 
