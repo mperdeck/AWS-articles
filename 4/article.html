@@ -564,33 +564,20 @@ Just as you need to log into AWS before you can do this manually, the
     if you plan to use a Multi-AZ deployment.
 </p>
 <p>
-    AWS refers to this as a 
-    <a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">Multi-AZ deployment</a>
-    (<a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html" target="_blank">more details</a>).
-    It is based on the 
-    <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring</a>
-    feature, available in 
-    <a href="https://msdn.microsoft.com/en-us/library/cc645993.aspx" target="_blank">SQL Server Standard Edition</a>
-    and higher (but not SQL Server Express or SQL Server Web).
-</p>
-<p>
     AWS' implementation of Multi-AZ deployments for SQL Server
-    It is based on the 
+    is based on the 
     <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring</a>
-
-
-
-    To switch on mirroring,
-    you need to associate an 
+    feature.
+    To switch on this feature,
+    you need to associate your RDS instance with an 
     <a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.SQLServer.Options.html#Appendix.SQLServer.Options.Mirroring" target="_blank">option group</a>
-     that has the mirroring option enabled
-    with your SQL Server database server.
+     that has the mirroring option enabled.
 </p>
 <p>
-    The Publish.ps1 script takes care of attaching the option group.
-    And it would have been natural to specify the option group along with all the other infrastructure 
-    in the CloudFormation template. However, oddly, CloudFormation doesn't let you create option groups.
-    You'll have to create one manually once off.
+    Because this option group is simply a bit of infrastructure, you'd think you can create this
+    in a CloudFormation template. Oddly, that cannot be done. You have to create it manually once off.
+When you run Publish.ps1, you'll pass in the name of the option group that you create here via a 
+    <a href="#Publish-Parameters-OptionGroupName">parameter</a>.
 </p>
 <p>
     To create the option group:
@@ -676,9 +663,9 @@ Just as you need to log into AWS before you can do this manually, the
       &quot;Live&quot;.
   </dd>
 
-  <dt>websiteDomain</dt>
+  <dt><a id="Publish-Parameters-Websitedomain"></a>websiteDomain</dt>
   <dd>
-      <a id="Publish-Parameters-Websitedomain"></a>
+      
       Domain of the web site. For example, &quot;mydomain.com&quot; for your Live stack, or &quot;test-domain.com&quot; for your Test stack.
   </dd>
 
@@ -740,7 +727,7 @@ Just as you need to log into AWS before you can do this manually, the
       package up the code and store the package in the S3 bucket.
   </dd>
 
-  <dt>dbOptionGroupName (optional)</dt>
+  <dt><a id="Publish-Parameters-OptionGroupName"></a>dbOptionGroupName (optional)</dt>
   <dd>
       Name of the option group you created 
       <a href="#optiongroup">earlier</a> that has mirroring enabled. Only use this if you're 
