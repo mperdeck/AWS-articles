@@ -2,8 +2,7 @@
 <li><a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">Download templates, scripts, sample app</a></li>
 </ul>
 
-<a id="introduction"></a>
-<h2>Introduction</h2>
+<a id="introduction"></a><h2>Introduction</h2>
 <p>
     This is part 4 of a 
     <a href="http://www.codeproject.com/search.aspx?q=amazon+web+services+perdeck&x=0&y=0&sbo=kw" target="_blank">series of articles</a>
@@ -19,7 +18,7 @@
     This involved defining your EC2 servers, database server, etc. by completing a series of menus.
 </p>
 
-<h2>Why CloudFormation</h2>
+<a id="whycloudformation"></a><h2>Why CloudFormation</h2>
 <p>
     Once your environment becomes a big more complicated,
     you'll quickly run into some drawbacks with this method:
@@ -69,7 +68,7 @@ This environment is called a <i>stack</i>.
     will also deploy software for you, such as a web application.
 </p>
 
-<h2>About this article</h2>
+<a id="aboutthisarticle"></a><h2>About this article</h2>
 
 <p>
     CloudFormation is a low level tool.
@@ -105,8 +104,7 @@ You still have to figure many things out on your own.
     to get all the details. This is not too hard and you'll learn a lot.
 </p>
 
-<a id="solution-goals"></a>
-<h2>Goals for this solution</h2>
+<a id="solution-goals"></a><h2>Goals for this solution</h2>
 
 <p>
     The solution described in this article
@@ -240,8 +238,7 @@ You still have to figure many things out on your own.
 </p>
 
 
-<a id="solutioncomponents"></a>
-<h2>Solution Components</h2>
+<a id="solutioncomponents"></a><h2>Solution Components</h2>
 <p>
     The solution consists of a number of templates, scripts, etc., 
     which are in the 
@@ -315,8 +312,7 @@ During deployment these will be replaced by the actual database server details a
    </li>
 </ul>
 
-<a id="costs"></a>
-<h2>Costs</h2>
+<a id="costs"></a><h2>Costs</h2>
 <p>
     Using AWS services is not free. This section is to spell this out.
     Personally, I found the amounts involved to be tiny,
@@ -430,8 +426,7 @@ During deployment these will be replaced by the actual database server details a
     I wouldn't keep a Multi-AZ deployment running overnight.
 </p>
 
-<a id="installation"></a>
-<h2>Detailed installation steps</h2>
+<a id="installation"></a><h2>Detailed installation steps</h2>
 
 <p>
     This section shows how to spin up the infrastructure
@@ -676,14 +671,19 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
 
 <h4>Example</h4>
 <p>
-    This is just an example that spins up infrastructure without a Multi-AZ deployment. Do not copy blindly, but use your own 
-    <a href="#Publish-Parameters">parameter values</a>.
+    This is just an example that spins up infrastructure without a Multi-AZ deployment. 
+    It assumes you stored the downloaded files in a directory &quot;c:\aws&quot;.
+</p>
+<p>
+   
+    Do not copy blindly, but use your own 
+    <a href="#Publish-Parameters">parameter values</a>, especially the ones that are <u>underlined</u> below.
 </p>
 
-<pre>.\publish.ps1 -version 1.0.0 -stackName teststack -websiteDomain mybogusdomain.com -keyName mykeyname 
-    -credentialsStoreName mycredentials -adminCidr 124.171.5.210/32 
+<pre>.\publish.ps1 -version 1.0.0 -stackName teststack -websiteDomain mybogusdomain.com -keyName <u>mykeyname</u> 
+    -credentialsStoreName <u>mycredentials</u> -adminCidr <u>124.171.5.210/32</u> 
     -dbMasterUsername dbusername -dbMasterUserPassword 'MustBe$uperHardToGu3ss!' 
-    -bucketName must-be-unique-across-all-S3-buckets-in-AWS 
+    -bucketName <u>must-be-unique-across-all-S3-buckets-in-AWS</u> 
     -templatePath 'c:\aws\Template with SQL Server Express\Ec2RdsRoute54.template' 
     -csProjPath 'c:\aws\SimpleSiteWithDb\SimpleSiteWithDb\SimpleSiteWithDb.csproj'
     -stackPolicyPath 'c:\aws\stackpolicy.txt'</pre>
@@ -819,15 +819,111 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
         this needs to be done only once after the initial creation of your stack.
     </p>
 
-    <a id="implementation"></a>
-<h2>Implementation notes</h2>
+    <a id="implementation"></a><h2>Implementation notes</h2>
 
 @@@@@@@@@@@@@@@@@@@@@@@
 
 
+    ==========================
+ami's change monthly. find one with powershell
+http://docs.aws.amazon.com/powershell/latest/userguide/pstools-ec2-get-amis.html
 
-<a id="nextparts"></a>
-<h2>Next Parts</h2>
+    update policy
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html
+<<<< kicks in when launch config is changed! So: change version property on launch config
+rolling updates. kill old servers
+
+
+    +++++++++++++++++++++++++++++++
+set a tag on the create stack with the version. That tag will show on the stack, the elb, and the instances (in the tags tab)
+
+Do not load your files (from the .zip from s3) in inetpub/temp
+That specific directory is used (by IIS?) to store stuff, including a config file for the app pool.
+Just call it something else (but probably not inetpub/wwwroot)
+=========================
+all stack status codes
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-describing-stacks.html
+
+
+
+    ================
+pseudo parameters
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html
+such as 
+{ "Ref" : "AWS::Region" }
+
+
+==============================================
+constructing an arn
+http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
+http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#arn-syntax-cloudformation
+
+creating a policy (to give yourself permssion to access s3, cloudformation)
+https://console.aws.amazon.com/iam/home?region=us-east-1#policies
+
+getting your account number
+http://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html
+
+To access S3 and cloudformation from powershell, you must create policies that let you do this (or use a prebuilt one)
+and attach those to the user that the script runs as.
+You must also set the credentials in the environment.
+
+
+----------------------
+create policy and attach that to user that runs the publish, because
+
+ec2: describe keypairs
+s3: upload to bucket
+cloudformation: run template
+autoscaling 
+etc.
+iam: createrole to access ec2 instances to access s3 bucket
+
+
+===================
+    d:
+cd "D:\Dev\trial\MvcApplication1\MvcApplication1"
+msbuild MvcApplication1.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
+
+AutoParameterizationWebConfigConnectionStrings
+to stop it from putting parameters in web.config
+http://stackoverflow.com/questions/7207689/how-to-get-rid-of-replacabletoken-in-web-config-completely
+http://blogs.msdn.com/b/webdev/archive/2010/11/10/asp-net-web-application-publish-package-tokenizing-parameters.aspx
+http://stackoverflow.com/questions/3629850/replacabletoken-when-using-web-config-transform
+
+============================
+    http://localhost/Books
+ <connectionStrings>
+    <add name="MvcApplication1" providerName="System.Data.SqlClient" connectionString="Data Source=aa7zjgdxk7nrvs.ck6zpfe8mamw.us-east-1.rds.amazonaws.com;Initial Catalog=MvcApplication1;User ID=overlord;Password=jti958st3pmlqt" />
+  </connectionStrings>
+DO NOT USE
+Integrated Security=SSPI;
+in connection string
+http://stackoverflow.com/questions/1229691/difference-between-integrated-security-true-and-integrated-security-sspi
+or you get 
+Unable to connect to RDS from .net sqlcmd connect statement, error is: 
+Login failed for user 'NT AUTHORITY\ANONYMOUS LOGON'.
+
+
+
+
+
+
+
+    ++++++++++++++++++++++++++++++++++++++++++++
+    			http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html#SQLServer.Concepts.General.Mirroring
+			
+			
+		SQL Server Multi-AZ using Mirroring is currently available in the US East (N. Virginia), US West (Oregon), and EU (Ireland) AWS regions. We plan to support other regions in the future.	
+
+
+
+
+
+
+
+
+<a id="nextparts"></a><h2>Next Parts</h2>
 
 <p>
     In 
