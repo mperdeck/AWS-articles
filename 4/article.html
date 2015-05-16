@@ -439,7 +439,7 @@ During deployment these will be replaced by the actual database server details a
     we can run the Publish.ps1 script to create the stack. You can use the same script to update your stack later on.
 </p>
 
-<h3>1. AWS Account</h3>
+<h3><a id="installation-awsaccount"></a>1. AWS Account</h3>
 <p>
 I'm assuming you have an AWS account 
         (<a href="http://aws.amazon.com/free/" target="_blank">get one</a>),
@@ -555,9 +555,33 @@ Just as you need to log into AWS before you can do this manually, the
 </p>
 <pre>Set-AWSCredentials -ProfileName &lt;store name&gt; </pre>
 
+<a id="cidr"></a>
+<h3>5. Find your CIDR</h3>
+
+<p>
+          You don't want everybody in the world to be able to try and RDP into your EC2 instances
+      or SSMS into your database servers.
+</p>
+<p>
+    To lock this down, the Publish.ps1 script lets you pass in the 
+      <a href="http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" target="_blank">CIDR</a>
+of the machine that can RDP or SSMS into your servers.
+</p>
+<p>
+    To find the CIDR of your machine:
+</p>
+<ol>
+    <li>
+        <a href="http://www.findmyip.org/" target="_blank">Get your external IP address</a>;
+    </li>
+    <li>
+        Add <i>/32</i> at the end. So if your IP address is <i>130.180.2.320</i>, your CIDR  is
+        <i>130.180.2.320/32</i>.
+    </li>
+</ol>
 
 <a id="optiongroup"></a>
-<h3>5. Create RDS option group to switch on SQL Server mirroring</h3>
+<h3>6. Create RDS option group to switch on SQL Server mirroring</h3>
 
 <p>
     You only need to do this
@@ -612,7 +636,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
     </li>
 </ol>
 
-<h3>6. Run Publish.ps1 script</h3>
+<h3>7. Run Publish.ps1 script</h3>
 <p>
     With the preliminaries done, you can now run the 
     <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
@@ -675,65 +699,64 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
 <h4>Parameters</h4>
 
 <dl>
-  <dt>version</dt>
-  <dd>
-      Version of the code you're deploying. For example &quot;2.1.0&quot;. Each time you deploy a new version of your code,
-      use a new version. The version doubles as the name of the code package in the S3 bucket, so make sure it is unique.
-  </dd>
+  <dt><b>version</b></dt>
+  <dd><p>
+      Version of the code you're deploying. For example &quot;2.1.0&quot;. 
+The version doubles as the name of the code package in the S3 bucket.
+If you're running Publish.ps1 to update infrastructure whilst keeping the web application the same, use the same version.
+  </p></dd>
 
-  <dt>stackName</dt>
-  <dd>
-      The set of servers, etc. you create with a template is called a stack. You can create a different set of servers
-      by passing in a different stack name. For example, you could create a stack &quot;Test&quot; and another stack called
+  <dt><b>stackName</b></dt>
+  <dd><p>
+       For example, &quot;Test&quot; or
       &quot;Live&quot;.
-  </dd>
+      The set of servers, etc. you create with a template is called a stack. You can create a different set of servers
+      by passing in a different stack name.
+  </p></dd>
 
-  <dt><a id="Publish-Parameters-Websitedomain"></a>websiteDomain</dt>
-  <dd>
+  <dt><b><a id="Publish-Parameters-Websitedomain"></a>websiteDomain</b></dt>
+  <dd><p>
       
-      Domain of the web site. For example, &quot;mydomain.com&quot; for your Live stack, or &quot;test-domain.com&quot; for your Test stack.
-  </dd>
+      Domain of the web site that will be associated with the name servers. For example, &quot;mydomain.com&quot; for your Live stack, or &quot;test-domain.com&quot; for your Test stack.
+  </p></dd>
 
-  <dt>keyName</dt>
-  <dd>
-      Name of the key pair that you'll use to log into your EC2 instances. Remember that key pairs are tied to a region.
-      To find a key pair name, click <i>Services</i> | <i>Key Pairs</i>.
-  </dd>
+  <dt><b>keyName</b></dt>
+  <dd><p>
+      Name of the key pair that you
+      created <a href="#installation-awsaccount">earlier</a>.
+      You'll use this to log into your EC2 instances. Remember that key pairs are tied to a region.
+  </p></dd>
 
-  <dt>credentialsStoreName</dt>
-  <dd>
+  <dt><b>credentialsStoreName</b></dt>
+  <dd><p>
       Name of the credentials store where you stored your credentials 
       <a href="#credentialsstore">earlier</a>.
-  </dd>
+  </p></dd>
 
-  <dt>adminCidr</dt>
-  <dd>
-      You don't want everybody in the world to be able to try and log into your EC2 instances
-      or database servers via SSMS.
-      Here you pass the
-      <a href="http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" target="_blank">CIDR</a>
-      from which someone can log in. Typically, that would be the CIDR of your own machine
-      (<a href="http://www.findmyip.org/" target="_blank">Your IP address</a> | 
-      <a href="http://www.ipaddressguide.com/cidr#range" target="_blank">Convert IP to CIDR</a>).
-  </dd>
+  <dt><b>adminCidr</b></dt>
+  <dd><p>
+      Use the CIDR you found
+      <a href="#cidr">earlier</a>.
+  </p></dd>
 
-  <dt>dbMasterUsername</dt>
-  <dt>dbMasterUserPassword</dt>
-  <dd>
+  <dt><b>dbMasterUsername</b></dt>
+  <dt><b>dbMasterUserPassword</b></dt>
+  <dd><p>
       RDS only supports SQL Server Authentication. These are the username and password that will be able
       to access your new database server via SSMS, and that will be inserted into your web.config.
-  </dd>
+  </p></dd>
 
-  <dt>bucketName</dt>
-  <dd>
+  <dt><b>bucketName</b></dt>
+  <dd><p>
       S3 bucket where the code packages will be stored. This name must be unique across all S3 buckets
-      hosted by AWS. To make sure a given S3 bucket name is available, create the S3 bucket yourself: click<i>Services</i> | <i>S3</i>.
-  </dd>
+      hosted by AWS. To make sure a given S3 bucket name is available, it would be easiest to create the S3 bucket yourself
+      and then pass your chosen name in via this parameter: click<i>Services</i> | <i>S3</i>.
+  </p></dd>
 
-  <dt>templatePath</dt>
-  <dd>
+  <dt><b>templatePath</b></dt>
+  <dd><p>
       Path to the CloudFormation template to use. 
-      You could use one of the 
+      Use one of the 
       <a href="#solutioncomponents-template-nofailover">templates in the downloads</a>
       or use your own.
       <p>
@@ -744,16 +767,16 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
           script sets only a limited set of parameters (in the method <i>launch-stack</i>).
           All other parameters must be optional and/or have defaults.
       </p>
-  </dd>
+  </p></dd>
 
-  <dt>csProjPath</dt>
-  <dd>
+  <dt><b>csProjPath</b></dt>
+  <dd><p>
       Path of the .csproj file of the web site you're deploying. The Publish.ps1 script will build the site in release mode,
       package up the code and store the package in the S3 bucket.
-  </dd>
+  </p></dd>
 
-  <dt><a id="Publish-Parameters-OptionGroupName"></a>dbOptionGroupName (optional)</dt>
-  <dd>
+  <dt><b><a id="Publish-Parameters-OptionGroupName"></a>dbOptionGroupName (optional)</b></dt>
+  <dd><p>
       Name of the option group you created 
       <a href="#optiongroup">earlier</a> that has mirroring enabled. Only use this if you're 
       using a template that creates a SQL Server Standard Edition (or higher) database server
@@ -763,16 +786,16 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
             If you try to use such an option group with an engine that does not support mirroring, such as SQL Server Express or SQL Server Web Edition,
             CloudFormation will fail to create your stack.
         </p>
-  </dd>
+  </p></dd>
 
-  <dt>stackPolicyPath (optional)</dt>
-  <dd>
+  <dt><b>stackPolicyPath (optional)</b></dt>
+  <dd><p>
       File path of a <a href="#solutioncomponents-stackpolicy">stack policy</a> to protect for example your database during stack updates
       (<a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/stackpolicy.txt" target="_blank">example</a>).
       If you do not use a stack policy, do not use this parameter.
-  </dd>
+  </p></dd>
 
-<h3>7. Set nameservers</h3>
+<h3>8. Set nameservers</h3>
 
     <p>
         After you've created your stack, you need to change the configuration of your
@@ -784,7 +807,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
         <a href="http://www.codeproject.com/Articles/891202/Amazon-Web-Services-part-How-to-point-your-domain#pointdomaintolb" target="_blank">here</a>.
     </p>
 
-<h3>8. Copy data and schema from old database</h3>
+<h3>9. Copy data and schema from old database</h3>
 
     <p>
         If you have an existing database, you'll want to copy its schema and data to your new RDS database.
@@ -792,7 +815,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
         <a href="http://www.codeproject.com/Articles/889910/Amazon-Web-Services-part-Adding-a-database-to-your#copyschemaanddata" target="_blank">here</a>.
     </p>
     <p>
-        Unless you completely delete your stack,
+        Unless you delete your database server,
         this needs to be done only once after the initial creation of your stack.
     </p>
 
