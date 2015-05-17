@@ -147,16 +147,20 @@ You still have to figure many things out on your own.
         For enhanced  availability, you can 
         use a 
         <a href="http://aws.amazon.com/rds/details/multi-az/" target="_blank">Multi-AZ deployment</a>
-        where a standby database server automatically takes over when the main database server fails.
+        where a standby database server automatically takes over when the main database server fails
+        (<a href="http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html#SQLServer.Concepts.General.Mirroring" target="_blank"
+            >only available</a>
+         in the US East (N. Virginia), US West (Oregon), and EU (Ireland) regions).
+        <p>
         Although reasonably priced for a company, this feature is probably too expensive for a personal site.
         So I created both a CloudFormation 
                 <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
-            target="_blank">template without a standyb</a>
+            target="_blank">template without a standy</a>
          and 
         a 
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
             target="_blank">template with a standby</a>.
-        <p />
+        </p>
     </li>
     <li>
         <b>Auto Scaling Group</b> -
@@ -258,7 +262,7 @@ shows how to use those components.
     <li>
         <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
             target="_blank">CloudFormation template with database server standby</a> that 
-        that specifies the infrastructure with the database server standby.
+         specifies the infrastructure with the database server standby.
         <p />
     </li>
     <li>
@@ -280,7 +284,11 @@ During deployment these will be replaced by the actual database server details a
         <ul>
             <li>
                 After a new web server is created by the auto scaling group, any Deploy.ps1 script inside the source tree of your web site is executed 
-                on the new webserver. 
+                on the new webserver by the CloudFormation template. 
+            </li>
+            <li>
+                However, this particular Deploy.ps1 file is a bit more restrictive as to where it sits. 
+                It has to sit in the root directory of the web application, where the main web.config is located.
             </li>
             <li>
                 Receives software version, database server details, etc. via parameters.
@@ -820,13 +828,156 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
     </p>
 
     <a id="implementation"></a><h2>Implementation notes</h2>
+    <p>
+        This section isn't a detailed discussion of every file
+        in the 
+        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">downloads</a>.
+Instead, it        
+        discusses some of the more interesting
+things I learned when building this solution.
+    </p>
 
-@@@@@@@@@@@@@@@@@@@@@@@
+   <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Deploy.ps1" target="_blank"
+            >Deploy.ps1 PowerShell script</a></h3>
+    <p>
+        This PowerShell script runs on the EC2 instance after the web application package has been copied there and has been unzipped.
+        It isn't complicated and well documented.
+    </p>
+    <p>A few interesting things:</p>
+    <ul>
+        <li>
+            You'll see that I used 
+            <a href="https://technet.microsoft.com/en-us/library/cc772200(v=ws.10).aspx" target="_blank">appcmd.exe</a>
+            to work with IIS, rather than easier to use 
+            <a href="https://technet.microsoft.com/en-us/library/ee790599.aspx" target="_blank">IIS Cmdlets in PowerShell</a>.
+<p>
+            The reason behind this is that the IIS Cmdlets require the
+            WebAdministration module to have been loaded, and I found I couldn't count on this always being the case.
+            So I used appcmd.exe which always works.
+</p>
+        </li>
+        <li>
+            I was sometimes confronted with the error message
+            <i>HTTP Error 500.21 - Internal Server Error Handler "ExtensionlessUrlHandler-Integrated-4.0" has a bad module "ManagedPipelineHandler" in its module list</i>.
+<p>
+            The solution was to re-install the .Net framework
+            (<a href="http://stackoverflow.com/questions/13162545/handler-extensionlessurlhandler-integrated-4-0-has-a-bad-module-managedpipeli"
+                target="_blank">Stack Overflow discussion</a>), using
+            <pre>cmd /c %systemroot%\Microsoft.NET\Framework\v4.0.30319\aspnet_regiis.exe -i</pre>
+</p>
+        </li>
+        <li>
+            Be careful with the PowerShell Cmdlet <i>Out-File</i>. By default it produces a file with encoding Unicode.
+            IIS chokes on this when reading for example web.config. I believe that in most cases you're better off with UTF8 anyway:
+            <pre>Out-File ..... -encoding UTF8</pre>
+        </li>
+
+    </ul>
+
+  <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a></h3>
+    <p>
+        You run this PowerShell script to create or update a stack.
+    </p>
+    <p>
+This script interacts with AWS using PowerShell Cmdlets provided by
+        <a href="http://aws.amazon.com/powershell/" target="_blank">AWS Tools for Windows PowerShell</a>.
+        I found that this works well and is very well documented.
+    </p>
+
+    <p>
+        Some things I learned while writing this script:
+    </p>
+    <ul>
+        <li>
+            Some sample CloudFormation templates on the Internet hard code  
+            the ID of the 
+            <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html" target="_blank">Amazon Machine Image</a> (AMI)
+           to use with EC2 instances.
+            I followed their lead, until one day I found that the AMI I had hardcoded no longer existed.
+            <p>       
+            In fact, AWS 
+            <a href="http://docs.aws.amazon.com/powershell/latest/userguide/pstools-ec2-get-amis.html" target="_blank">regularly provides</a>
+             new updated AMIs with new IDs, so hard coding IDs won't work long term. The solution was to get the latest EC2 instance AMI
+                each time you create or update a stack:
+                <pre>$imageId = (Get-EC2ImageByName -Names WINDOWS_2012R2_BASE | Select -ExpandProperty ImageId)</pre>
+            </p>            
+        </li>
+
+        <li>
+            At the end of the method <i>launch-stack</i>, it waits until the stack has been completely created or updated.
+            It does this by polling the status of the stack every 5 seconds (in method <i>waitfor-stack-status</i>).
+            I had to interpret the AWS stack status (a string) to find out whether the create/update had succeeded/failed or was still in progress.
+            This was made easier by having the 
+            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-describing-stacks.html" target="_blank">full set of stack status codes</a>.
+        <p />
+        </li>
+        <li>
+            The Cmdlets 
+            <i></i>
+            <a href="http://docs.aws.amazon.com/powershell/latest/reference/items/New-CFNStack.html" target="_blank">New-CFNStack</a>
+            and 
+            <a href="http://docs.aws.amazon.com/powershell/latest/reference/items/Update-CFNStack.html" target="_blank">Update-CFNStack</a>
+are used to create/update a stack using a template.
+            When your template creates an 
+            <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-instanceprofile.html" target="_blank">IAM Instance Profile</a>,
+             for example to give EC2 instances access to an S3 bucket,
+            you have to allow the Cmdlets to use that template by
+            passing in   
+            &quot;CAPABILITY_IAM&quot; 
+            via the 
+            Capability parameter:
+            <pre>New-CFNStack -Capability @( &quot;CAPABILITY_IAM&quot; ) ....</pre>
+        </li>
+        <li>
+            In method <i>upload-deployment</i>), 
+            I used 
+            <a href="https://msdn.microsoft.com/en-us/library/dd393574.aspx" target="_blank">MSBuild</a>
+            and more specifically its 
+            <a href="http://vishaljoshi.blogspot.com.au/2009/02/web-packaging-creating-web-packages.html" target="_blank">Package</a>
+            target to build and package up the web application into a single .zip file using the line:
+            <pre>msbuild $csProjPath /t:Package /p:Configuration=Release /p:PackageLocation=$releaseZip /p:AutoParameterizationWebConfigConnectionStrings=False</pre>
+            <p>
+                I looked at alternatives such as 
+                <a href="http://docs.octopusdeploy.com/display/OD/Using+OctoPack" target="_blank">OctoPack</a>, but this is the simplest way and it works well.
+            </p>
+            <p>
+                By default, the <i>Package</i> target 
+                replaces the web.config's connection by a replacable token, which is not what I want here.
+                Setting <i>AutoParameterizationWebConfigConnectionStrings</i> to <i>False</i> suppresses this behaviour.  
+            </p>
+        </li>
+    </ul>
+
+    <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Web.Release.config" target="_blank"
+        >Trial site Web.Release.config</a></h3>
+    <p>
+        This is the web.config transform that generates the release version of the web.config. You can see the placeholders
+        that will be replaced by Deploy.ps1.
+    </p>
+
+    <p>
+    Some connection strings use <i>Integrated Security=<a
+        href="http://stackoverflow.com/questions/1229691/difference-between-integrated-security-true-and-integrated-security-sspi" target="_blank"
+        >SSPI</a>;</i>. Do not use this with an AWS hosted site. It will cause AWS to try to log into your database with the 
+    <i>NT AUTHORITY\ANONYMOUS LOGON</i> account rather than your own account - which will fail. 
+</p>
 
 
-    ==========================
-ami's change monthly. find one with powershell
-http://docs.aws.amazon.com/powershell/latest/userguide/pstools-ec2-get-amis.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     update policy
 http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html
@@ -840,10 +991,6 @@ set a tag on the create stack with the version. That tag will show on the stack,
 Do not load your files (from the .zip from s3) in inetpub/temp
 That specific directory is used (by IIS?) to store stuff, including a config file for the app pool.
 Just call it something else (but probably not inetpub/wwwroot)
-=========================
-all stack status codes
-http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-describing-stacks.html
-
 
 
     ================
@@ -880,41 +1027,7 @@ etc.
 iam: createrole to access ec2 instances to access s3 bucket
 
 
-===================
-    d:
-cd "D:\Dev\trial\MvcApplication1\MvcApplication1"
-msbuild MvcApplication1.csproj /t:Package /p:Configuration=Release /p:PackageLocation=. /p:AutoParameterizationWebConfigConnectionStrings=False
-
-AutoParameterizationWebConfigConnectionStrings
-to stop it from putting parameters in web.config
-http://stackoverflow.com/questions/7207689/how-to-get-rid-of-replacabletoken-in-web-config-completely
-http://blogs.msdn.com/b/webdev/archive/2010/11/10/asp-net-web-application-publish-package-tokenizing-parameters.aspx
-http://stackoverflow.com/questions/3629850/replacabletoken-when-using-web-config-transform
-
-============================
-    http://localhost/Books
- <connectionStrings>
-    <add name="MvcApplication1" providerName="System.Data.SqlClient" connectionString="Data Source=aa7zjgdxk7nrvs.ck6zpfe8mamw.us-east-1.rds.amazonaws.com;Initial Catalog=MvcApplication1;User ID=overlord;Password=jti958st3pmlqt" />
-  </connectionStrings>
-DO NOT USE
-Integrated Security=SSPI;
-in connection string
-http://stackoverflow.com/questions/1229691/difference-between-integrated-security-true-and-integrated-security-sspi
-or you get 
-Unable to connect to RDS from .net sqlcmd connect statement, error is: 
-Login failed for user 'NT AUTHORITY\ANONYMOUS LOGON'.
-
-
-
-
-
-
-
-    ++++++++++++++++++++++++++++++++++++++++++++
-    			http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_SQLServer.html#SQLServer.Concepts.General.Mirroring
-			
-			
-		SQL Server Multi-AZ using Mirroring is currently available in the US East (N. Virginia), US West (Oregon), and EU (Ireland) AWS regions. We plan to support other regions in the future.	
+
 
 
 
