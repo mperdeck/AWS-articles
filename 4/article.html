@@ -827,6 +827,9 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
         this needs to be done only once after the initial creation of your stack.
     </p>
 
+
+
+
     <a id="implementation"></a><h2>Implementation notes</h2>
     <p>
         This section isn't a detailed discussion of every file
@@ -837,42 +840,74 @@ Instead, it
 things I learned when building this solution.
     </p>
 
-   <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Deploy.ps1" target="_blank"
-            >Deploy.ps1 PowerShell script</a></h3>
-    <p>
-        This PowerShell script runs on the EC2 instance after the web application package has been copied there and has been unzipped.
-        It isn't complicated and well documented.
-    </p>
-    <p>A few interesting things:</p>
-    <ul>
-        <li>
-            You'll see that I used 
-            <a href="https://technet.microsoft.com/en-us/library/cc772200(v=ws.10).aspx" target="_blank">appcmd.exe</a>
-            to work with IIS, rather than easier to use 
-            <a href="https://technet.microsoft.com/en-us/library/ee790599.aspx" target="_blank">IIS Cmdlets in PowerShell</a>.
-<p>
-            The reason behind this is that the IIS Cmdlets require the
-            WebAdministration module to have been loaded, and I found I couldn't count on this always being the case.
-            So I used appcmd.exe which always works.
-</p>
-        </li>
-        <li>
-            I was sometimes confronted with the error message
-            <i>HTTP Error 500.21 - Internal Server Error Handler "ExtensionlessUrlHandler-Integrated-4.0" has a bad module "ManagedPipelineHandler" in its module list</i>.
-<p>
-            The solution was to re-install the .Net framework
-            (<a href="http://stackoverflow.com/questions/13162545/handler-extensionlessurlhandler-integrated-4-0-has-a-bad-module-managedpipeli"
-                target="_blank">Stack Overflow discussion</a>), using
-            <pre>cmd /c %systemroot%\Microsoft.NET\Framework\v4.0.30319\aspnet_regiis.exe -i</pre>
-</p>
-        </li>
-        <li>
-            Be careful with the PowerShell Cmdlet <i>Out-File</i>. By default it produces a file with encoding Unicode.
-            IIS chokes on this when reading for example web.config. I believe that in most cases you're better off with UTF8 anyway:
-            <pre>Out-File ..... -encoding UTF8</pre>
-        </li>
 
-    </ul>
+<h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+            target="_blank">CloudFormation template</a></h3>
+    <p>
+        On a high level, a CloudFormation template is simply a long list of infrastructure resources.
+        The 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-guide.html" target="_blank"
+            >introduction to building CloudFormation templates</a>
+        is well worth reading, as is the
+        <a href="http://aws.amazon.com/documentation/cloudformation/" target="_blank">user guide</a>.
+        There are also 
+        the
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html" target="_blank">Pseudo Parameters Reference</a>
+        and the
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html" target="_blank">Intrinsic Function Reference</a>.
+    </p>
+
+    <p>
+        I gained a lot from looking at
+        <a href="http://aws.amazon.com/cloudformation/aws-cloudformation-templates/" target="_blank">sample templates and snippets</a>.
+        Also, each resource has a type, such as <i>AWS::RDS::DBInstance</i>. Googling those types and understanding what they do taught me a lot
+        on how AWS works.
+    </p>
+
+<p>
+    Having said that, there were a few tricky bits I wanted to discuss here.
+</p>
+
+
+    <h4>Loading a code package onto a new EC2 instance</h4>
+
+    
+Do not load your files (from the .zip from s3) in inetpub/temp
+That specific directory is used (by IIS?) to store stuff, including a config file for the app pool.
+Just call it something else (but probably not inetpub/wwwroot)
+
+
+
+    <h4>Allowing an EC2 instance to read a file from an S3 bucket</h4>
+
+
+
+
+
+
+
+
+    <h4>Adding version tags to EC2 instances</h4>
+    <p>
+        One goal was to have a version tag on each EC2 instance, to make it easy to find out what software version 
+        it runs. Of course, EC2 instances get created and terminated by the auto scaling group, so you can't add tags directly to them.
+    </p>
+<p>
+    A simple solution is to add the version tag to the auto scaling group itself
+    (<a href="http://docs.aws.amazon.com/AutoScaling/latest/DeveloperGuide/ASTagging.html" target="_blank">details</a>).
+    If you look at the 
+    <i>WebServerGroup</i> (of type 
+    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-group.html#cfn-as-group-tags" target="_blank"
+        >AWS::AutoScaling::AutoScalingGroup</a>),
+    you'll find that it has a 
+    <i>Tags</i>
+    property 
+containing the version tag.
+    Setting 
+    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-tags.html#cfn-as-tags-PropagateAtLaunch" target="_blank"
+        >PropagateAtLaunch</a> to <i>true</i> ensures that the tag will be copied to newly launced EC2 instances.
+</p>
+
 
   <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a></h3>
     <p>
@@ -948,6 +983,43 @@ are used to create/update a stack using a template.
         </li>
     </ul>
 
+   <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Deploy.ps1" target="_blank"
+            >Deploy.ps1 PowerShell script</a></h3>
+    <p>
+        This PowerShell script runs on the EC2 instance after the web application package has been copied there and has been unzipped.
+        It isn't complicated and well documented.
+    </p>
+    <p>A few interesting things:</p>
+    <ul>
+        <li>
+            You'll see that I used 
+            <a href="https://technet.microsoft.com/en-us/library/cc772200(v=ws.10).aspx" target="_blank">appcmd.exe</a>
+            to work with IIS, rather than easier to use 
+            <a href="https://technet.microsoft.com/en-us/library/ee790599.aspx" target="_blank">IIS Cmdlets in PowerShell</a>.
+<p>
+            The reason behind this is that the IIS Cmdlets require the
+            WebAdministration module to have been loaded, and I found I couldn't count on this always being the case.
+            So I used appcmd.exe which always works.
+</p>
+        </li>
+        <li>
+            I was sometimes confronted with the error message
+            <i>HTTP Error 500.21 - Internal Server Error Handler "ExtensionlessUrlHandler-Integrated-4.0" has a bad module "ManagedPipelineHandler" in its module list</i>.
+<p>
+            The solution was to re-install the .Net framework
+            (<a href="http://stackoverflow.com/questions/13162545/handler-extensionlessurlhandler-integrated-4-0-has-a-bad-module-managedpipeli"
+                target="_blank">Stack Overflow discussion</a>), using
+            <pre>cmd /c %systemroot%\Microsoft.NET\Framework\v4.0.30319\aspnet_regiis.exe -i</pre>
+</p>
+        </li>
+        <li>
+            Be careful with the PowerShell Cmdlet <i>Out-File</i>. By default it produces a file with encoding Unicode.
+            IIS chokes on this when reading for example web.config. I believe that in most cases you're better off with UTF8 anyway:
+            <pre>Out-File ..... -encoding UTF8</pre>
+        </li>
+
+    </ul>
+
     <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Web.Release.config" target="_blank"
         >Trial site Web.Release.config</a></h3>
     <p>
@@ -983,21 +1055,6 @@ are used to create/update a stack using a template.
 http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html
 <<<< kicks in when launch config is changed! So: change version property on launch config
 rolling updates. kill old servers
-
-
-    +++++++++++++++++++++++++++++++
-set a tag on the create stack with the version. That tag will show on the stack, the elb, and the instances (in the tags tab)
-
-Do not load your files (from the .zip from s3) in inetpub/temp
-That specific directory is used (by IIS?) to store stuff, including a config file for the app pool.
-Just call it something else (but probably not inetpub/wwwroot)
-
-
-    ================
-pseudo parameters
-http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html
-such as 
-{ "Ref" : "AWS::Region" }
 
 
 ==============================================

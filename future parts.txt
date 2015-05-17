@@ -6,5 +6,5 @@ cdn/ec2 servers in multiple regions, interaction with bundles
 queue, mailing list signup
 logging to cloudwatch logging
 caching with elasti cache, asp.net caching providers
-
+add version tags to stack, elb
 
