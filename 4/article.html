@@ -880,11 +880,50 @@ Just call it something else (but probably not inetpub/wwwroot)
 
     <h4>Allowing an EC2 instance to read a file from an S3 bucket</h4>
 
-
-
-
-
-
+    <p>
+        For the EC2 instance to load the package from the S3 bucket, it has to have permission to do so.
+    </p>
+    <p>
+        This can be done by creating a 
+        <a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/roles-toplevel.html" target="_blank">role</a>.
+        This is a collection of permissions that can be assigned to for example a user on a temporary basis.
+        The permissions themselves are contained in a 
+        <a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/PoliciesOverview.html" target="_blank">policy</a>,
+        which needs to be attached to the role.
+    </p>
+    <p>
+        In the template, the permission to execute a <i>GetObject</i> action (that is, load a file)
+        on the package is encoded in a policy in the 
+        <i>RolePolicies</i> resource
+        of type 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-policy.html" target="_blank">AWS::IAM::Policy</a>.
+        Its <i>Roles</i> property
+        attaches the policy to the
+        <i>InstanceRole</i>
+        resource of type
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html" target="_blank">AWS::IAM::Role</a>.
+    </p>
+    <p>
+        An added twist is that it isn't the EC2 instance itself that will be loading the package, but software
+        running under Windows on that virtual machine. Because of this,
+        <i>InstanceRole</i> needs to be first added to an
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-instanceprofile.html" target="_blank">InstanceProfile</a>
+        (<a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/roles-usingrole-ec2instance.html" target="_blank">details</a>).
+        In the template this InstanceProfile is imaginatively called
+<i>InstanceProfile</i>.
+    </p>
+    <p>
+        Finally, we can now 
+        attach
+<i>InstanceProfile</i>
+        to the 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html" target="_blank">launch configuration</a>
+        (resource <i>LaunchConfig</i>)
+        via its
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html#cfn-as-launchconfig-iaminstanceprofile"
+             target="_blank">IamInstanceProfile</a>
+        property.
+    </p>
 
 
     <h4>Adding version tags to EC2 instances</h4>
