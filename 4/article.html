@@ -878,10 +878,10 @@ Just call it something else (but probably not inetpub/wwwroot)
 
 
 
-    <h4>Allowing an EC2 instance to read a file from an S3 bucket</h4>
+ <a id="allows3read"></a><h4>Allowing EC2 instances to read a file from an S3 bucket</h4>
 
     <p>
-        For the EC2 instance to load the package from the S3 bucket, it has to have permission to do so.
+        For the EC2 instances to load the package from the S3 bucket, they have to have permission to do so.
     </p>
     <p>
         This can be done by creating a 
@@ -925,21 +925,52 @@ Just call it something else (but probably not inetpub/wwwroot)
         property.
     </p>
 
+        <h4>Setting credentials for retrieving resources listed in AWS::CloudFormation::Init</h4>
+    <p>
+        In addition to 
+        <a href="#allows3read">allowing EC2 instances to read a file from an S3 bucket</a>,
+        you also need to provide credentials for accessing those files (unless they are not protected at all).
+    </p>
+    <p>
+        You do this by adding a
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-authentication.html" target="_blank">AWS::CloudFormation::Authentication</a>
+        object to the Metadata
+        of your 
+        launch configuration (search for &quot;AWS::CloudFormation::Authentication&quot; in 
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+            target="_blank">the template</a>).
+You can use this to provide credentials for any resources or files listed in your
+    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-init.html" target="_blank">AWS::CloudFormation::Init</a>
+object.
+If you were to retrieve files or resources from for example Github,
+        this would be the place to provide your Github credentials.
+    </p>
+    <p>
+        As far as providing credentials for the S3 bucket is concerned, the simplest way here
+        is to rever to the <i>InstanceRole</i> object
+        that had already been created by the template.
+    </p>
 
-    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-     "LaunchConfig
-" : {
-      "Type" : "AWS::AutoScaling::LaunchConfiguration",
-	  "Metadata" : {
-		"Version" : { "Ref" : "Version" },
-		"AWS::CloudFormation::Authentication" : {
+    <p>Some pages that I found useful:</p>
+    <ul>
+        <li>
+        <a href="http://blog.kloud.com.au/2013/08/05/bootstrapping-on-aws/" target="_blank">Bootstrapping on AWS</a>
+            </li>
+        <li>
+            <a href="https://github.com/awslabs/aws-hangouts/blob/master/20140130_cfn/README.md" target="_blank"
+                >AWS CloudFormation Office Hours: January 30, 2014</a>
+        </li>
+        <li>
+            <a href="http://blogs.aws.amazon.com/application-management/post/Tx3LKFZ27CWZBKO/Authenticated-File-Downloads-with-CloudFormation"
+                 target="_blank">Authenticated File Downloads with CloudFormation</a>
+        </li>
+    </ul>
+
+    
+    
 
 
-
-
-
-
-
+    
 
 
 
