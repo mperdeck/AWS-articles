@@ -918,13 +918,14 @@ To still have the launch configuration replaced when the version changes,
         you could set the <i>Version</i> property on the <i>Metadata</i>:
     </p>
 
-<pre>&quot;LaunchConfig&quot; : {<br>
-&quot;Type&quot; : &quot;AWS::AutoScaling::LaunchConfiguration&quot;,<br>
-&quot;Metadata&quot; : {<br>
-    &quot;Version&quot; : { &quot;Ref&quot; : &quot;Version&quot; },</pre>
+<pre>&quot;LaunchConfig&quot; : {
+    &quot;Type&quot; : &quot;AWS::AutoScaling::LaunchConfiguration&quot;,
+    &quot;Metadata&quot; : {
+        &quot;Version&quot; : { &quot;Ref&quot; : &quot;Version&quot; },</pre>
 
     <p>
-        To have the existing EC2 instances replaced,
+Finally,
+        to have the existing EC2 instances replaced,
         you have to specifiy
         an 
         <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html" target="_blank"
