@@ -878,6 +878,63 @@ Just call it something else (but probably not inetpub/wwwroot)
 
 
 
+    <h4>Starting the software update process</h4>
+    <p>
+        You can run the Publish.ps1 script to purely install
+        a new version of your web application, without changes to the CloudFormation template.
+    As part of this, Publish.ps1 uploads a new package to the S3 bucket.
+        Question is how to get the launch configuration to pick up this new version and 
+        replace EC2 instances running the old version with EC2 instances running the new version.
+    </p>
+
+    <p>
+        When you update a property of a 
+        launch configuration,
+        that launch configuration gets replaced by a new configuration.
+        Then when its auto scaling group creates new EC2 instances, those instances 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html" target="_blank"
+            >receive the latest version</a>      
+         of your web application.
+    </p>
+
+    <p>
+        If you have a look at the <i>AWS::CloudFormation::Init</i> object used in the launch configuration,
+        you see that the <i>sources</i> property changes
+        when you update the 
+        <i>Version</i> parameter.
+        This is because the name of every package is based on the version.
+        So that solves how to give new EC2 instances the latest web application version.
+    </p>
+    <p>
+        Basing the names of packages on their version means that packages of previous versions are preserved (unless you manually delete them).
+        Obviously this takes space.
+        In order to save space, you could give all packages the same name, so old packages get overwritten (you would have to modify the
+        Publish.ps1 script).
+        However, in that case the 
+        <i>sources</i> property no longer changes with the version.
+    </p>
+    <p>
+To still have the launch configuration replaced when the version changes,
+        you could set the <i>Version</i> property on the <i>Metadata</i>:
+    </p>
+
+<pre>&quot;LaunchConfig&quot; : {<br>
+&quot;Type&quot; : &quot;AWS::AutoScaling::LaunchConfiguration&quot;,<br>
+&quot;Metadata&quot; : {<br>
+    &quot;Version&quot; : { &quot;Ref&quot; : &quot;Version&quot; },</pre>
+
+    <p>
+        To have the existing EC2 instances replaced,
+        you have to specifiy
+        an 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html" target="_blank"
+            >UpdatePolicy Attribute</a>
+        for your auto scaling group
+        (in the template, search for &quot;UpdatePolicy&quot;).
+        This specifies properties for your rolling updates, such as many EC2 insances get replaced in one go.
+    </p>
+
+
  <a id="allows3read"></a><h4>Allowing EC2 instances to read a file from an S3 bucket</h4>
 
     <p>
