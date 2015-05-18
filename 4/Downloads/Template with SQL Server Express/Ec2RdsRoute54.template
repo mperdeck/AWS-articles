@@ -257,7 +257,6 @@
     "LaunchConfig" : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
 	  "Metadata" : {
-		"Version" : { "Ref" : "Version" },
 		"AWS::CloudFormation::Authentication" : {
           "default" : {
             "type" : "s3",
