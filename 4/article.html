@@ -14,7 +14,7 @@
     In parts 1, 2 and 3, you saw how to use 
     the AWS service
                 <a href="http://aws.amazon.com/elasticbeanstalk/" target="_blank">Elastic Beanstalk</a> to
-    deploy a load balanced IIS based web site with a SQL Server database and its own domain name.
+    deploy a load balanced IIS based web application with a SQL Server database and its own domain name.
     This involved defining your EC2 servers, database server, etc. by completing a series of menus.
 </p>
 
@@ -90,7 +90,7 @@ This environment is called a <i>stack</i>.
     to get it wrong. I found that the learning curve can be quite steep.
 </p>
 <p>
-    When I set out to create an MVC web site with SQL Server using CloudFormation, I found that:
+    When I set out to create an MVC web application with SQL Server using CloudFormation, I found that:
 </p>
 <ul>
     <li>
@@ -108,10 +108,10 @@ You still have to figure many things out on your own.
 
 <p>
     So I'm publishing the fully fledged working solution here that I arrived at.
-    You should be able to use this as is for your own web application, or use it as a basis for your own solution.
+    You should be able to use this as is for your own web application, or as a basis for your own solution.
 </p>
 <p>
-    Note that this is not a introduction to CloudFormation or AWS.
+    Note that this is not an introduction to CloudFormation or AWS.
     The focus of this article is on describing the solution I came up with.
     However, it has many links to relevant parts of the AWS documentation
     to get all the details. This is not too hard and you'll learn a lot.
@@ -133,7 +133,7 @@ You still have to figure many things out on your own.
 
 
 <p>
-    The infrastructure goal was to deploy a web site that uses a database and that has its own domain:
+    The infrastructure goal was to deploy a web application that uses a database and that has its own domain:
 </p>
 <img src="cfarchitecture.png" width="500" />
 
@@ -143,13 +143,13 @@ You still have to figure many things out on your own.
 <ul>
     <li>
         <b>Web servers on EC2 instances</b> -
-        The web site will run on one or more <a href="http://aws.amazon.com/ec2/" target="_blank">EC2 instances</a> - virtual machines in the AWS cloud
+        The web application will run on one or more <a href="http://aws.amazon.com/ec2/" target="_blank">EC2 instances</a> - virtual machines in the AWS cloud
         acting as web servers.
         <p />
     </li>
     <li>
         <b>SQL Server database server</b> -
-        The web sites access a SQL Server database hosted on an 
+        The web application accesses a SQL Server database hosted on an 
         <a href="http://aws.amazon.com/rds/" target="_blank">RDS</a> (Relational Database Service) instance. 
         RDS is a fully managed database server as a service with automatic 
         backups, etc. 
@@ -211,13 +211,13 @@ You still have to figure many things out on your own.
 <ul>
     <li>
 <b>Packaging</b>
--        Packages up an ASP.NET web project
-        and store the packet in an S3 bucket.
+-        Packages up an ASP.NET web application
+        and stores the packet in an S3 bucket.
         <p />
     </li>
     <li>
 <b>Deployment</b> - 
-        Installs IIS, etc. on new EC2 instances with a Deploy.ps1 script.
+        Installs IIS, etc. on new EC2 instances with a <i>Deploy.ps1</i> script.
         <p />
     </li>
     <li>
@@ -242,7 +242,7 @@ You still have to figure many things out on your own.
     <li>
         <b>Web.config updated</b>
         -
-        During deployment, the web.config file is updated with the version number, and the server name, user name and user password of the database server.
+        During deployment, the web.config file is updated with the software version, and the server name, user name and user password of the database server.
     </li>
 </ul>
 
@@ -279,10 +279,13 @@ shows how to use those components.
         <p />
     </li>
     <li>
-        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4/Downloads/SimpleSiteWithDb" target="_blank">Very simple sample web site</a>
+        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4/Downloads/SimpleSiteWithDb" target="_blank">Very simple sample web application</a>
         that uses a database. You may want to use this to experiment before moving to something more complicated.
         <p>
-            If you have a look at its web.config file, you'll find that it has a web.release.config transform
+            If you have a look at its web.config file, you'll find that it has a 
+            <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/SimpleSiteWithDb/SimpleSiteWithDb/Web.Release.config"
+                target="_blank">web.release.config</a>
+             transform
             to generate the Release version. That Release version has the placeholders
             <i>{{DbUsername}}</i>,
             <i>{{DbPassword}}</i>,
@@ -296,7 +299,7 @@ During deployment these will be replaced by the actual database server details a
             >Deploy.ps1</a> PowerShell script.
         <ul>
             <li>
-                After a new web server is created by the auto scaling group, any Deploy.ps1 script inside the source tree of your web site is executed 
+                After a new web server is created by the auto scaling group, any Deploy.ps1 script inside the source tree of your web application is executed 
                 on the new webserver by the CloudFormation template. 
             </li>
             <li>
@@ -335,7 +338,7 @@ During deployment these will be replaced by the actual database server details a
 
 <a id="costs"></a><h2>Costs</h2>
 <p>
-    Using AWS services is not free. This section is to spell this out.
+    Using AWS services is not free. This section is here to spell this out.
     Personally, I found the amounts involved to be tiny,
     except for Multi-AZ deployments - do not leave these running overnight.
 </p>
@@ -358,7 +361,7 @@ During deployment these will be replaced by the actual database server details a
     </tr>
     <tr>
         <td style="padding: 5px; border: 1px solid black;">
-            <a href="http://aws.amazon.com/ec2/pricing/" target="_blank">EC2 t2.micro instances</a>
+            <a href="http://aws.amazon.com/ec2/pricing/" target="_blank">EC2 instances</a>
         </td>
         <td style="padding: 5px; border: 1px solid black;">
             Virtual machines running web servers
@@ -377,7 +380,7 @@ During deployment these will be replaced by the actual database server details a
             <a href="http://aws.amazon.com/autoscaling/pricing/" target="_blank">Auto Scaling</a>
         </td>
         <td style="padding: 5px; border: 1px solid black;">
-            Spinning up/down web servers in response to traffic load
+            Spinning up/down web servers in response to load
         </td>
     </tr>
     <tr>
@@ -432,7 +435,7 @@ During deployment these will be replaced by the actual database server details a
     the 
     <a href="https://msdn.microsoft.com/en-us/library/ms189852.aspx" target="_blank">SQL Server Mirroring feature</a>. This feature is 
     <a href="https://msdn.microsoft.com/en-us/library/cc645993.aspx" target="_blank">not available</a>
-     on SQL Server Express.
+     on SQL Server Express or SQL Server Web Edition.
 </p>
 <p>
     As of March 2015, Your cheapest option that supports mirroring would be a SQL Server Standard Edition database
@@ -489,7 +492,7 @@ You then attach that policy to the user.
 
 <ol>
     <li>
-        Sign into the <a href="aws.amazon.com" target="_blank">AWS Console</a>;
+        Sign into the <a href="http://aws.amazon.com/" target="_blank">AWS Console</a>;
     </li>
     <li>
         Click <i>Services</i> (top of the screen) | <i>IAM</i> | <i>Policies</i> | <i>Create Policy</i>;
@@ -542,7 +545,7 @@ Just as you need to log into AWS before you can do this manually, the
 <p>
     A better way is to store your credentials in a 
     <a href="http://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html" target="_blank">credentials store</a>, 
-    which is simply a file on your machine: 
+    which is simply a file somewhere on your machine: 
 </p>
 <ol>
     <li>
@@ -565,7 +568,7 @@ Just as you need to log into AWS before you can do this manually, the
     
 <p>
     As an aside, if you have a look at the
-    <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1">Publish.ps1</a>
+    <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
     script, you'll see that it uses this command to tell 
     the PowerShell commands in the current session to use the credentials in the credentials store:
 </p>
@@ -628,7 +631,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
     </li>
 <li>
     Think of a name for your option group, such as &quot;sqlserver-mirroring&quot;.
-    Fill in a name and description. Write down the name, you'll need it later on;
+    Fill in the name and a description. Write down the name, you'll need it later on;
 </li>
     <li>
         Set <i>Engine</i> to <i>sqlserver-se</i> (Standard Edition) or <i>sqlserver-ee</i> (Enterprise Edition);
@@ -657,7 +660,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
     With the preliminaries done, you can now run the 
     <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/publish.ps1" target="_blank">Publish.ps1</a>
     script to spin up the infrastructure
-    and deploy the web site.
+    and deploy the web application.
 </p>
 
 <h4>Time to run</h4>
@@ -685,10 +688,12 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
 
 <h4>Usage of the Publish.ps1 script</h4>
 
-<pre>.\publish.ps1 -version &lt;code version&gt; -stackName &lt;stack name&gt; -websiteDomain &lt;web site domain&gt; -keyName &lt;key name&gt; 
-    -credentialsStoreName &lt;credential store name&gt; -adminCidr &lt;admin cidr&gt; -dbMasterUsername &lt;database username&gt; 
-    -dbMasterUserPassword &lt;database password&gt; -bucketName &lt;S3 bucket to store code&gt; -templatePath &lt;template file&gt; 
-    -csProjPath &lt;.csproj file of your web site&gt; -dbOptionGroupName &lt;option group name&gt; -stackPolicyPath &lt;file with stack policy&gt</pre>
+<pre>.\publish.ps1 -version &lt;code version&gt; -stackName &lt;stack name&gt; -websiteDomain &lt;web site domain&gt; 
+    -keyName &lt;key name&gt; -credentialsStoreName &lt;credential store name&gt; -adminCidr &lt;admin cidr&gt; 
+    -dbMasterUsername &lt;database username&gt; -dbMasterUserPassword &lt;database password&gt; 
+    -bucketName &lt;S3 bucket to store code&gt; -templatePath &lt;template file&gt; 
+    -csProjPath &lt;.csproj file of your web application&gt; -dbOptionGroupName &lt;option group name&gt; 
+    -stackPolicyPath &lt;file with stack policy&gt</pre>
 
 <h4>Example</h4>
 <p>
@@ -697,12 +702,12 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
 </p>
 <p>
    
-    Do not copy blindly, but use your own 
+    Do not copy this blindly, but use your own 
     <a href="#Publish-Parameters">parameter values</a>, especially the ones that are <u>underlined</u> below.
 </p>
 
 <pre>.\publish.ps1 -version 1.0.0 -stackName teststack -websiteDomain mybogusdomain.com -keyName <u>mykeyname</u> 
-    -credentialsStoreName <u>mycredentials</u> -adminCidr <u>124.171.5.210/32</u> 
+    -credentialsStoreName <u>mycredentials</u> -adminCidr <u>130.180.2.320/32</u> 
     -dbMasterUsername dbusername -dbMasterUserPassword 'MustBe$uperHardToGu3ss!' 
     -bucketName <u>must-be-unique-across-all-S3-buckets-in-AWS</u> 
     -templatePath 'c:\aws\Template with SQL Server Express\Ec2RdsRoute54.template' 
@@ -711,7 +716,7 @@ When you run Publish.ps1, you'll pass in the name of the option group that you c
 
 <h4>PowerShell special characters in parameter values</h4>
 <p>
-    If any parameter values contain a $, enclose it with single quotes ('), not with double quotes. That way, PowerShell won't regard the $ as 
+    If any parameter value contain a $, enclose the parameter value with single quotes ('), not with double quotes. That way, PowerShell won't regard the $ as 
     the start of a variable and try to expand it.
 </p>
 
@@ -738,7 +743,7 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
   <dt><b><a id="Publish-Parameters-Websitedomain"></a>websiteDomain</b></dt>
   <dd><p>
       
-      Domain of the web site that will be associated with the name servers. For example, &quot;mydomain.com&quot; for your Live stack, or &quot;test-domain.com&quot; for your Test stack.
+      Domain of the web application that will be associated with the name servers. For example, &quot;mydomain.com&quot; for your Live stack, or &quot;test-domain.com&quot; for your Test stack.
   </p></dd>
 
   <dt><b>keyName</b></dt>
@@ -771,7 +776,7 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
   <dd><p>
       S3 bucket where the code packages will be stored. This name must be unique across all S3 buckets
       hosted by AWS. To make sure a given S3 bucket name is available, it would be easiest to create the S3 bucket yourself
-      and then pass your chosen name in via this parameter: click<i>Services</i> | <i>S3</i>.
+      and then pass your chosen name in via this parameter. To open the S3 dashboard, click <i>Services</i> | <i>S3</i>.
   </p></dd>
 
   <dt><b>templatePath</b></dt>
@@ -792,7 +797,7 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
 
   <dt><b>csProjPath</b></dt>
   <dd><p>
-      Path of the .csproj file of the web site you're deploying. The Publish.ps1 script will build the site in release mode,
+      Path of the .csproj file of the web application you're deploying. The Publish.ps1 script will build the site in release mode,
       package up the code and store the package in the S3 bucket.
   </p></dd>
 
@@ -801,7 +806,7 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
       Name of the option group you created 
       <a href="#optiongroup">earlier</a> that has mirroring enabled. Only use this if you're 
       using a template that creates a SQL Server Standard Edition (or higher) database server
-      (such as <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+      (such as <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Standard%20and%20Multi%20AZ%20deployment/Ec2RdsRoute54.template"
             target="_blank">this template</a>).
         <p>
             If you try to use such an option group with an engine that does not support mirroring, such as SQL Server Express or SQL Server Web Edition,
@@ -989,7 +994,7 @@ The
         <i>c:\inetpub\temp</i> is used by IIS for its own purposes. Deleting it does break things.
     </li>
     <li>
-        <i>c:\inetpub\wwwroot</i> is used by the default web site.
+        <i>c:\inetpub\wwwroot</i> is used by the default web site in IIS.
     </li>
     <li>
         <i>%temp%</i> gets expanded into the temporary directory by Windows Explorer, but 
