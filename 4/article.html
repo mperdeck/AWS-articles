@@ -927,15 +927,38 @@ If you search for
   	    }
     }
 </pre>
-
-
-
-
     <p>
+        In this template,
+        the one MS-DOS command is 
+        the
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-init.html" target="_blank">cfn-init.exe</a> program.
+        This 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html" target="_blank"
+            >CloudFormation Helper Script</a> is always available on an EC2 instance.
+        It actions the meta data in the 
+        AWS::CloudFormation::Init
+        object.
+        You'll see 
+        <a href="#implementation-template-cloudformationinit">below</a>
+         that the <i>AWS::CloudFormation::Init</i>
+        says to
+        load a package file (a .zip file) from the S3 bucket
+        and extract the files into the
+        <i>c:\inetpub\deploy</i> directory.
+    </p>
+    <p>
+        After <i>cfn-init.exe</i> has executed, the PowerShell script kicks in.
+        This finds all Deploy.ps1 scripts within the code package and 
+        <a href="https://technet.microsoft.com/en-us/library/hh849893.aspx" target="_blank">invokes</a>
+         them.
+        Note that it has to 
+        <a href="https://technet.microsoft.com/en-us/library/hh849812.aspx" target="_blank">set the execution policy</a>
+         to <i>Bypass</i> temporarily to allow this to happen.
+        It then cleans up the 
+        <i>c:\inetpub\deploy</i> directory.
     </p>
 
-
-
+    <a id="implementation-template-cloudformationinit"></a>
 
 
 
