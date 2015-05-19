@@ -870,11 +870,100 @@ things I learned when building this solution.
 
 
     <h4>Loading a code package onto a new EC2 instance</h4>
+    <p>
+        The 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-group.html" target="_blank"
+            >auto scaling group</a>
+        is responsible for creating new EC2 instances.
+        This includes installing the web application, 
+        installing IIS, etc.
+    </p>
+
+    <p>
+        This installation work is handled by a
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html" target="_blank"
+            >launch configuration</a> - a separate resource. 
+If you search for 
+        <i>AWS::AutoScaling::AutoScalingGroup</i> in the
+        <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+            target="_blank">template</a>,
+        you'll find  that it is associated with the auto scaling group via the
+        auto scaling group's 
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-group.html#cfn-as-group-launchconfigurationname"
+            target="_blank">LaunchConfigurationName</a>
+        property.
+    </p>
+    <p>
+        If you now search for
+        <i>LaunchConfig</i>,
+        you'll find that it knows everything about configuring a new EC2 instance, including the AMI image id, its instance type
+        and everything related to installing the web application. The installation story is spread over two properties:
+        the <i>UserData</i> property and the
+        <i>AWS::CloudFormation::Init</i> object in the <i>Metadata</i> property.
+    </p>
+
+    The
+    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html#cfn-as-launchconfig-userdata"
+        target="_blank">UserData</a> property contains 
+    scripts that will run on the new EC2 instance. Oddly, it is 
+    <a href="http://en.wikipedia.org/wiki/Base64" target="_blank">Base64</a>
+    encoded.
+    Luckily, the built in
+    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html" target="_blank">intrinsic function</a>
+   Fn::Base64  does the Base64 encoding for us:
+    </p>
+<pre>"LaunchConfig" : {
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Properties" : {
+		  "UserData" : { "<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-base64.html" target="_blank"
+        >Fn::Base64</a>" : { "<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-join.html" target="_blank">Fn::Join</a>" : ["", [
+			"&lt;script&gt;\n",
+                "... MS-DOS commands ... \n"
+			"&lt;/script&gt;\n",
+			"&lt;powershell&gt;\n",
+                "... PowerShell commands ... \n"
+			"&lt;/powershell&gt;\n"
+		  ]] } }
+  	    }
+    }
+</pre>
+
+
+
+
+    <p>
+    </p>
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
 
     
 Do not load your files (from the .zip from s3) in inetpub/temp
 That specific directory is used (by IIS?) to store stuff, including a config file for the app pool.
 Just call it something else (but probably not inetpub/wwwroot)
+
+
+
+
+
+
 
 
 
