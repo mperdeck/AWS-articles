@@ -1,9 +1,9 @@
 
 title:
-Amazon Web Services part 4 - Cloudformation template for load balanced IIS web site with sql server database
+Amazon Web Services part 4 - Cloudformation template to create a load balanced IIS/SQL Server web site using EC2, RDS and Route53
 
 subtitle:
-Cloudformation template that generates a load balanced IIS based web site with SQL Server database, plus PowerShell script to deploy your web site code.
+A fully functional sample Cloudformation template that generates a load balanced IIS/SQL Server based web site, plus PowerShell scripts to automatically deploy the web site on your EC2 instances
 
  
 

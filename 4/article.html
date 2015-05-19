@@ -18,6 +18,19 @@
     This involved defining your EC2 servers, database server, etc. by completing a series of menus.
 </p>
 
+<ul>
+<li><a href="#whycloudformation">Why CloudFormation</a></li>
+<li><a href="#aboutthisarticle">About this article</a></li>
+<li><a href="#solution-goals">Goals for this solution</a></li>
+<li><a href="#solutioncomponents">Solution Components</a></li>
+<li><a href="#costs">Costs</a></li>
+<li><a href="#installation">Detailed installation steps</a></li>
+<li><a href="#implementation">Implementation notes</a></li>
+<li><a href="#nextparts">Next Parts</a></li>
+</ul>
+
+
+
 <a id="whycloudformation"></a><h2>Why CloudFormation</h2>
 <p>
     Once your environment becomes a big more complicated,
@@ -948,7 +961,7 @@ If you search for
     </p>
     <p>
         After <i>cfn-init.exe</i> has executed, the PowerShell script kicks in.
-        This finds all Deploy.ps1 scripts within the code package and 
+        This finds all <i>Deploy.ps1</i> scripts within the code package and 
         <a href="https://technet.microsoft.com/en-us/library/hh849893.aspx" target="_blank">invokes</a>
          them.
         Note that it has to 
@@ -959,36 +972,35 @@ If you search for
     </p>
 
     <a id="implementation-template-cloudformationinit"></a>
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-    
-Do not load your files (from the .zip from s3) in inetpub/temp
-That specific directory is used (by IIS?) to store stuff, including a config file for the app pool.
-Just call it something else (but probably not inetpub/wwwroot)
-
-
-
-
-
-
-
-
+    <p>
+The
+    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-init.html" target="_blank">AWS::CloudFormation::Init</a>
+        documentation is well worth reading.
+        One of its many tricks is the
+        <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-init.html#aws-resource-init-sources" target="_blank"
+            >sources</a> section, which allows you to download a .zip file from a URL and extract it into a directory on the EC2 instance.
+        Here that URL is the package in the S3 bucket, but you could also load the .zip file from Github.
+    </p>
+<p>
+    In principle you can extract the files in any directory. However, keep in mind that:
+</p>
+<ul>
+    <li>
+        <i>c:\inetpub\temp</i> is used by IIS for its own purposes. Deleting it does break things.
+    </li>
+    <li>
+        <i>c:\inetpub\wwwroot</i> is used by the default web site.
+    </li>
+    <li>
+        <i>%temp%</i> gets expanded into the temporary directory by Windows Explorer, but 
+    not by AWS::CloudFormation::Init.
+</li>
+</ul>
+<p>
+    This is why in the end I used 
+    <i>c:\inetpub\deploy</i>
+    as a temporary directory to extract the web application.
+</p>
 
     <h4>Starting the software update process</h4>
     <p>
@@ -1291,65 +1303,6 @@ are used to create/update a stack using a template.
         >SSPI</a>;</i>. Do not use this with an AWS hosted site. It will cause AWS to try to log into your database with the 
     <i>NT AUTHORITY\ANONYMOUS LOGON</i> account rather than your own account - which will fail. 
 </p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    update policy
-http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html
-<<<< kicks in when launch config is changed! So: change version property on launch config
-rolling updates. kill old servers
-
-
-==============================================
-constructing an arn
-http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
-http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#arn-syntax-cloudformation
-
-creating a policy (to give yourself permssion to access s3, cloudformation)
-https://console.aws.amazon.com/iam/home?region=us-east-1#policies
-
-getting your account number
-http://docs.aws.amazon.com/IAM/latest/UserGuide/AccountAlias.html
-
-To access S3 and cloudformation from powershell, you must create policies that let you do this (or use a prebuilt one)
-and attach those to the user that the script runs as.
-You must also set the credentials in the environment.
-
-
-----------------------
-create policy and attach that to user that runs the publish, because
-
-ec2: describe keypairs
-s3: upload to bucket
-cloudformation: run template
-autoscaling 
-etc.
-iam: createrole to access ec2 instances to access s3 bucket
-
-
-
-
-
-
-
-
-
-
 
 <a id="nextparts"></a><h2>Next Parts</h2>
 
