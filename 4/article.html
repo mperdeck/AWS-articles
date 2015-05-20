@@ -951,8 +951,7 @@ If you search for
 <pre>"LaunchConfig" : {
     "Type" : "AWS::AutoScaling::LaunchConfiguration",
     "Properties" : {
-        "UserData" : { "<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-base64.html" target="_blank"
-        >Fn::Base64</a>" : { "<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-join.html" target="_blank">Fn::Join</a>" : ["", [
+        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
             "&lt;script&gt;\n",
                 "... MS-DOS commands ... \n"
             "&lt;/script&gt;\n",
@@ -964,8 +963,9 @@ If you search for
 }
 </pre>
     <p>
-        In this template,
-        the one MS-DOS command is 
+        Looking at the <a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
+            target="_blank">template</a>,
+        you'll see that the one MS-DOS command calls 
         the
         <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-init.html" target="_blank">cfn-init.exe</a> program.
         This 
