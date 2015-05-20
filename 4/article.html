@@ -20,12 +20,15 @@
 <p>
 	This part introduces the AWS service
 	<a href="http://aws.amazon.com/cloudformation/" target="_blank">CloudFormation</a>.
-	This allows you to express your entire environment in a text file.
+	This allows you to express your entire environment in a text file called a template.
 </p>
 <p>
-	You'll see how to use this to create the web servers, load balancer, name servers, etc. needed to host a web application. It also deploys the
-	web application itself, so when it's done, you have a running web site.
-But first we'll see why expressing your environment in a text file is useful at all.
+    The solution presented in this article
+    uses a template to define all the web servers, database server, load balancer, name servers, etc. needed to host a web application. 
+    It also takes care of deploying the 
+	web application itself.
+    Running a single Publish.ps1 PowerShell script will create/update all the bits of infrastructure and deploy the web application,
+ so when it's done, you have a running web site.
 </p>
 
 <ul>
@@ -938,7 +941,7 @@ If you search for
 		The
 		<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html#cfn-as-launchconfig-userdata"
 		   target="_blank">UserData</a> property contains
-		scripts that will run on the new EC2 instance. Oddly, it is
+		scripts that will be run on the new EC2 instance after it has been created. Oddly, it is
 		<a href="http://en.wikipedia.org/wiki/Base64" target="_blank">Base64</a>
 		encoded.
 		Luckily, the built in
@@ -974,16 +977,18 @@ If you search for
         You'll see 
         <a href="#implementation-template-cloudformationinit">below</a>
          that the <i>AWS::CloudFormation::Init</i>
-        says to
+        object used in this template
+        gets cfn-init.exe
+        to
         load a package file (a .zip file) from the S3 bucket
         and extract the files into the
         <i>c:\inetpub\deploy</i> directory.
     </p>
     <p>
         After <i>cfn-init.exe</i> has executed, the PowerShell script kicks in.
-        This finds all <i>Deploy.ps1</i> scripts within the code package and 
+        This finds all files called <i>Deploy.ps1</i> within the code package and 
         <a href="https://technet.microsoft.com/en-us/library/hh849893.aspx" target="_blank">invokes</a>
-         them.
+         them as PowerShell scripts.
         Note that it has to 
         <a href="https://technet.microsoft.com/en-us/library/hh849812.aspx" target="_blank">set the execution policy</a>
          to <i>Bypass</i> temporarily to allow this to happen.
@@ -999,7 +1004,7 @@ The
         One of its many tricks is the
         <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-init.html#aws-resource-init-sources" target="_blank"
             >sources</a> section, which allows you to download a .zip file from a URL and extract it into a directory on the EC2 instance.
-        Here that URL is the package in the S3 bucket, but you could also load the .zip file from Github.
+        Here that URL is the package in the S3 bucket, but you could also load a .zip file from Github.
     </p>
 <p>
     In principle you can extract the files in any directory. However, keep in mind that:
@@ -1029,10 +1034,11 @@ The
     As part of this, Publish.ps1 uploads a new package to the S3 bucket.
         Question is how to get the launch configuration to pick up this new version and 
         replace EC2 instances running the old version with EC2 instances running the new version.
+        Luckily, AWS makes this fairly easy.
     </p>
 
     <p>
-        When you update a property of a 
+        Firstly, when you update a property of a 
         launch configuration,
         that launch configuration gets replaced by a new configuration.
         Then when its auto scaling group creates new EC2 instances, those instances 
@@ -1053,12 +1059,12 @@ The
         Basing the names of packages on their version means that packages of previous versions are preserved (unless you manually delete them).
         Obviously this takes space.
         In order to save space, you could give all packages the same name, so old packages get overwritten (you would have to modify the
-        Publish.ps1 script).
+        Publish.ps1 script to make this happen).
         However, in that case the 
         <i>sources</i> property no longer changes with the version.
     </p>
     <p>
-To still have the launch configuration replaced when the version changes,
+In that case, to still have the launch configuration replaced when the version changes,
         you could set the <i>Version</i> property on the <i>Metadata</i>:
     </p>
 
@@ -1068,15 +1074,16 @@ To still have the launch configuration replaced when the version changes,
         &quot;Version&quot; : { &quot;Ref&quot; : &quot;Version&quot; },</pre>
 
     <p>
-Finally,
-        to have the existing EC2 instances replaced,
-        you have to specifiy
+        Having made sure that new EC2 instances receive the latest code,
+        we still have to get rid of the EC2 instances running old code.
+You can do this by specifying
         an 
         <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html" target="_blank"
             >UpdatePolicy Attribute</a>
         for your auto scaling group
         (in the template, search for &quot;UpdatePolicy&quot;).
-        This specifies properties for your rolling updates, such as many EC2 insances get replaced in one go.
+        In addition to causing the auto scaling group to replace EC2 instances in a rolling update,
+        this also lets you specify how many EC2 insances get replaced in one go, etc.
     </p>
 
 
@@ -1094,7 +1101,7 @@ Finally,
         which needs to be attached to the role.
     </p>
     <p>
-        In the template, the permission to execute a <i>GetObject</i> action (that is, load a file)
+        In the template, the permission to execute a <i>GetObject</i> action (that is, file load)
         on the package is encoded in a policy in the 
         <i>RolePolicies</i> resource
         of type 
@@ -1149,7 +1156,7 @@ If you were to retrieve files or resources from for example Github,
     </p>
     <p>
         As far as providing credentials for the S3 bucket is concerned, the simplest way here
-        is to rever to the <i>InstanceRole</i> object
+        is to refer to the <i>InstanceRole</i> object
         that had already been created by the template.
     </p>
 
@@ -1180,7 +1187,7 @@ If you were to retrieve files or resources from for example Github,
     <h4>Adding version tags to EC2 instances</h4>
     <p>
         One goal was to have a version tag on each EC2 instance, to make it easy to find out what software version 
-        it runs. Of course, EC2 instances get created and terminated by the auto scaling group, so you can't add tags directly to them.
+        it runs. Of course, EC2 instances get created and terminated by the auto scaling group, so you can't add tags directly to the EC2 instances.
     </p>
 <p>
     A simple solution is to add the version tag to the auto scaling group itself
@@ -1188,7 +1195,7 @@ If you were to retrieve files or resources from for example Github,
     If you look at the 
     <i>WebServerGroup</i> (of type 
     <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-group.html#cfn-as-group-tags" target="_blank"
-        >AWS::AutoScaling::AutoScalingGroup</a>),
+        >AWS::AutoScaling::AutoScalingGroup</a>) in the template,
     you'll find that it has a 
     <i>Tags</i>
     property 
