@@ -17,6 +17,16 @@
     deploy a load balanced IIS based web application with a SQL Server database and its own domain name.
     This involved defining your EC2 servers, database server, etc. by completing a series of menus.
 </p>
+<p>
+	This part introduces the AWS service
+	<a href="http://aws.amazon.com/cloudformation/" target="_blank">CloudFormation</a>.
+	This allows you to express your entire environment in a text file.
+</p>
+<p>
+	You'll see how to use this to create the web servers, load balancer, name servers, etc. needed to host a web application. It also deploys the
+	web application itself, so when it's done, you have a running web site.
+But first we'll see why expressing your environment in a text file is useful at all.
+</p>
 
 <ul>
 <li><a href="#whycloudformation">Why CloudFormation</a></li>
@@ -33,7 +43,8 @@
 
 <a id="whycloudformation"></a><h2>Why CloudFormation</h2>
 <p>
-    Once your environment becomes a big more complicated,
+Specifying your environment by fillout out a few forms is very convenient.
+   However, once your environment becomes a bit more complicated,
     you'll quickly run into some drawbacks with this method:
 </p>
 <ul>
@@ -849,14 +860,17 @@ If you're running Publish.ps1 to update infrastructure whilst keeping the web ap
 
 
     <a id="implementation"></a><h2>Implementation notes</h2>
-    <p>
-        This section isn't a detailed discussion of every file
-        in the 
-        <a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">downloads</a>.
-Instead, it        
-        discusses some of the more interesting
-things I learned when building this solution.
-    </p>
+	<p>
+		This section isn't a detailed discussion of every file
+		in the
+		<a href="https://github.com/mperdeck/AWS-articles/tree/master/4" target="_blank">downloads</a>.
+		That would be very boring. I also provided a lot of comments and apart from the templates the files are not very complicated.
+	</p>
+	<p>
+		Instead, this section
+		discusses some of the more interesting
+		things I learned when building this solution.
+	</p>
 
 
 <h3><a href="https://github.com/mperdeck/AWS-articles/blob/master/4/Downloads/Template%20with%20SQL%20Server%20Express/Ec2RdsRoute54.template"
@@ -920,30 +934,31 @@ If you search for
         <i>AWS::CloudFormation::Init</i> object in the <i>Metadata</i> property.
     </p>
 
-    The
-    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html#cfn-as-launchconfig-userdata"
-        target="_blank">UserData</a> property contains 
-    scripts that will run on the new EC2 instance. Oddly, it is 
-    <a href="http://en.wikipedia.org/wiki/Base64" target="_blank">Base64</a>
-    encoded.
-    Luckily, the built in
-    <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html" target="_blank">intrinsic function</a>
-   Fn::Base64  does the Base64 encoding for us:
-    </p>
+	<p>
+		The
+		<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html#cfn-as-launchconfig-userdata"
+		   target="_blank">UserData</a> property contains
+		scripts that will run on the new EC2 instance. Oddly, it is
+		<a href="http://en.wikipedia.org/wiki/Base64" target="_blank">Base64</a>
+		encoded.
+		Luckily, the built in
+		<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html" target="_blank">intrinsic function</a>
+		Fn::Base64  does the Base64 encoding for us:
+	</p>
 <pre>"LaunchConfig" : {
-      "Type" : "AWS::AutoScaling::LaunchConfiguration",
-      "Properties" : {
-		  "UserData" : { "<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-base64.html" target="_blank"
+    "Type" : "AWS::AutoScaling::LaunchConfiguration",
+    "Properties" : {
+        "UserData" : { "<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-base64.html" target="_blank"
         >Fn::Base64</a>" : { "<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-join.html" target="_blank">Fn::Join</a>" : ["", [
-			"&lt;script&gt;\n",
+            "&lt;script&gt;\n",
                 "... MS-DOS commands ... \n"
-			"&lt;/script&gt;\n",
-			"&lt;powershell&gt;\n",
+            "&lt;/script&gt;\n",
+            "&lt;powershell&gt;\n",
                 "... PowerShell commands ... \n"
-			"&lt;/powershell&gt;\n"
-		  ]] } }
-  	    }
+            "&lt;/powershell&gt;\n"
+        ]] } }
     }
+}
 </pre>
     <p>
         In this template,
